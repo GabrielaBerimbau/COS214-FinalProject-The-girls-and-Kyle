@@ -1,0 +1,11 @@
+.vscode
+# Build files
+build/
+*.o
+*.out
+main
+demo
+
+# VSCode
+.vscode/
+
