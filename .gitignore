@@ -2,11 +2,14 @@
 # Build files
 build/
 *.o
+*.a
 *.out
 main
 demo
+RunTests
 
 # VSCode
 .vscode/
-
 *.Zoneidentifier
+makefile.backup
+
