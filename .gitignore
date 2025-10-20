@@ -1,5 +1,5 @@
 .vscode
-# Build files
+#Build files
 build/
 *.o
 *.a
@@ -8,8 +8,11 @@ main
 demo
 RunTests
 
-# VSCode
+#VSCode
 .vscode/
 *.Zoneidentifier
 makefile.backup
 
+#raylib stuff just incase
+external/raylib/src/*.o
+external/raylib/src/libraylib.a
