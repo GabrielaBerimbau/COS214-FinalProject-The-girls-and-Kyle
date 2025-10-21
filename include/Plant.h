@@ -79,7 +79,7 @@ class Plant : public PlantObserverSubject{
         void dailyUpdate(); 
 
         std::string toString() const;
-}   
+};   
 
 
 #endif
