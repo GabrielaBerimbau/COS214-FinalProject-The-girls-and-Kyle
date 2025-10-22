@@ -2,6 +2,7 @@
 #define COLLEAGUE_H
 
 #include <string>
+#include "NurseryMediator.h"
 
 /**
  * @class Colleague

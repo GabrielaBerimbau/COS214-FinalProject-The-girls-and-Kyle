@@ -1,5 +1,2 @@
-#include "DecorativePotDecorator.h"
+// #include "include/DecorativePotDecorator.h"
 
-DecorativePotDecorator::DecorativePotDecorator()
-{
-}

@@ -17,7 +17,7 @@ class SalesAssistant : public StaffMembers{
         Plant* findRequestedPlant(std::string plantName);
 
     private:
-        CareScheduler
+        CareScheduler c;
 };
 
 #endif //SALES_ASSISTANT_H
