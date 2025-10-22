@@ -1,5 +1,2 @@
-#include "GiftWrapDecorator.h"
+// #include "include/GiftWrapDecorator.h"
 
-GiftWrapDecorator::GiftWrapDecorator()
-{
-}
