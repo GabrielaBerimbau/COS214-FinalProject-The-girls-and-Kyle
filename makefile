@@ -5,7 +5,7 @@
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude
+CXXFLAGS = -std=c++17 -Wall -Wextra -I.
 TEST_FLAGS = -pthread
 
 # ============================================================================
@@ -15,7 +15,17 @@ TEST_FLAGS = -pthread
 RAYLIB_DIR = external/raylib
 RAYLIB_INCLUDE = $(RAYLIB_DIR)/src
 RAYLIB_LIB_DIR = $(RAYLIB_DIR)/src
-RAYLIB_LIBS = -L$(RAYLIB_LIB_DIR) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S), Darwin)
+    # macOS linking flags
+    RAYLIB_LIBS = -L$(RAYLIB_LIB_DIR) -lraylib \
+                  -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+else
+    # Linux linking flags
+    RAYLIB_LIBS = -L$(RAYLIB_LIB_DIR) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+endif
+
 
 # ============================================================================
 # GOOGLE TEST SETUP (local installation in external/)
