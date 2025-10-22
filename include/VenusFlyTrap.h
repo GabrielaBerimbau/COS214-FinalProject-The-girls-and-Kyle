@@ -18,34 +18,6 @@ class VenusFlyTrap : public OtherPlant {
 
         ~VenusFlyTrap();
 
-        int getNumberOfTraps() const;
-
-        void setNumberOfTraps(int traps);
-
-        void addTrap();
-
-        bool isTrapOpen() const;
-
-        void openTrap();
-
-        void closeTrap();
-
-        int getTrapSensitivity() const;
-
-        void setTrapSensitivity(int sensitivity);
-
-        int getInsectsCaptured() const;
-
-        void captureInsect();
-
-        int getDaysSinceLastFeeding() const;
-
-        void updateFeedingStatus();
-
-        std::string getTrapColor() const;
-
-        void setTrapColor(const std::string& color);
-
         std::string toString() const override;
 };
 

@@ -19,28 +19,6 @@ class Cactus : public Succulent {
 
         ~Cactus();
 
-        int getSpineCount() const;
-
-        void setSpineCount(int count);
-
-        std::string getSpineColor() const;
-
-        void setSpineColor(const std::string& color);
-
-        std::string getCactusShape() const;
-
-        bool canFlower() const;
-
-        void setCanProduceFlowers(bool canFlower);
-
-        bool isFlowering() const;
-
-        void startFlowering();
-
-        void endFlowering();
-
-        std::string getCactusVariety() const;
-
         std::string toString() const override;
 };
 

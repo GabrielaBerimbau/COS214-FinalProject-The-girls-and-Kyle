@@ -16,27 +16,7 @@ class Aloe : public Succulent {
              PlantState* initialState, const std::string& variety = "Vera");
 
         ~Aloe();
-
-        bool hasMedicinalUse() const;
-
-        void setMedicinalProperties(bool medicinal);
-
-        int getGelContentLevel() const;
-
-        void setGelContentLevel(int level);
-
-        std::string getAloeVariety() const;
-
-        int getNumberOfLeaves() const;
-
-        void setNumberOfLeaves(int leaves);
-
-        void addLeaf();
-
-        bool wasRecentlyHarvested() const;
-
-        void harvestGel();
-
+        
         std::string toString() const override;
 };
 
