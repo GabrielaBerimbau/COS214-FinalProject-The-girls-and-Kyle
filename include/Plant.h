@@ -29,7 +29,7 @@ class Plant : public PlantObserverSubject{
 
         ~Plant();
 
-        void performCare();
+        virtual void performCare();
 
         PlantState* getState() const;
 
@@ -79,7 +79,7 @@ class Plant : public PlantObserverSubject{
         void dailyUpdate(); 
 
         std::string toString() const;
-}   
+};
 
 
 #endif

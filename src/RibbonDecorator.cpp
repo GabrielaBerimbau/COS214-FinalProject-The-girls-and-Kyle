@@ -1,5 +1,2 @@
-#include "RibbonDecorator.h"
+// #include "include/RibbonDecorator.h"
 
-RibbonDecorator::RibbonDecorator()
-{
-}

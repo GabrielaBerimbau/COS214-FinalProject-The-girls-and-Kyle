@@ -5,7 +5,7 @@
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude
+CXXFLAGS = -std=c++17 -Wall -Wextra -I.
 TEST_FLAGS = -pthread
 
 # ============================================================================
