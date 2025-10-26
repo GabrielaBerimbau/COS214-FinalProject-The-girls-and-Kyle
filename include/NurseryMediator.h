@@ -12,7 +12,7 @@ class Plant;
  * @brief Mediator that coordinates communication between different nursery components
  */
 class NurseryMediator{
-    private:
+    protected: // changed to protected for NurseryCoordinator
         std::vector<Colleague*> colleagues;
 
     public:
