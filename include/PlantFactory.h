@@ -2,6 +2,7 @@
 #define PLANT_FACTORY_H
 
 class Plant;
+class CareScheduler;
 
 /**
  * Base Creator (Factory Method).
@@ -13,6 +14,13 @@ public:
 
     // Factory Method
     virtual Plant* buildPlant() const = 0;
+
+    protected:
+    CareScheduler* scheduler_;
+    
+    CareScheduler* getScheduler() const { 
+        return scheduler_; 
+    }
 };
 
 #endif // PLANT_FACTORY_H

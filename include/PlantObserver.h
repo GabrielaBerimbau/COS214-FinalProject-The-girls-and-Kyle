@@ -10,7 +10,7 @@ class Plant;
 class PlantObserver {
 public:
     virtual ~PlantObserver() {}
-    virtual void update() = 0;
+    virtual void update(Plant* plant) = 0;
 };
 
 #endif // PLANT_OBSERVER_H

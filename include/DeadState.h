@@ -12,6 +12,8 @@ public:
     ~DeadState();
     
     void handleChange(Plant* plant) override;
+
+    std::string getStateName() override;
 };
 
 #endif
