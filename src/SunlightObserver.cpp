@@ -1,7 +1,7 @@
-#include "SunlightObserver.h"
-#include "Plant.h"
-#include "CareScheduler.h"
-#include "AdjustSunlightCommand.h"
+#include "include/SunlightObserver.h"
+#include "include/Plant.h"
+#include "include/CareScheduler.h"
+#include "include/AdjustSunlightCommand.h"
 
 SunlightObserver::SunlightObserver(CareScheduler* scheduler, Plant* plant)
     : scheduler_(scheduler), plant_(plant) {

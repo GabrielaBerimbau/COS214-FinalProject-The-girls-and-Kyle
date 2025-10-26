@@ -1,7 +1,7 @@
-#include "SeedlingState.h"
-#include "GrowingState.h"
-#include "DeadState.h"
-#include "Plant.h"
+#include "include/SeedlingState.h"
+#include "include/GrowingState.h"
+#include "include/DeadState.h"
+#include "include/Plant.h"
 #include <iostream>
 
 SeedlingState::SeedlingState() {

@@ -1,7 +1,7 @@
-#include "GrowingState.h"
-#include "MatureState.h"
-#include "DeadState.h"
-#include "Plant.h"
+#include "include/GrowingState.h"
+#include "include/MatureState.h"
+#include "include/DeadState.h"
+#include "include/Plant.h"
 #include <iostream>
 
 GrowingState::GrowingState() {

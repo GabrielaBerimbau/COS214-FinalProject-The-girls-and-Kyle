@@ -2,6 +2,7 @@
 #define PLANT_FACTORY_H
 
 class Plant;
+class CareScheduler;
 
 /**
  * Base Creator (Factory Method).

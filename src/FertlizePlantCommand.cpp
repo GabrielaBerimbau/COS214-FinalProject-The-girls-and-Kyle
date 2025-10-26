@@ -1,6 +1,6 @@
-#include "FertilizePlantCommand.h"
-#include "Plant.h"
-#include "CareStrategy.h"
+#include "include/FertilizePlantCommand.h"
+#include "include/Plant.h"
+#include "include/CareStrategy.h"
 #include <iostream>
 
 FertilizePlantCommand::FertilizePlantCommand(Plant* target) 

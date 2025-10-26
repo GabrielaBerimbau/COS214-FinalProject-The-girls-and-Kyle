@@ -1,6 +1,6 @@
-#include "AdjustSunlightCommand.h"
-#include "Plant.h"
-#include "CareStrategy.h"
+#include "include/AdjustSunlightCommand.h"
+#include "include/Plant.h"
+#include "include/CareStrategy.h"
 #include <iostream>
 
 AdjustSunlightCommand::AdjustSunlightCommand(Plant* target) 

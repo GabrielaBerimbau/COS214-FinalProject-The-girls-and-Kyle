@@ -1,11 +1,11 @@
-#include "CactusFactory.h"
-#include "Cactus.h"
-#include "SucculentCareStrategy.h"
-#include "SeedlingState.h"
-#include "WaterObserver.h"
-#include "FertilizeObserver.h"
-#include "SunlightObserver.h"
-#include "CareScheduler.h"
+#include "include/CactusFactory.h"
+#include "include/Cactus.h"
+#include "include/SucculentCareStrategy.h"
+#include "include/SeedlingState.h"
+#include "include/WaterObserver.h"
+#include "include/FertilizeObserver.h"
+#include "include/SunlightObserver.h"
+#include "include/CareScheduler.h"
 
 Plant* CactusFactory::buildPlant() const {
     static int cactusCounter = 1;

@@ -1,6 +1,6 @@
-#include "WaterPlantCommand.h"
-#include "Plant.h"
-#include "CareStrategy.h"
+#include "include/WaterPlantCommand.h"
+#include "include/Plant.h"
+#include "include/CareStrategy.h"
 #include <iostream>
 
 WaterPlantCommand::WaterPlantCommand(Plant* target) 

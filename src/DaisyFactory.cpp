@@ -1,11 +1,11 @@
-#include "DaisyFactory.h"
-#include "Daisy.h"
-#include "FlowerCareStrategy.h"
-#include "SeedlingState.h"
-#include "WaterObserver.h"
-#include "FertilizeObserver.h"
-#include "SunlightObserver.h"
-#include "CareScheduler.h"
+#include "include/DaisyFactory.h"
+#include "include/Daisy.h"
+#include "include/FlowerCareStrategy.h"
+#include "include/SeedlingState.h"
+#include "include/WaterObserver.h"
+#include "include/FertilizeObserver.h"
+#include "include/SunlightObserver.h"
+#include "include/CareScheduler.h"
 
 Plant* DaisyFactory::buildPlant() const {
     static int daisyCounter = 1;

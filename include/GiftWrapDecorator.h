@@ -65,7 +65,7 @@ class GiftWrapDecorator : public Decorator {
         /**
          * @brief Fixed cost for gift wrapping service
          */
-        static const double GIFT_WRAP_PRICE = 20.0;
+        static constexpr double GIFT_WRAP_PRICE = 20.0;
 
 };
 

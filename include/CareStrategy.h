@@ -7,8 +7,6 @@ class CareStrategy {
     public:
         virtual ~CareStrategy(){}
 
-        virtual void performCare(Plant* plant) = 0;
-
         virtual void water(Plant* plant) = 0;
 
         virtual void fertilize(Plant* plant) =0;
