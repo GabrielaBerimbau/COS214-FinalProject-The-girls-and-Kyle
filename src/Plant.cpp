@@ -1,30 +1,45 @@
-#include "Plant.h"
-#include "PlantObserver.h"
+#include "include/Plant.h"
+#include "include/PlantObserver.h"
+#include "include/CareStrategy.h"
+#include "include/PlantState.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 Plant::Plant(const std::string& name, const std::string& id, 
              CareStrategy* careStrategy, PlantState* initialState)
     : plantName(name), plantID(id), strategy(careStrategy), state(initialState),
       age(0), waterLevel(100), sunlightExposure(50), nutrientLevel(100),
-      healthLevel(100), readyForSale(false), price(0.0), season("Spring") {
-    
-    std::cout << "Plant created: " << plantName << " (ID: " << plantID << ")" << std::endl;
+      healthLevel(100), readyForSale(false), price(0.0) {
 }
 
 Plant::~Plant() {
-    delete strategy;
-    delete state;
-    
-    std::cout << "Plant destroyed: " << plantName << std::endl;
+    if (strategy != nullptr) {
+        delete strategy;
+        strategy = nullptr;
+    }
+    if (state != nullptr) {
+        delete state;
+        state = nullptr;
+    }
+    observers.clear();
 }
 
 void Plant::performCare() {
-    if (strategy) {
-        strategy->water(this);
-    } else {
-        std::cout << "No care strategy assigned to plant: " << plantName << std::endl;
+    if (strategy != nullptr) {
+        strategy->performCare(this);
     }
+}
+
+void Plant::setStrategy(CareStrategy* newStrategy) {
+    if (strategy != nullptr) {
+        delete strategy;
+    }
+    strategy = newStrategy;
+}
+
+CareStrategy* Plant::getStrategy() const {
+    return strategy;
 }
 
 PlantState* Plant::getState() const {
@@ -32,38 +47,60 @@ PlantState* Plant::getState() const {
 }
 
 void Plant::setState(PlantState* newState) {
-    if (state != newState && state != nullptr) {
+    if (state != nullptr && state != newState) {
         delete state;
     }
-
     state = newState;
-    if (state) {
+    if (state != nullptr) {
         std::string stateName = state->getStateName();
         if (stateName == "Mature" || stateName == "Flowering") {
             readyForSale = true;
+        } else if (stateName == "Dead") {
+            readyForSale = false;
         } else {
             readyForSale = false;
         }
     }
 }
 
-void Plant::setStrategy(CareStrategy* newStrategy) {
-    if (strategy) {
-        delete strategy;
+void Plant::attach(PlantObserver* observer) {
+    if (observer == nullptr) {
+        return;
     }
-    strategy = newStrategy;
+    auto it = std::find(observers.begin(), observers.end(), observer);
+    if (it == observers.end()) {
+        observers.push_back(observer);
+    }
+}
+
+void Plant::detach(PlantObserver* observer) {
+    if (observer == nullptr) {
+        return;
+    }
+    auto it = std::find(observers.begin(), observers.end(), observer);
+    if (it != observers.end()) {
+        observers.erase(it);
+    }
+}
+
+void Plant::notify() {
+    for (PlantObserver* observer : observers) {
+        if (observer != nullptr) {
+            observer->update(this);
+        }
+    }
+}
+
+std::string Plant::getName() const {
+    return plantName;
 }
 
 std::string Plant::getID() const {
     return plantID;
 }
 
-int Plant::getAge() {
+int Plant::getAge() const {
     return age;
-}
-
-void Plant::incrementAge() {
-    age++;
 }
 
 int Plant::getWaterLevel() const {
@@ -102,10 +139,6 @@ int Plant::getHealthLevel() const {
 
 void Plant::updateHealth() {
     healthLevel = (waterLevel + nutrientLevel + sunlightExposure) / 3;
-    
-    if (healthLevel < 20) {
-        std::cout << "WARNING: " << plantName << " is in poor health!" << std::endl;
-    }
 }
 
 bool Plant::isReadyForSale() const {
@@ -121,70 +154,48 @@ double Plant::getPrice() const {
 }
 
 void Plant::setPrice(double newPrice) {
-    price = newPrice;
+    if (newPrice >= 0) {
+        price = newPrice;
+    }
 }
 
-std::string Plant::getSeason() const {
-    return season;
-}
-
-void Plant::setSeason(const std::string& newSeason) {
-    season = newSeason;
+void Plant::incrementAge() {
+    age++;
 }
 
 void Plant::dailyUpdate() {
     incrementAge();
-    
     waterLevel -= 10;
     if (waterLevel < 0) waterLevel = 0;
-    
     nutrientLevel -= 5;
     if (nutrientLevel < 0) nutrientLevel = 0;
-    
-   updateHealth();
-    
+    updateHealth();
     notify();
-    
-    if (state) {
+    if (state != nullptr) {
         state->handleChange(this);
     }
-    
-    std::cout << "Daily update completed for " << plantName 
-              << " (Age: " << age << " days, Health: " << healthLevel << "%)" << std::endl;
 }
 
-void Plant::attach(PlantObserver* observer) {
-    observers.push_back(observer);
-}
-
-void Plant::detach(PlantObserver* observer) {
-    for (auto it = observers.begin(); it != observers.end(); ++it) {
-        if (*it == observer) {
-            observers.erase(it);
-            break;
-        }
-    }
-}
-
-void Plant::notify() {
-    for (PlantObserver* observer : observers) {
-        observer->update(this);
-    }
+void Plant::updateCondition() {
+    waterLevel -= 5;
+    if (waterLevel < 0) waterLevel = 0;
+    nutrientLevel -= 3;
+    if (nutrientLevel < 0) nutrientLevel = 0;
+    updateHealth();
+    notify();
 }
 
 std::string Plant::toString() const {
     std::ostringstream output;
     output << "Plant: " << plantName << "\n"
-        << "  ID: " << plantID << "\n"
-        << "  Age: " << age << " days\n"
-        << "  State: " << (state ? state->getStateName() : "Unknown") << "\n"
-        << "  Water Level: " << waterLevel << "%\n"
-        << "  Nutrient Level: " << nutrientLevel << "%\n"
-        << "  Sunlight Exposure: " << sunlightExposure << "%\n"
-        << "  Health: " << healthLevel << "%\n"
-        << "  Ready for Sale: " << (readyForSale ? "Yes" : "No") << "\n"
-        << "  Price: R" << price << "\n"
-        << "  Season: " << season;
-    
+           << "ID: " << plantID << "\n"
+           << "Age: " << age << " days\n"
+           << "State: " << (state ? state->getStateName() : "Unknown") << "\n"
+           << "Water Level: " << waterLevel << "%\n"
+           << "Nutrient Level: " << nutrientLevel << "%\n"
+           << "Sunlight Exposure: " << sunlightExposure << "%\n"
+           << "Health: " << healthLevel << "%\n"
+           << "Ready for Sale: " << (readyForSale ? "Yes" : "No") << "\n"
+           << "Price: R" << price;
     return output.str();
 }
