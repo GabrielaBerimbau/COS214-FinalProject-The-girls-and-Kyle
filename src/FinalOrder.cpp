@@ -12,7 +12,7 @@ FinalOrder::FinalOrder(const std::string& name)
 FinalOrder::FinalOrder(const FinalOrder& other)
     : customerName(other.customerName), totalPrice(other.totalPrice) {
     for (auto* o : other.orderList) {
-        orderList.push_back(new Order(*o));  // Deep copy
+       orderList.push_back(o->clone());  // Deep copy
     }
 }
 

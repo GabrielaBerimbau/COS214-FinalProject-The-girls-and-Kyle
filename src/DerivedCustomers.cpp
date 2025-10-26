@@ -2,6 +2,8 @@
 #include "include/PaymentProcessor.h"
 #include "include/CashPayment.h"
 #include "include/CreditCardPayment.h"
+#include "include/FinalOrder.h"
+#include "include/ConcreteOrder.h"
 #include "include/Plant.h"
 #include <iostream>
 
@@ -36,6 +38,23 @@ void CorporateCustomer::checkOut() {
         std::cout << "Large bulk order detected. Processing approval...\n";
     }
     
+    // Create FinalOrder from cart
+    FinalOrder* finalOrder = new FinalOrder(getName());
+    
+    // Add each plant from cart as a ConcreteOrder
+    for (Plant* plant : cart) {
+        if (plant != nullptr) {
+            std::vector<std::string> items;
+            items.push_back(plant->getName());
+            ConcreteOrder* order = new ConcreteOrder(
+                plant->getName(), 
+                items, 
+                plant->getPrice()
+            );
+            finalOrder->addOrder(order);
+        }
+    }
+    
     // Notify mediator of purchase
     if (mediator) {
         mediator->processPurchase();
@@ -43,15 +62,16 @@ void CorporateCustomer::checkOut() {
     
     // Use credit card payment for corporate
     PaymentProcessor* processor = new CreditCardPayment();
-    processor->processTransaction();
+    processor->processTransaction(finalOrder);
     
-    // Deduct from budget (called by payment processor in real implementation)
+    // Deduct from budget
     if (deductFromBudget(total)) {
         std::cout << "Corporate purchase successful!\n";
         clearCart();
     }
     
     delete processor;
+    delete finalOrder;
 }
 
 // ============ RegularCustomer ============
@@ -80,6 +100,23 @@ void RegularCustomer::checkOut() {
         return;
     }
     
+    // Create FinalOrder from cart
+    FinalOrder* finalOrder = new FinalOrder(getName());
+    
+    // Add each plant from cart as a ConcreteOrder
+    for (Plant* plant : cart) {
+        if (plant != nullptr) {
+            std::vector<std::string> items;
+            items.push_back(plant->getName());
+            ConcreteOrder* order = new ConcreteOrder(
+                plant->getName(), 
+                items, 
+                plant->getPrice()
+            );
+            finalOrder->addOrder(order);
+        }
+    }
+    
     // Notify mediator of purchase
     if (mediator) {
         mediator->processPurchase();
@@ -88,7 +125,7 @@ void RegularCustomer::checkOut() {
     // Regular customers can choose payment method
     // For now, default to credit card
     PaymentProcessor* processor = new CreditCardPayment();
-    processor->processTransaction();
+    processor->processTransaction(finalOrder);
     
     // Deduct from budget
     if (deductFromBudget(total)) {
@@ -97,6 +134,7 @@ void RegularCustomer::checkOut() {
     }
     
     delete processor;
+    delete finalOrder;
 }
 
 // ============ WalkInCustomer ============
@@ -125,6 +163,23 @@ void WalkInCustomer::checkOut() {
         return;
     }
     
+    // Create FinalOrder from cart
+    FinalOrder* finalOrder = new FinalOrder(getName());
+    
+    // Add each plant from cart as a ConcreteOrder
+    for (Plant* plant : cart) {
+        if (plant != nullptr) {
+            std::vector<std::string> items;
+            items.push_back(plant->getName());
+            ConcreteOrder* order = new ConcreteOrder(
+                plant->getName(), 
+                items, 
+                plant->getPrice()
+            );
+            finalOrder->addOrder(order);
+        }
+    }
+    
     // Notify mediator of purchase
     if (mediator) {
         mediator->processPurchase();
@@ -132,7 +187,7 @@ void WalkInCustomer::checkOut() {
     
     // Walk-in customers typically pay cash
     PaymentProcessor* processor = new CashPayment();
-    processor->processTransaction();
+    processor->processTransaction(finalOrder);
     
     // Deduct from budget
     if (deductFromBudget(total)) {
@@ -141,4 +196,5 @@ void WalkInCustomer::checkOut() {
     }
     
     delete processor;
+    delete finalOrder;
 }
