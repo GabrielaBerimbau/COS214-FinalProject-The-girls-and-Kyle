@@ -13,6 +13,7 @@ Plant::Plant(const std::string& name, const std::string& id,
 
 Plant::~Plant() {
     delete strategy;
+    delete state;
     
     std::cout << "Plant destroyed: " << plantName << std::endl;
 }
