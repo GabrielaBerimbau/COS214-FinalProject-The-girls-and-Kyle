@@ -2,9 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 
-FloorManager::FloorManager(): StaffMembers(), name("Floor Manager"), id("FM" + std::to_string(rand() % 1000)){}
-
-FloorManager::FloorManager(std::string staffName, std::string staffId): StaffMembers(), name(staffName), id(staffId){}
+FloorManager::FloorManager(NurseryMediator* med, std::string staffName, std::string staffId): StaffMembers(med, staffName, staffId){}
 
 FloorManager::~FloorManager(){}
 

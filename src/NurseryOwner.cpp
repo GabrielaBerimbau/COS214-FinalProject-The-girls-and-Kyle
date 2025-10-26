@@ -2,9 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 
-NurseryOwner::NurseryOwner(): StaffMembers(), name("Nursery Owner"), id("OWNER" + std::to_string(rand() % 100)){}
-
-NurseryOwner::NurseryOwner(std::string staffName, std::string staffId): StaffMembers(), name(staffName), id(staffId){}
+NurseryOwner::NurseryOwner(NurseryMediator* med, std::string staffName, std::string staffId): StaffMembers(med, staffName, staffId){}
 
 NurseryOwner::~NurseryOwner(){}
 

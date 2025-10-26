@@ -1,7 +1,7 @@
 #include "../include/StaffMembers.h"
 #include <iostream>
 
-StaffMembers::StaffMembers(): nextHandler(nullptr){}
+StaffMembers::StaffMembers(NurseryMediator* med, std::string staffName, std::string staffId): Person(med, staffName, staffId), nextHandler(nullptr){}
 
 StaffMembers::~StaffMembers(){}
 

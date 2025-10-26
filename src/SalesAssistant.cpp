@@ -2,9 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 
-SalesAssistant::SalesAssistant(): StaffMembers(), scheduler(new CareScheduler()), name("Sales Assistant"), id("SA" + std::to_string(rand() % 1000)){}
-
-SalesAssistant::SalesAssistant(std::string staffName, std::string staffId): StaffMembers(), scheduler(new CareScheduler()), name(staffName), id(staffId){}
+SalesAssistant::SalesAssistant(NurseryMediator* med, std::string staffName, std::string staffId): StaffMembers(med, staffName, staffId), scheduler(new CareScheduler()){}
 
 SalesAssistant::~SalesAssistant(){
     delete scheduler;
@@ -68,7 +66,11 @@ void SalesAssistant::customerRequestsPlant(std::string plantName){
 
 Plant* SalesAssistant::findRequestedPlant(std::string plantName){
     std::cout << "SalesAssistant " << id << ": Searching for '" << plantName << "'\n";
-    // this would search through sales floor - implement when integrating with mediator
+
+    if(mediator != nullptr){
+        return mediator->requestPlantFromStaff(plantName);
+    }
+
     return nullptr;
 }
 

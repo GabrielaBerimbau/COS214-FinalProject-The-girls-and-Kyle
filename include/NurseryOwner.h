@@ -10,8 +10,14 @@ class NurseryOwner: public StaffMembers{
         std::string id;
 
     public:
-        NurseryOwner();
-        NurseryOwner(std::string staffName, std::string staffId);
+        /**
+         * @brief Constructor
+         * @param med Pointer to mediator
+         * @param staffName Name of nursery owner
+         * @param staffId ID of nursery owner
+         */
+        NurseryOwner(NurseryMediator* med, std::string staffName, std::string staffId);
+        
         virtual ~NurseryOwner();
         
         /**

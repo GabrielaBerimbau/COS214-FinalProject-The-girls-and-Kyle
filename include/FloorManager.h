@@ -10,8 +10,14 @@ class FloorManager: public StaffMembers{
         std::string id;
 
     public:
-        FloorManager();
-        FloorManager(std::string staffName, std::string staffId);
+        /**
+         * @brief Constructor
+         * @param med Pointer to mediator
+         * @param staffName Name of floor manager
+         * @param staffId ID of floor manager
+         */
+        FloorManager(NurseryMediator* med, std::string staffName, std::string staffId);
+        
         virtual ~FloorManager();
         
         /**

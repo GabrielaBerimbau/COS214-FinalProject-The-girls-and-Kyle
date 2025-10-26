@@ -3,13 +3,21 @@
 #define STAFF_MEMBERS_H
 
 #include "Request.h"
+#include "Person.h"
 
-class StaffMembers{
+class StaffMembers: public Person{
     protected:
         StaffMembers* nextHandler;
 
     public:
-        StaffMembers();
+        /**
+         * @brief Constructor
+         * @param med Pointer to mediator
+         * @param staffName Name of staff member
+         * @param staffId ID of staff member
+         */
+        StaffMembers(NurseryMediator* med, std::string staffName, std::string staffId);
+        
         virtual ~StaffMembers();
         
         /**

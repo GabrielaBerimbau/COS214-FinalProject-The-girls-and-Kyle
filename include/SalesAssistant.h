@@ -13,8 +13,14 @@ class SalesAssistant: public StaffMembers{
         std::string id;
 
     public:
-        SalesAssistant();
-        SalesAssistant(std::string staffName, std::string staffId);
+        /**
+         * @brief Constructor
+         * @param med Pointer to mediator
+         * @param staffName Name of sales assistant
+         * @param staffId ID of sales assistant
+         */
+        SalesAssistant(NurseryMediator* med, std::string staffName, std::string staffId);
+
         virtual ~SalesAssistant();
         
         /**
