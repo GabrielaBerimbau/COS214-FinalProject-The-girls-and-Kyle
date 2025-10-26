@@ -15,6 +15,13 @@ class CareStrategy {
 
         virtual void prune(Plant* plant) =0;
 
+        virtual void performCare(Plant* plant) {
+            water(plant);
+            fertilize(plant);
+            adjustSunlight(plant);
+            prune(plant);
+        }
+
 };
 
 #endif
