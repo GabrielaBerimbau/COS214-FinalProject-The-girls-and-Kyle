@@ -1,5 +1,88 @@
-// #include "include/SalesAssistant.h"
+#include "../include/SalesAssistant.h"
+#include <iostream>
+#include <cstdlib>
 
-// SalesAssistant::SalesAssistant() : StaffMembers()
-// {
-// }
+SalesAssistant::SalesAssistant(): StaffMembers(), scheduler(new CareScheduler()), name("Sales Assistant"), id("SA" + std::to_string(rand() % 1000)){}
+
+SalesAssistant::SalesAssistant(std::string staffName, std::string staffId): StaffMembers(), scheduler(new CareScheduler()), name(staffName), id(staffId){}
+
+SalesAssistant::~SalesAssistant(){
+    delete scheduler;
+}
+
+void SalesAssistant::handleRequest(Request* request){
+    if(request == nullptr){
+        std::cout << "SalesAssistant: Received null request\n";
+        return;
+    }
+    
+    std::cout << "SalesAssistant " << id << ": Received request - '" << request->getMessage() << "'\n";
+    
+    // low level requests - simple plant requests
+    if(request->getLevel() == RequestLevel::LOW){
+        std::cout << "SalesAssistant " << id << ": Handling simple request\n";
+        
+        std::string message = request->getMessage();
+        
+        // if(message.find("plant") != std::string::npos || 
+        //    message.find("rose") != std::string::npos || 
+        //    message.find("daisy") != std::string::npos ||
+        //    message.find("cactus") != std::string::npos){
+            
+        //     std::cout << "SalesAssistant " << id << ": Processing plant request\n";
+        // }
+
+        // waiting for plants to be implemented to see exactly what all we have
+        
+        request->markHandled();
+    } 
+    else{
+        if(nextHandler != nullptr){
+            std::cout << "SalesAssistant " << id << ": Escalating request to next handler\n";
+            nextHandler->handleRequest(request);
+        } 
+        
+        else{
+            std::cout << "SalesAssistant " << id << ": No higher authority available\n";
+        }
+    }
+}
+
+void SalesAssistant::handleRequest(){
+    std::cout << "SalesAssistant " << id << ": Handling general request\n";
+}
+
+void SalesAssistant::customerRequestsPlant(std::string plantName){
+    std::cout << "SalesAssistant " << id << ": Customer requested '" << plantName << "'\n";
+    
+    Plant* plant = findRequestedPlant(plantName);
+    
+    if(plant != nullptr){
+        std::cout << "SalesAssistant " << id << ": Found plant '" << plantName << "'\n";
+    } 
+
+    else{
+        std::cout << "SalesAssistant " << id << ": Plant '" << plantName << "' not found\n";
+    }
+}
+
+Plant* SalesAssistant::findRequestedPlant(std::string plantName){
+    std::cout << "SalesAssistant " << id << ": Searching for '" << plantName << "'\n";
+    // this would search through sales floor - implement when integrating with mediator
+    return nullptr;
+}
+
+std::string SalesAssistant::getName()const{
+    return name;
+}
+
+std::string SalesAssistant::getId()const{
+    return id;
+}
+
+void SalesAssistant::runCareScheduler(){
+    if(scheduler != nullptr && !scheduler->empty()){
+        std::cout << "SalesAssistant " << id << ": Running care scheduler\n";
+        scheduler->runAll();
+    }
+}
