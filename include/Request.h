@@ -9,9 +9,9 @@
  * @brief Priority levels for requests in chain of responsibility
  */
 enum class RequestLevel{
-    LOW,      // Handled by SalesAssistant
-    MEDIUM,   // Handled by FloorManager
-    HIGH      // Handled by NurseryOwner
+    LOW,      // handled by SalesAssistant
+    MEDIUM,   // handled by FloorManager
+    HIGH      // handled by NurseryOwner
 };
 
 /**
@@ -29,14 +29,14 @@ class Request{
          * @param sentence Input sentence
          * @return Vector of keywords
          */
-        std::vector<std::string> extractKeywords(const std::string& sentence);
+        std::vector<std::string> extractKeywords(const std::string& sentence)const;
         
         /**
          * @brief Determine request level based on keywords
          * @param keywords Vector of keywords
          * @return RequestLevel priority
          */
-        RequestLevel determineLevel(const std::vector<std::string>& keywords);
+        RequestLevel determineLevel(const std::vector<std::string>& keywords)const;
         
     public:
         /**
