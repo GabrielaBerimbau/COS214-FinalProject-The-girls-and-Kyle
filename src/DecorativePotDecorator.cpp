@@ -12,7 +12,7 @@ double DecorativePotDecorator::getPrice()
     }
 }
 
-std::string DecorativePotDecorator::getDescription()
+std::string DecorativePotDecorator::description()
 {
     if (plant) {
         std::ostringstream output;

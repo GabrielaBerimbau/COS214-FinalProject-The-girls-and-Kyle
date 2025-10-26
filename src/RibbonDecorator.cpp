@@ -13,7 +13,7 @@ double RibbonDecorator::getPrice()
     }
 }
 
-std::string RibbonDecorator::getDescription()
+std::string RibbonDecorator::description()
 {
     if (plant) {
         std::ostringstream output;
