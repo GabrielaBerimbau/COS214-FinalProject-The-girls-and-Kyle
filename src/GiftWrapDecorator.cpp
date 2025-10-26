@@ -1,2 +1,24 @@
-// #include "include/GiftWrapDecorator.h"
+// #include "GiftWrapDecorator.h"
+#include "include/GiftWrapDecorator.h"
 
+GiftWrapDecorator::GiftWrapDecorator(Plant *plant) : Decorator(plant)
+{
+}
+
+double GiftWrapDecorator::getPrice()
+{
+    if (plant) {
+        return plant->getPrice() + GIFT_WRAP_PRICE;
+    }
+}
+
+std::string GiftWrapDecorator::getDescription()
+{
+    if (plant) {
+        std::ostringstream output;
+        output << plant->description();
+        output << "Decoration: gift wrapping\n";
+
+        return output.str();
+    }
+}
