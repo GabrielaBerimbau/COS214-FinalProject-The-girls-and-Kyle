@@ -208,3 +208,10 @@ std::string Plant::description() const {
     return output.str();
 
 }
+
+
+
+CareStrategy* Plant::getCareStrategy()const {
+     return strategy;
+      }
+
