@@ -14,11 +14,11 @@ void SalesAssistant::handleRequest(Request* request){
         return;
     }
     
-    std::cout << "SalesAssistant " << id << ": Received request - '" << request->getMessage() << "'\n";
+    std::cout << "SalesAssistant " << getId() << ": Received request - '" << request->getMessage() << "'\n";
     
     // low level requests - simple plant requests
     if(request->getLevel() == RequestLevel::LOW){
-        std::cout << "SalesAssistant " << id << ": Handling simple request\n";
+        std::cout << "SalesAssistant " << getId() << ": Handling simple request\n";
         
         std::string message = request->getMessage();
         
@@ -30,42 +30,42 @@ void SalesAssistant::handleRequest(Request* request){
         //     std::cout << "SalesAssistant " << id << ": Processing plant request\n";
         // }
 
-        // waiting for plants to be implemented to see exactly what all we have
+        // waiting for request.cpp to be complete
         
         request->markHandled();
     } 
     else{
         if(nextHandler != nullptr){
-            std::cout << "SalesAssistant " << id << ": Escalating request to next handler\n";
+            std::cout << "SalesAssistant " << getId() << ": Escalating request to next handler\n";
             nextHandler->handleRequest(request);
         } 
         
         else{
-            std::cout << "SalesAssistant " << id << ": No higher authority available\n";
+            std::cout << "SalesAssistant " << getId() << ": No higher authority available\n";
         }
     }
 }
 
 void SalesAssistant::handleRequest(){
-    std::cout << "SalesAssistant " << id << ": Handling general request\n";
+    std::cout << "SalesAssistant " << getId() << ": Handling general request\n";
 }
 
 void SalesAssistant::customerRequestsPlant(std::string plantName){
-    std::cout << "SalesAssistant " << id << ": Customer requested '" << plantName << "'\n";
+    std::cout << "SalesAssistant " << getId() << ": Customer requested '" << plantName << "'\n";
     
     Plant* plant = findRequestedPlant(plantName);
     
     if(plant != nullptr){
-        std::cout << "SalesAssistant " << id << ": Found plant '" << plantName << "'\n";
+        std::cout << "SalesAssistant " << getId() << ": Found plant '" << plantName << "'\n";
     } 
 
     else{
-        std::cout << "SalesAssistant " << id << ": Plant '" << plantName << "' not found\n";
+        std::cout << "SalesAssistant " << getId() << ": Plant '" << plantName << "' not found\n";
     }
 }
 
 Plant* SalesAssistant::findRequestedPlant(std::string plantName){
-    std::cout << "SalesAssistant " << id << ": Searching for '" << plantName << "'\n";
+    std::cout << "SalesAssistant " << getId() << ": Searching for '" << plantName << "'\n";
 
     if(mediator != nullptr){
         return mediator->requestPlantFromStaff(plantName);
@@ -76,7 +76,7 @@ Plant* SalesAssistant::findRequestedPlant(std::string plantName){
 
 void SalesAssistant::runCareScheduler(){
     if(scheduler != nullptr && !scheduler->empty()){
-        std::cout << "SalesAssistant " << id << ": Running care scheduler\n";
+        std::cout << "SalesAssistant " << getId() << ": Running care scheduler\n";
         scheduler->runAll();
     }
 }

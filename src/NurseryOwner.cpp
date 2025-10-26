@@ -12,30 +12,30 @@ void NurseryOwner::handleRequest(Request* request){
         return;
     }
     
-    std::cout << "NurseryOwner " << id << ": Received request - '" << request->getMessage() << "'\n";
+    std::cout << "NurseryOwner " << getId() << ": Received request - '" << request->getMessage() << "'\n";
 
-    std::cout << "NurseryOwner " << id << ": Making decision on request\n";
+    std::cout << "NurseryOwner " << getId() << ": Making decision on request\n";
     
     std::string message = request->getMessage();
     
     // handle complaints, refunds
     if(message.find("complaint") != std::string::npos || message.find("refund") != std::string::npos){
         
-        std::cout << "NurseryOwner " << id << ": Addressing customer complaint/ refund\n";
+        std::cout << "NurseryOwner " << getId() << ": Addressing customer complaint/ refund\n";
     } 
     else if(message.find("lawsuit") != std::string::npos ||  message.find("urgent") != std::string::npos){
         
-        std::cout << "NurseryOwner " << id << ": Handling urgent/ legal matter\n";
+        std::cout << "NurseryOwner " << getId() << ": Handling urgent/ legal matter\n";
     }
     
     else{
-        std::cout << "NurseryOwner " << id << ": Making final decision on complex request\n";
+        std::cout << "NurseryOwner " << getId() << ": Making final decision on complex request\n";
     }
     
     request->markHandled();
-    std::cout << "NurseryOwner " << id << ": Request resolved\n";
+    std::cout << "NurseryOwner " << getId() << ": Request resolved\n";
 }
 
 void NurseryOwner::handleRequest(){
-    std::cout << "NurseryOwner " << id << ": Handling general request\n";
+    std::cout << "NurseryOwner " << getId() << ": Handling general request\n";
 }

@@ -12,11 +12,11 @@ void FloorManager::handleRequest(Request* request){
         return;
     }
     
-    std::cout << "FloorManager " << id << ": Received request - '" << request->getMessage() << "'\n";
+    std::cout << "FloorManager " << getId() << ": Received request - '" << request->getMessage() << "'\n";
     
     // medium requests - bulk orders, special plant arracngements
     if(request->getLevel() == RequestLevel::MEDIUM){
-        std::cout << "FloorManager " << id << ": Handling moderate complexity request\n";
+        std::cout << "FloorManager " << getId() << ": Handling moderate complexity request\n";
         
         std::string message = request->getMessage();
         
@@ -24,29 +24,29 @@ void FloorManager::handleRequest(Request* request){
            message.find("wedding") != std::string::npos ||
            message.find("special") != std::string::npos){
             
-            std::cout << "FloorManager " << id << ": Processing bulk/ special order\n";
+            std::cout << "FloorManager " << getId() << ": Processing bulk/ special order\n";
         }
         
         request->markHandled();
     } 
     else if(request->getLevel() == RequestLevel::LOW){
         // shouldn't get here, but handle just in case
-        std::cout << "FloorManager " << id << ": Handling simple request\n";
+        std::cout << "FloorManager " << getId() << ": Handling simple request\n";
         request->markHandled();
     } 
     
     else{
         if(nextHandler != nullptr){
-            std::cout << "FloorManager " << id << ": Escalating to Nursery Owner\n";
+            std::cout << "FloorManager " << getId() << ": Escalating to Nursery Owner\n";
             nextHandler->handleRequest(request);
         } 
 
         else{
-            std::cout << "FloorManager " << id << ": No higher authority available\n";
+            std::cout << "FloorManager " << getId() << ": No higher authority available\n";
         }
     }
 }
 
 void FloorManager::handleRequest(){
-    std::cout << "FloorManager " << id << ": Handling general request\n";
+    std::cout << "FloorManager " << getId() << ": Handling general request\n";
 }
