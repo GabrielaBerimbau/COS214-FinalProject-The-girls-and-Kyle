@@ -32,7 +32,7 @@ void NurseryCoordinator::checkPlantRelocation(){
     
     for(Plant* plant: allPlants){
         if(plant != nullptr && plant->isReadyForSale()){
-            std::cout << "NurseryCoordinator: Plant " << plant->getID() << " is ready for sale\n";
+            std::cout << "NurseryCoordinator: Plant '" << plant->getName() << "' (ID: " << plant->getID() << ") is ready for sale\n";
             
             // find an empty spot on the sales floor to put the plant
             bool placed = false;
@@ -46,7 +46,7 @@ void NurseryCoordinator::checkPlantRelocation(){
 
                         placed = true;
 
-                        std::cout << "NurseryCoordinator: Moved plant " << plant->getID() << " to the sales floor at position (" << i << "," << j << ")\n";
+                        std::cout << "NurseryCoordinator: Moved plant '" << plant->getName() << "' (ID: " << plant->getID() << ") to the sales floor at position (" << i << "," << j << ")\n";
                     }
                 }
             }
@@ -138,7 +138,7 @@ bool NurseryCoordinator::coordinatePurchaseWorkflow(std::string customerId, std:
 
         for(Plant* plant: displayPlants){
             
-            if(plant != nullptr && plant->getID() == plantName){
+            if(plant != nullptr && plant->getName() == plantName){
                 std::cout << "NurseryCoordinator: Plant found on sales floor, processing purchase\n";
                 processPurchase();
 

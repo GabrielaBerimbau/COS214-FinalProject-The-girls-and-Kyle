@@ -48,7 +48,7 @@ Plant* NurseryMediator::requestPlantFromStaff(std::string plantName){
             std::vector<Plant*> displayPlants = sf->getDisplayPlants();
 
             for(Plant* plant: displayPlants){
-                if(plant != nullptr && (plant->getID() == plantName)){
+                if(plant != nullptr && (plant->getName() == plantName)){
                     std::cout << "Mediator: Plant was found on sales floor" << std::endl;
                     return plant;
                 }
@@ -84,7 +84,7 @@ void NurseryMediator::giveCustomerPlant(Plant* plant){
         return;
     }
     
-    std::cout << "Mediator: Giving plant " << plant->getID() << " to customer\n";
+    std::cout << "Mediator: Giving plant '" << plant->getName() << "' (ID: " << plant->getID() << ") to customer\n";
     
     for (Colleague* colleague: colleagues) {
         Customer* customer = dynamic_cast<Customer*>(colleague);

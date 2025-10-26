@@ -50,8 +50,8 @@ bool Greenhouse::addPlant(Plant* plant, int row, int col){
     plantGrid[row][col] = plant;
     currentNumberOfPlants++;
     
-    std::cout << "Plant " << plant->getID() << " was added to greenhouse at (" << row << "," << col << ")\n";
-    
+    std::cout << "Plant '" << plant->getName() << "' (ID: " << plant->getID() << ") was added to greenhouse at (" << row << "," << col << ")\n";
+
     if(mediator != nullptr){
         mediator->notify(this);
     }
@@ -71,7 +71,7 @@ bool Greenhouse::removePlant(Plant* plant) {
                 plantGrid[i][j] = nullptr;
                 currentNumberOfPlants--;
                 
-                std::cout << "Plant " << plant->getID() << " removed from the greenhouse\n";
+                std::cout << "Plant '" << plant->getName() << "' (ID: " << plant->getID() << ") removed from the greenhouse\n";
                 
                 if(mediator != nullptr){
                     mediator->notify(this);
@@ -112,7 +112,7 @@ Plant* Greenhouse::findPlant(std::string plantName){
 
             Plant* plant = plantGrid[i][j];
 
-            if(plant != nullptr && (plant->getID() == plantName)){
+            if(plant != nullptr && (plant->getName() == plantName)){
                 return plant;
             }
         }
@@ -134,7 +134,7 @@ bool Greenhouse::hasPlant(std::string plantName)const{
 
             Plant* plant = plantGrid[i][j];
 
-            if(plant != nullptr && (plant->getID() == plantName)){
+            if(plant != nullptr && (plant->getName() == plantName)){
                 return true;
             }
         }
