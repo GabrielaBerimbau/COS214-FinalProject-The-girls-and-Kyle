@@ -1,13 +1,24 @@
+// include/NurseryCoordinator.h
 #ifndef NURSERYCOORDINATOR_H
 #define NURSERYCOORDINATOR_H
 
 #include "NurseryMediator.h"
+#include <string>
+
+class SalesFloor;
+class Greenhouse;
+class Person;
 
 /**
  * @class NurseryCoordinator
  * @brief Extended mediator with additional coordination capabilities
+ * @note Coordinates plant relocation and nursery operations
  */
 class NurseryCoordinator: public NurseryMediator{
+    private:
+        SalesFloor* salesFloorRef;
+        Greenhouse* greenhouseRef;
+
     public:
         /**
          * @brief Constructor
@@ -18,6 +29,51 @@ class NurseryCoordinator: public NurseryMediator{
          * @brief Destructor
          */
         ~NurseryCoordinator();
+
+        /**
+         * @brief Set reference to sales floor
+         * @param sf Pointer to sales floor
+         */
+        void setSalesFloor(SalesFloor* sf);
+
+        /**
+         * @brief Set reference to greenhouse
+         * @param gh Pointer to greenhouse
+         */
+        void setGreenhouse(Greenhouse* gh);
+
+        /**
+         * @brief Check if mature plants need to be moved to sales floor
+         */
+        void checkPlantRelocation();
+
+        /**
+         * @brief Coordinates the transfer of plant from greenhouse to sales floor
+         * @param plantName Name of plant to transfer
+         * @return true if successful, false if not
+         */
+        bool coordinatePlantTransfer(std::string plantName);
+
+        /**
+         * @brief Assign a staff member to handle a customer
+         * @param customerId Customer needing assistance
+         * @return Assigned staff member ID
+         */
+        std::string assignStaffToCustomer(std::string customerId);
+
+        /**
+         * @brief Get available staff member
+         * @return Pointer to the available staff, or nullptr
+         */
+        Person* getAvailableStaff();
+
+        /**
+         * @brief Coordinate the entire purchase workflow
+         * @param customerId Customer making purchase
+         * @param plantName Plant being purchased
+         * @return true if purchase completed successfully, false if not
+         */
+        bool coordinatePurchaseWorkflow(std::string customerId, std::string plantName);
 };
 
 #endif
