@@ -1,6 +1,8 @@
 #ifndef PLANTSTATE_H
 #define PLANTSTATE_H
 
+#include <string>
+
 class Plant;
 
 class PlantState {
