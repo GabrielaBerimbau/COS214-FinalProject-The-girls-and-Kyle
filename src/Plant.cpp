@@ -1,4 +1,5 @@
 #include "Plant.h"
+#include "PlantObserver.h"
 #include <iostream>
 #include <sstream>
 
@@ -31,6 +32,10 @@ PlantState* Plant::getState() const {
 }
 
 void Plant::setState(PlantState* newState) {
+    if (state != newState && state != nullptr) {
+        delete state;
+    }
+
     state = newState;
     if (state) {
         std::string stateName = state->getStateName();
@@ -146,6 +151,25 @@ void Plant::dailyUpdate() {
     
     std::cout << "Daily update completed for " << plantName 
               << " (Age: " << age << " days, Health: " << healthLevel << "%)" << std::endl;
+}
+
+void Plant::attach(PlantObserver* observer) {
+    observers.push_back(observer);
+}
+
+void Plant::detach(PlantObserver* observer) {
+    for (auto it = observers.begin(); it != observers.end(); ++it) {
+        if (*it == observer) {
+            observers.erase(it);
+            break;
+        }
+    }
+}
+
+void Plant::notify() {
+    for (PlantObserver* observer : observers) {
+        observer->update(this);
+    }
 }
 
 std::string Plant::toString() const {

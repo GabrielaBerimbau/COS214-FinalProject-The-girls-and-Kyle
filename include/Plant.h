@@ -1,13 +1,13 @@
 #ifndef PLANT_H
 #define PLANT_H
 
-#include "PlantObserverSubject.h"
 #include "CareStrategy.h"
 #include "PlantState.h"
 #include <string>
 
+class PlantObserver;
 
-class Plant : public PlantObserverSubject{
+class Plant{
     private:
         CareStrategy* strategy;
         PlantState* state;
@@ -20,7 +20,8 @@ class Plant : public PlantObserverSubject{
         int healthLevel;                  
         bool readyForSale;                
         double price;                    
-        std::string season; 
+        std::string season;
+        std::vector<PlantObserver*> observers;
 
 
     public: 
@@ -77,6 +78,12 @@ class Plant : public PlantObserverSubject{
         and notifies observers of any changes.
         */
         void dailyUpdate(); 
+
+        void attach(PlantObserver* observer);
+
+        void detach(PlantObserver* observer);
+        
+        void notify();
 
         std::string toString() const;
 };
