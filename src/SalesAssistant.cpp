@@ -20,20 +20,21 @@ void SalesAssistant::handleRequest(Request* request){
     if(request->getLevel() == RequestLevel::LOW){
         std::cout << "SalesAssistant " << getId() << ": Handling simple request\n";
         
-        std::string message = request->getMessage();
+        std::string plantName = request->extractPlantName();
         
-        // if(message.find("plant") != std::string::npos || 
-        //    message.find("rose") != std::string::npos || 
-        //    message.find("daisy") != std::string::npos ||
-        //    message.find("cactus") != std::string::npos){
+        if(!plantName.empty()){
+            std::cout << "SalesAssistant " << getId() << ": Customer wants a '" << plantName << "'\n";
             
-        //     std::cout << "SalesAssistant " << id << ": Processing plant request\n";
-        // }
+            customerRequestsPlant(plantName);
+        }
 
-        // waiting for request.cpp to be complete
+        else{
+            std::cout << "SalesAssistant " << getId() << ": Processing general inquiry\n";
+        }
         
         request->markHandled();
     } 
+
     else{
         if(nextHandler != nullptr){
             std::cout << "SalesAssistant " << getId() << ": Escalating request to next handler\n";

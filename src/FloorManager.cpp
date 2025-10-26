@@ -14,7 +14,7 @@ void FloorManager::handleRequest(Request* request){
     
     std::cout << "FloorManager " << getId() << ": Received request - '" << request->getMessage() << "'\n";
     
-    // medium requests - bulk orders, special plant arracngements
+    // medium requests - bulk orders, special plant arrangements
     if(request->getLevel() == RequestLevel::MEDIUM){
         std::cout << "FloorManager " << getId() << ": Handling moderate complexity request\n";
         
