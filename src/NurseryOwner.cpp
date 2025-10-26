@@ -39,3 +39,11 @@ void NurseryOwner::handleRequest(Request* request){
 void NurseryOwner::handleRequest(){
     std::cout << "NurseryOwner " << getId() << ": Handling general request\n";
 }
+
+std::string NurseryOwner::getId() const{
+    return id;
+}
+
+std::string NurseryOwner::getName() const{
+    return name;
+}

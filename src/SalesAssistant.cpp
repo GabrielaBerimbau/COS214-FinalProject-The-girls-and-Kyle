@@ -81,3 +81,11 @@ void SalesAssistant::runCareScheduler(){
         scheduler->runAll();
     }
 }
+
+std::string SalesAssistant::getId() const{
+    return id;
+}
+
+std::string SalesAssistant::getName() const{
+    return name;
+}
