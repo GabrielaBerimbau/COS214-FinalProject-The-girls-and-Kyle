@@ -74,14 +74,6 @@ Plant* SalesAssistant::findRequestedPlant(std::string plantName){
     return nullptr;
 }
 
-std::string SalesAssistant::getName()const{
-    return name;
-}
-
-std::string SalesAssistant::getId()const{
-    return id;
-}
-
 void SalesAssistant::runCareScheduler(){
     if(scheduler != nullptr && !scheduler->empty()){
         std::cout << "SalesAssistant " << id << ": Running care scheduler\n";
