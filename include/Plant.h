@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-class CareStrategy;
-class PlantState;
-class PlantObserver;
+#include "CareStrategy.h"
+#include "PlantState.h"
+#include "PlantObserver.h"
 
 class Plant {
 private:
@@ -55,7 +55,7 @@ public:
     void setPrice(double newPrice);
     
     void incrementAge();
-    void dailyUpdate();
+    virtual void dailyUpdate();
     void updateCondition();
     
     virtual std::string toString() const;
