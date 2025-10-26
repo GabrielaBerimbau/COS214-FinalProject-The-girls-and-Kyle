@@ -1,12 +1,12 @@
 
-#include "AloeFactory.h"
-#include "Aloe.h"
-#include "SucculentCareStrategy.h"
-#include "SeedlingState.h"
-#include "WaterObserver.h"
-#include "FertilizeObserver.h"
-#include "SunlightObserver.h"
-#include "CareScheduler.h"
+#include "include/AloeFactory.h"
+#include "include/Aloe.h"
+#include "include/SucculentCareStrategy.h"
+#include "include/SeedlingState.h"
+#include "include/WaterObserver.h"
+#include "include/FertilizeObserver.h"
+#include "include/SunlightObserver.h"
+#include "include/CareScheduler.h"
 #include <iostream>
 
 Plant* AloeFactory::buildPlant() const {

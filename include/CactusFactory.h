@@ -1,7 +1,7 @@
 #ifndef CACTUS_FACTORY_H
 #define CACTUS_FACTORY_H
 
-#include "SucculantFactory.h"
+#include "SucculentFactory.h"
 
 class CactusFactory : public SucculantFactory {
 public:

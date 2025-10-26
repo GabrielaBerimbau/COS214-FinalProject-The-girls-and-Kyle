@@ -1,7 +1,7 @@
-#include "WaterObserver.h"
-#include "Plant.h"
-#include "CareScheduler.h"
-#include "WaterPlantCommand.h"
+#include "include/WaterObserver.h"
+#include "include/Plant.h"
+#include "include/CareScheduler.h"
+#include "include/WaterPlantCommand.h"
 
 WaterObserver::WaterObserver(CareScheduler* scheduler, Plant* plant)
     : scheduler_(scheduler), plant_(plant) {

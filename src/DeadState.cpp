@@ -1,5 +1,5 @@
-#include "DeadState.h"
-#include "Plant.h"
+#include "include/DeadState.h"
+#include "include/Plant.h"
 #include <iostream>
 
 DeadState::DeadState() {

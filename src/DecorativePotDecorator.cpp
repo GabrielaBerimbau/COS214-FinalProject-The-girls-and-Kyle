@@ -1,7 +1,7 @@
-// #include "DecorativePotDecorator.h"
 #include "include/DecorativePotDecorator.h"
 
-DecorativePotDecorator::DecorativePotDecorator(Plant *plant, std::string colour) : Decorator(plant), potColour(colour)
+DecorativePotDecorator::DecorativePotDecorator(Plant *plant, std::string colour) 
+    : Decorator(plant), potColour(colour)
 {
 }
 
@@ -10,6 +10,7 @@ double DecorativePotDecorator::getPrice()
     if (plant) {
         return plant->getPrice() + POT_PRICE;
     }
+    return 0.0;  // Add return for the case when plant is nullptr
 }
 
 std::string DecorativePotDecorator::getDescription()
@@ -21,4 +22,5 @@ std::string DecorativePotDecorator::getDescription()
 
         return output.str();
     }
+    return "";  // Add return for the case when plant is nullptr
 }

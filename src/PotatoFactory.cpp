@@ -1,11 +1,11 @@
-#include "PotatoFactory.h"
-#include "Potato.h"
-#include "VegetableCareStrategy.h"
-#include "SeedlingState.h"
-#include "WaterObserver.h"
-#include "FertilizeObserver.h"
-#include "SunlightObserver.h"
-#include "CareScheduler.h"
+#include "include/PotatoFactory.h"
+#include "include/Potato.h"
+#include "include/VegetableCareStrategy.h"
+#include "include/SeedlingState.h"
+#include "include/WaterObserver.h"
+#include "include/FertilizeObserver.h"
+#include "include/SunlightObserver.h"
+#include "include/CareScheduler.h"
 
 Plant* PotatoFactory::buildPlant() const {
     static int potatoCounter = 1;

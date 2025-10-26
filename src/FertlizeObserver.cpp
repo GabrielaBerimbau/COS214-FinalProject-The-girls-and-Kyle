@@ -1,7 +1,7 @@
-#include "FertilizeObserver.h"
-#include "Plant.h"
-#include "CareScheduler.h"
-#include "FertilizePlantCommand.h"
+#include "include/FertilizeObserver.h"
+#include "include/Plant.h"
+#include "include/CareScheduler.h"
+#include "include/FertilizePlantCommand.h"
 
 FertilizeObserver::FertilizeObserver(CareScheduler* scheduler, Plant* plant)
     : scheduler_(scheduler), plant_(plant) {

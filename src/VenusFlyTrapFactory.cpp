@@ -1,11 +1,11 @@
-#include "VenusFlyTrapFactory.h"
-#include "VenusFlyTrap.h"
-#include "OtherPlantCareStrategy.h"
-#include "SeedlingState.h"
-#include "WaterObserver.h"
-#include "FertilizeObserver.h"
-#include "SunlightObserver.h"
-#include "CareScheduler.h"
+#include "include/VenusFlyTrapFactory.h"
+#include "include/VenusFlyTrap.h"
+#include "include/OtherPlantCareStrategy.h"
+#include "include/SeedlingState.h"
+#include "include/WaterObserver.h"
+#include "include/FertilizeObserver.h"
+#include "include/SunlightObserver.h"
+#include "include/CareScheduler.h"
 
 Plant* VenusFlyTrapFactory::buildPlant() const {
     static int vftCounter = 1;
