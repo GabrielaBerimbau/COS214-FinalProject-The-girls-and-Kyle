@@ -3,21 +3,19 @@
 
 #include "PlantObserver.h"
 
-class CareScheduler;  // forward
+class CareScheduler;
 class Plant;
 
 class WaterObserver : public PlantObserver {
-public:
-    // Optionally pass collaborators via ctor; bodies in .cpp.
-    WaterObserver(CareScheduler* scheduler, Plant* plant);
-    virtual ~WaterObserver() {}
-
-    virtual void update();
-    void addTask();  // as per UML
-
 private:
-    CareScheduler* scheduler_; // not owned
-    Plant* plant_;             // not owned
+    CareScheduler* scheduler_;
+    Plant* plant_;
+    
+public:
+    WaterObserver(CareScheduler* scheduler, Plant* plant);
+    virtual ~WaterObserver();
+    virtual void update(Plant* plant) override;
 };
 
 #endif // WATER_OBSERVER_H
+
