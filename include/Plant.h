@@ -60,6 +60,9 @@ public:
     
     virtual std::string toString() const;
     virtual std::string description() const;
+
+
+    CareStrategy* getCareStrategy() const;
 };
 
 #endif
