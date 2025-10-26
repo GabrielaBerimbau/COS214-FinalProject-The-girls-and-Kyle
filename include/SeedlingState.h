@@ -2,6 +2,7 @@
 #define SEEDLINGSTATE_H
 
 #include "PlantState.h"
+#include <string>
 
 class Plant;
 
@@ -12,6 +13,8 @@ public:
     ~SeedlingState();
     
     void handleChange(Plant* plant) override;
+
+    std::string getStateName() override;
 };
 
 #endif
