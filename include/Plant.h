@@ -59,6 +59,7 @@ public:
     void updateCondition();
     
     virtual std::string toString() const;
+    virtual std::string description() const;
 };
 
 #endif

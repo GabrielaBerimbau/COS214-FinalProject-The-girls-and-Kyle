@@ -198,4 +198,13 @@ std::string Plant::toString() const {
            << "Ready for Sale: " << (readyForSale ? "Yes" : "No") << "\n"
            << "Price: R" << price;
     return output.str();
+
+}
+
+std::string Plant::description() const {
+    std::ostringstream output;
+    output << "Plant: " << plantName << "\n"
+           << "ID: " << plantID << "\n" ;
+    return output.str();
+
 }
