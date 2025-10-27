@@ -7,7 +7,7 @@
 #include "include/SunlightObserver.h"
 #include "include/CareScheduler.h"
 
-Plant* VenusFlyTrapFactory::buildPlant() const {
+Plant* VenusFlyTrapFactory::buildPlant(CareScheduler* scheduler) const {
     static int vftCounter = 1;
     std::string plantId = "VFT_" + std::to_string(vftCounter++);
     CareStrategy* careStrategy = new OtherPlantCareStrategy();
@@ -15,12 +15,15 @@ Plant* VenusFlyTrapFactory::buildPlant() const {
     
     VenusFlyTrap* plant = new VenusFlyTrap(plantId, careStrategy, initialState, 5);
     
-    CareScheduler* scheduler = getScheduler();
-    
-    // Create observers, attach() is in constructors for observers
-    new WaterObserver(scheduler, plant);
-    new FertilizeObserver(scheduler, plant);
-    new SunlightObserver(scheduler, plant);
+    if (scheduler != nullptr) {
+        WaterObserver* waterObs = new WaterObserver(scheduler, plant);
+        FertilizeObserver* fertObs = new FertilizeObserver(scheduler, plant);
+        SunlightObserver* sunObs = new SunlightObserver(scheduler, plant);
+        
+        plant->addOwnedObserver(waterObs);
+        plant->addOwnedObserver(fertObs);
+        plant->addOwnedObserver(sunObs);
+    }
     
     return plant;
 }

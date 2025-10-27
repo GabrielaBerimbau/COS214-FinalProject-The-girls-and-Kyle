@@ -6,7 +6,7 @@
 class DaisyFactory : public FlowerFactory {
 public:
     virtual ~DaisyFactory() {}
-    virtual Plant* buildPlant() const;   // returns new Daisy
+    virtual Plant* buildPlant(CareScheduler* scheduler = nullptr) const;   // returns new Daisy
 };
 
 #endif // DAISY_FACTORY_H

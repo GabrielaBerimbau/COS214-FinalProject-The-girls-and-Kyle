@@ -16,6 +16,8 @@ public:
 
     Order* clone() const override;
     void display() const override;
+    std::string getName() const override;
+    double getPrice() const override;
 
     void setCustomerName(const std::string& name);
     void addPlant(const std::string& plant);

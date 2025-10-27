@@ -12,15 +12,8 @@ class PlantFactory {
 public:
     virtual ~PlantFactory() {}
 
-    // Factory Method
-    virtual Plant* buildPlant() const = 0;
+    Plant* buildPlant(CareScheduler* scheduler) const;
 
-    protected:
-    CareScheduler* scheduler_;
-    
-    CareScheduler* getScheduler() const { 
-        return scheduler_; 
-    }
 };
 
 #endif // PLANT_FACTORY_H

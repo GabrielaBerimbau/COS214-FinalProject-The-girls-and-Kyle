@@ -7,7 +7,7 @@ class FlowerFactory : public PlantFactory {
 public:
     virtual ~FlowerFactory() {}
     // still abstract concrete flowers will override buildPlant()
-    virtual Plant* buildPlant() const = 0;
+    virtual Plant* buildPlant(CareScheduler* scheduler = nullptr) const = 0;
 };
 
 #endif // FLOWER_FACTORY_H

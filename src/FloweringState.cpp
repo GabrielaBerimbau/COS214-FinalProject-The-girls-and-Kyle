@@ -18,7 +18,7 @@ void FloweringState::handleChange(Plant* plant) {
     if (health < 10) {
         std::cout << "Flowering plant " << plant->getID() << " has died due to poor health." << std::endl;
         plant->setState(new DeadState());
-        delete this;
+        //delete this;
         return;
     }
     
@@ -30,7 +30,7 @@ void FloweringState::handleChange(Plant* plant) {
     if (age >= 50) {
         std::cout << "Flowering plant " << plant->getID() << " has finished blooming... transitioning back to Mature state." << std::endl;
         plant->setState(new MatureState());
-        delete this;
+       // delete this;
         return;
     }
     

@@ -67,6 +67,17 @@ DEMO_EXEC = $(BUILD_DIR)/Demo
 TEST_EXEC = $(BUILD_DIR)/RunTests
 
 # ============================================================================
+# VALGRIND CONFIGURATION
+# ============================================================================
+
+VALGRIND = valgrind
+VALGRIND_FLAGS = --leak-check=full \
+                 --show-leak-kinds=all \
+                 --track-origins=yes \
+                 --verbose \
+                 --log-file=valgrind-out.txt
+
+# ============================================================================
 # MAIN TARGETS
 # ============================================================================
 
@@ -79,6 +90,8 @@ all: $(MAIN_EXEC) $(DEMO_EXEC)
 	@echo "    make run-demo  - Run Demo"
 	@echo "  Run tests:"
 	@echo "    make test      - Run all tests"
+	@echo "  Memory checking:"
+	@echo "    make valgrind  - Check for memory leaks"
 
 # Build everything including tests
 all-with-tests: all $(TEST_EXEC)
@@ -157,12 +170,49 @@ test-filter: $(TEST_EXEC)
 	@./$(TEST_EXEC) --gtest_filter=$(FILTER)
 
 # ============================================================================
+# VALGRIND TARGET
+# ============================================================================
+
+# Run TestingMain with Valgrind - comprehensive memory analysis
+valgrind: $(MAIN_EXEC)
+	@echo "Running TestingMain with Valgrind..."
+	@echo "═══════════════════════════════════════════════════════════════"
+	@$(VALGRIND) $(VALGRIND_FLAGS) ./$(MAIN_EXEC)
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════════════"
+	@echo "                    MEMORY ANALYSIS REPORT"
+	@echo "═══════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "HEAP USAGE:"
+	@grep "total heap usage" valgrind-out.txt | sed 's/^==.*== */  /' || echo "  No data"
+	@grep "in use at exit" valgrind-out.txt | sed 's/^==.*== */  /' || echo "  No data"
+	@echo ""
+	@echo "LEAK SUMMARY:"
+	@grep -A 5 "LEAK SUMMARY" valgrind-out.txt | grep -E "(definitely|indirectly|possibly|still reachable)" | sed 's/^==.*== */  /' || echo "  No leaks"
+	@echo ""
+	@echo "ERROR SUMMARY:"
+	@grep "ERROR SUMMARY" valgrind-out.txt | sed 's/^==.*== */  /' || echo "  No errors"
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════════════"
+	@if grep -q "All heap blocks were freed" valgrind-out.txt; then \
+		echo "✓ SUCCESS: All memory properly freed!"; \
+	elif grep -q "definitely lost: 0 bytes" valgrind-out.txt; then \
+		echo "✓ SUCCESS: No memory leaks detected!"; \
+	else \
+		echo "✗ FAILED: Memory leaks detected - check valgrind-out.txt"; \
+	fi
+	@echo ""
+	@echo "Full report saved to: valgrind-out.txt"
+	@echo "═══════════════════════════════════════════════════════════════"
+
+# ============================================================================
 # UTILITY TARGETS
 # ============================================================================
 
 # Clean build artifacts (keeps external libraries built)
 clean:
 	@rm -rf $(BUILD_DIR)
+	@rm -f valgrind-out.txt
 
 # Clean everything including external library builds
 clean-all: clean
@@ -208,8 +258,11 @@ help:
 	@echo "  make test-verbose - Run tests with timing info"
 	@echo "  make test-filter FILTER='TestName*' - Run specific tests"
 	@echo ""
+	@echo "Memory Checking:"
+	@echo "  make valgrind     - Run with memory leak detection"
+	@echo ""
 	@echo "Cleaning:"
-	@echo "  make clean        - Remove build artifacts"
+	@echo "  make clean        - Remove build artifacts and valgrind logs"
 	@echo "  make clean-all    - Remove build + external builds"
 	@echo "  make rebuild      - Clean and rebuild"
 	@echo "  make rebuild-all  - Clean everything and rebuild"
@@ -223,4 +276,4 @@ help:
 # ============================================================================
 
 .PHONY: all all-with-tests run run-demo test test-verbose test-filter \
-        clean clean-all rebuild rebuild-all show-sources help
+        clean clean-all rebuild rebuild-all show-sources help valgrind
