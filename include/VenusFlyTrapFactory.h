@@ -6,7 +6,7 @@
 class VenusFlyTrapFactory : public OtherPlantFactory {
 public:
     virtual ~VenusFlyTrapFactory() {}
-    virtual Plant* buildPlant() const;
+    virtual Plant* buildPlant(CareScheduler* scheduler = nullptr) const;
 };
 
 #endif // VENUS_FLY_TRAP_FACTORY_H

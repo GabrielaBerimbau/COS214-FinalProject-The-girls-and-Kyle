@@ -119,26 +119,27 @@ int main() {
     
     cout << "✓ Staff members hired and chain established" << endl;
     
-    // ============================================
-    // STEP 3: Create plants using factories
-    // ============================================
-    printSeparator();
-    cout << "STEP 3: Growing plants in greenhouse" << endl;
-    
-    CareScheduler* scheduler = new CareScheduler();
-    
-    // Create different types of plants
-    RoseFactory roseFactory;
-    DaisyFactory daisyFactory;
-    PotatoFactory potatoFactory;
-    AloeFactory aloeFactory;
-    CactusFactory cactusFactory;
-    
-    Plant* rose = roseFactory.buildPlant();
-    Plant* daisy = daisyFactory.buildPlant();
-    Plant* potato = potatoFactory.buildPlant();
-    Plant* aloe = aloeFactory.buildPlant();
-    Plant* cactus = cactusFactory.buildPlant();
+   // ============================================
+// STEP 3: Create plants using factories
+// ============================================
+printSeparator();
+cout << "STEP 3: Growing plants in greenhouse" << endl;
+
+CareScheduler* scheduler = new CareScheduler();
+
+// Create different types of plants
+RoseFactory roseFactory;
+DaisyFactory daisyFactory;
+PotatoFactory potatoFactory;
+AloeFactory aloeFactory;
+CactusFactory cactusFactory;
+
+// Pass scheduler to factories
+Plant* rose = roseFactory.buildPlant(scheduler);
+Plant* daisy = daisyFactory.buildPlant(scheduler);
+Plant* potato = potatoFactory.buildPlant(scheduler);
+Plant* aloe = aloeFactory.buildPlant(scheduler);
+Plant* cactus = cactusFactory.buildPlant(scheduler);
     
     cout << "✓ Created 5 different plants" << endl;
     

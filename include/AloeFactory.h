@@ -7,7 +7,7 @@ class AloeFactory : public SucculantFactory {
 public:
     virtual ~AloeFactory() {}
     
-    virtual Plant* buildPlant() const;
+    virtual Plant* buildPlant(CareScheduler* scheduler = nullptr) const;
 };
 
 #endif // ALOE_FACTORY_H

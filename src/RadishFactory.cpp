@@ -7,7 +7,7 @@
 #include "include/SunlightObserver.h"
 #include "include/CareScheduler.h"
 
-Plant* RadishFactory::buildPlant() const {
+Plant* RadishFactory::buildPlant(CareScheduler* scheduler) const {
     static int radishCounter = 1;
     std::string plantId = "RADISH_" + std::to_string(radishCounter++);
     CareStrategy* careStrategy = new VegetableCareStrategy();
@@ -15,12 +15,15 @@ Plant* RadishFactory::buildPlant() const {
     
     Radish* plant = new Radish(plantId, careStrategy, initialState, "Cherry Belle", "Red");
     
-    CareScheduler* scheduler = getScheduler();
-    
-    // Create observers, attach() is in constructors for observers
-    new WaterObserver(scheduler, plant);
-    new FertilizeObserver(scheduler, plant);
-    new SunlightObserver(scheduler, plant);
+    if (scheduler != nullptr) {
+        WaterObserver* waterObs = new WaterObserver(scheduler, plant);
+        FertilizeObserver* fertObs = new FertilizeObserver(scheduler, plant);
+        SunlightObserver* sunObs = new SunlightObserver(scheduler, plant);
+        
+        plant->addOwnedObserver(waterObs);
+        plant->addOwnedObserver(fertObs);
+        plant->addOwnedObserver(sunObs);
+    }
     
     return plant;
 }

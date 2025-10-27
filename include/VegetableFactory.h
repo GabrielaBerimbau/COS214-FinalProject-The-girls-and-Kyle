@@ -6,7 +6,7 @@
 class VegetableFactory : public PlantFactory {
 public:
     virtual ~VegetableFactory() {}
-    virtual Plant* buildPlant() const = 0;
+    virtual Plant* buildPlant(CareScheduler* scheduler = nullptr) const = 0;
 };
 
 #endif // VEGETABLE_FACTORY_H

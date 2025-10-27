@@ -22,6 +22,7 @@ private:
     bool readyForSale;
     double price;
     std::vector<PlantObserver*> observers;
+    std::vector<PlantObserver*> ownedObservers;
 
 public:
     Plant(const std::string& name, const std::string& id, 
@@ -37,6 +38,7 @@ public:
     void attach(PlantObserver* observer);
     void detach(PlantObserver* observer);
     void notify();
+    void addOwnedObserver(PlantObserver* observer); 
 
     std::string getName() const;
     std::string getID() const;
