@@ -63,3 +63,18 @@ void ConcreteOrder::remove(Order *order)
         plantList.erase(it);
     }
 }
+
+
+Order* ConcreteOrder::clone() const {
+    ConcreteOrder* copy = new ConcreteOrder(orderName);
+    for (auto* child : plantList) {
+        if (child) {
+            copy->add(child->clone());
+        }
+    }
+    return copy;
+}
+
+std::string ConcreteOrder::getName() const {
+    return orderName;
+}
