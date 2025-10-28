@@ -18,6 +18,8 @@ class Leaf : public Order { //composite pattern - leaf
         virtual void add(Order* order) override;
         virtual void remove(Order* order) override;
         // virtual Order* getChild(int index) override;  //only for a composite
+        Order* clone() const override;
+        std::string getName() const override;
 
 
     private:

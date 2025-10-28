@@ -33,6 +33,14 @@ void Leaf::remove(Order *order)
     throw std::runtime_error("Cannot remove from a Leaf.");
 }
 
+Order* Leaf::clone() const {
+    return new Leaf(*this);
+}
+
+std::string Leaf::getName() const {
+    return plant->getName();
+}
+
 // Order *Leaf::getChild(int index)
 // {
 //     return nullptr;
