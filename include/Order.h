@@ -4,13 +4,16 @@
 #include <string>
 #include <vector>
 
-class Order {
-public:
-    virtual ~Order() = default;
-    virtual Order* clone() const = 0;
-    virtual void display() const = 0;
-    virtual std::string getName() const = 0;
-    virtual double getPrice() const = 0;
+class Order { //composite pattern - Component
+    public:
+        virtual ~Order() = default;
+
+        virtual double getPrice() = 0;
+        virtual std::string description() = 0;
+        
+        virtual void add(Order* order) = 0;
+        virtual void remove(Order* order) = 0;
+        // virtual Order* getChild(int index) = 0; //only for a composite
 };
 
 #endif

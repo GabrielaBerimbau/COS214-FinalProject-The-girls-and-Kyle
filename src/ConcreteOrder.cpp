@@ -1,45 +1,65 @@
 #include "include/ConcreteOrder.h"
-#include <iostream>
 
-ConcreteOrder::ConcreteOrder(std::string name, std::vector<std::string> items, double price)
-    : customerName(name), plantList(items), totalPrice(price) {
+ConcreteOrder::ConcreteOrder(std::string orderN) : orderName(orderN) 
+{
 }
 
-ConcreteOrder::ConcreteOrder(const ConcreteOrder& other)
-    : customerName(other.customerName), 
-      plantList(other.plantList), 
-      totalPrice(other.totalPrice) {
+ConcreteOrder::~ConcreteOrder() 
+{
+    // Memory management
 }
 
-Order* ConcreteOrder::clone() const {
-    return new ConcreteOrder(*this);
-}
-
-void ConcreteOrder::display() const {
-    std::cout << "Order for: " << customerName << "\n";
-    std::cout << "Plants:\n";
-    for (const auto& plant : plantList) {
-        std::cout << "  - " << plant << "\n";
+double ConcreteOrder::getPrice()
+{
+    double total = 0.0;
+    
+    for (Order* plant : plantList) {
+        if (plant) {
+            total += plant->getPrice();  //Recursive call
+        }
     }
-    std::cout << "Total Price: R" << totalPrice << "\n";
+    
+    return total;
 }
 
-std::string ConcreteOrder::getName() const {
-    return customerName;
+std::string ConcreteOrder::description() 
+{
+    std::ostringstream output;
+    output << orderName;
+    
+    if (!plantList.empty()) {
+        output << " [\n";
+        for (size_t i = 0; i < plantList.size(); ++i) {
+            if (plantList[i]) {
+                output << "  " << plantList[i]->description();
+                if (i < plantList.size() - 1) {
+                    output << ",\n";
+                }
+            }
+        }
+        output << "\n]";
+    }
+    
+    return output.str();
 }
 
-double ConcreteOrder::getPrice() const {
-    return totalPrice;
+void ConcreteOrder::add(Order *order)
+{
+    if (order == nullptr) {
+        return;
+    }
+
+    plantList.push_back(order);
 }
 
-void ConcreteOrder::setCustomerName(const std::string& name) {
-    customerName = name;
-}
+void ConcreteOrder::remove(Order *order)
+{
+    if (order == nullptr) {
+        return;
+    }
 
-void ConcreteOrder::addPlant(const std::string& plant) {
-    plantList.push_back(plant);
-}
-
-double ConcreteOrder::getTotalPrice() const {
-    return totalPrice;
+    auto it = std::find(plantList.begin(), plantList.end(), order);
+    if (it != plantList.end()) {
+        plantList.erase(it);
+    }
 }

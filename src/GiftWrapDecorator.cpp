@@ -12,7 +12,7 @@ double GiftWrapDecorator::getPrice()
     }
 }
 
-std::string GiftWrapDecorator::getDescription()
+std::string GiftWrapDecorator::description()
 {
     if (plant) {
         std::ostringstream output;

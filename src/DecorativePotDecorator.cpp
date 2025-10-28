@@ -13,7 +13,7 @@ double DecorativePotDecorator::getPrice()
     return 0.0;  // Add return for the case when plant is nullptr
 }
 
-std::string DecorativePotDecorator::getDescription()
+std::string DecorativePotDecorator::description()
 {
     if (plant) {
         std::ostringstream output;

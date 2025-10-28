@@ -59,7 +59,7 @@ class RibbonDecorator : public Decorator { //inherits from decorator
          * 
          * @return String in format: "[plant description] with ribbon"
          */
-        std::string getDescription() override;
+        std::string description() override;
 
 
     private: 

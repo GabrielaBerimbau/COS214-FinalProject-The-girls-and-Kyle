@@ -63,7 +63,7 @@ class Decorator {
          * 
          * @return String description of the decorated plant
          */
-        virtual std::string getDescription() = 0;
+        virtual std::string description() = 0;
 
     protected:
         /**

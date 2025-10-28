@@ -1,27 +1,31 @@
 #ifndef CONCRETEORDER_H
 #define CONCRETEORDER_H
+
 #include "Order.h"
+#include <sstream>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <algorithm>
 
 class ConcreteOrder : public Order {
-private:
-    std::vector<std::string> plantList;
-    std::string customerName;
-    double totalPrice;
+    public:
+        ConcreteOrder(std::string orderN);
+        virtual ~ConcreteOrder();
 
-public:
-    ConcreteOrder(std::string name, std::vector<std::string> items, double price);
-    ConcreteOrder(const ConcreteOrder& other);
+        virtual double getPrice() override;
+        virtual std::string description() override;
 
-    Order* clone() const override;
-    void display() const override;
-    std::string getName() const override;
-    double getPrice() const override;
+        virtual void add(Order* order) override;
+        virtual void remove(Order* order) override;
+        // virtual Order* getChild(int index) override; //only for a composite
 
-    void setCustomerName(const std::string& name);
-    void addPlant(const std::string& plant);
-    double getTotalPrice() const;
+    private:
+        std::vector<Order*> plantList;
+        std::string orderName;
+        // std::string customerName; - in Person class
+        // double totalPrice; - in final order
 };
 
-#endif
+#endif //CONCRETEORDER_H
+

@@ -59,7 +59,7 @@ class GiftWrapDecorator : public Decorator {
          * 
          * @return String in format: "[plant description] with gift wrapping"
          */
-        std::string getDescription() override;
+        std::string description() override;
 
     private:
         /**
