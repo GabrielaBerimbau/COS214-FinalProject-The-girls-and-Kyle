@@ -129,11 +129,13 @@ void Customer::addPlantToOrder(Plant* plant, int quantity) {
         std::cout << "Cannot add null plant to order.\n";
         return;
     }
+
+    for (int i = 0; i < quantity; i++) {
+        Leaf* leaf = new Leaf(plant, false);
+        currentOrder->add(leaf);
+    }
     
-    Leaf* leaf = new Leaf(plant, quantity);
-    currentOrder->add(leaf);
-    
-    std::cout << "Added plant to order (Qty: " << quantity << ")\n";
+    std::cout << "Added " << quantity << " plant(s) to order\n";
 }
 
 ConcreteOrder* Customer::getCurrentOrder() const {
