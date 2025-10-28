@@ -6,6 +6,7 @@ void SucculentCareStrategy::water(Plant* plant) {
     // Succulents need minimal watering
     plant->setWaterLevel(plant->getWaterLevel() + 15.0);
     std::cout << "Watering succulent - requires minimal water" << std::endl;
+    (void)plant;
 }
 
 void SucculentCareStrategy::fertilize(Plant* plant) {
@@ -22,4 +23,5 @@ void SucculentCareStrategy::adjustSunlight(Plant* plant) {
 
 void SucculentCareStrategy::prune(Plant* plant) {
     std::cout << "Pruning succulent - removing dead leaves" << std::endl;
+    (void)plant;
 }

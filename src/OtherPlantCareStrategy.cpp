@@ -6,6 +6,7 @@ void OtherPlantCareStrategy::water(Plant* plant) {
     // Standard watering for other plant types
     plant->setWaterLevel(plant->getWaterLevel() + 20);
     std::cout << "Watering plant - standard care" << std::endl;
+    (void)plant;
 }
 
 void OtherPlantCareStrategy::fertilize(Plant* plant) {
@@ -22,4 +23,5 @@ void OtherPlantCareStrategy::adjustSunlight(Plant* plant) {
 
 void OtherPlantCareStrategy::prune(Plant* plant) {
     std::cout << "Pruning plant - general maintenance" << std::endl;
+(void)plant;
 }
