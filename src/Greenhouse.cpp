@@ -2,7 +2,7 @@
 #include "../include/Plant.h"
 #include <iostream>
 
-Greenhouse::Greenhouse(NurseryMediator* med, int numRows, int numCols): Colleague(med), rows(numRows), cols(numCols), currentNumberOfPlants(0) {
+Greenhouse::Greenhouse(NurseryMediator* med, int numRows, int numCols): Colleague(med), currentNumberOfPlants(0), rows(numRows), cols(numCols) {
     
     capacity = rows * cols;
     plantGrid.resize(rows);

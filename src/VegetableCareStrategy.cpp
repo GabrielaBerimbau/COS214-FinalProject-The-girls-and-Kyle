@@ -6,6 +6,7 @@ void VegetableCareStrategy::water(Plant* plant) {
     // Vegetables need regular, moderate watering
     plant->setWaterLevel(plant->getWaterLevel() + 30);
     std::cout << "Watering vegetable - regular watering schedule" << std::endl;
+    (void)plant;
 }
 
 void VegetableCareStrategy::fertilize(Plant* plant) {
@@ -22,4 +23,5 @@ void VegetableCareStrategy::adjustSunlight(Plant* plant) {
 
 void VegetableCareStrategy::prune(Plant* plant) {
     std::cout << "Pruning vegetable - removing old growth and suckers" << std::endl;
+(void)plant;
 }

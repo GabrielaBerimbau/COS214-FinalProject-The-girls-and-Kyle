@@ -3,6 +3,7 @@
 VenusFlyTrap::VenusFlyTrap(const std::string& id, CareStrategy* careStrategy,
                            PlantState* initialState, int initialTraps)
     : OtherPlant("Venus Fly Trap", id, careStrategy, initialState) {
+        (void)initialTraps;
 }
 
 VenusFlyTrap::~VenusFlyTrap() {

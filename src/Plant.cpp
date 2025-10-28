@@ -6,16 +6,12 @@
 #include <sstream>
 #include <algorithm>
 
-Plant::Plant(const std::string& name, const std::string& id, 
-             CareStrategy* careStrategy, PlantState* initialState)
-    : plantName(name), plantID(id), strategy(careStrategy), state(initialState),
+Plant::Plant(const std::string& name, const std::string& id, CareStrategy* careStrategy, PlantState* initialState) : strategy(careStrategy), state(initialState), plantName(name), plantID(id),
       age(0), waterLevel(100), sunlightExposure(50), nutrientLevel(100),
       healthLevel(100), readyForSale(false), price(0.0) {
 }
 
-Plant::Plant(const Plant& other)
-    : plantName(other.plantName), plantID(other.plantID), 
-      strategy(nullptr), state(nullptr),
+Plant::Plant(const Plant& other) : strategy(nullptr), state(nullptr), plantName(other.plantName), plantID(other.plantID),
       age(other.age), waterLevel(other.waterLevel), 
       sunlightExposure(other.sunlightExposure), nutrientLevel(other.nutrientLevel),
       healthLevel(other.healthLevel), readyForSale(other.readyForSale), 

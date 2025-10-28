@@ -4,6 +4,8 @@ Potato::Potato(const std::string& id, CareStrategy* careStrategy,
                PlantState* initialState, const std::string& variety,
                const std::string& skin)
     : Vegetable("Potato", id, careStrategy, initialState) {
+        (void)variety;
+        (void)skin;
 }
 
 Potato::~Potato() {

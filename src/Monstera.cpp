@@ -4,6 +4,7 @@
 Monstera::Monstera(const std::string& id, CareStrategy* careStrategy,
                    PlantState* initialState, int initialLeaves)
     : OtherPlant("Monstera", id, careStrategy, initialState) {
+        (void)initialLeaves;
 }
 
 Monstera::~Monstera() {
