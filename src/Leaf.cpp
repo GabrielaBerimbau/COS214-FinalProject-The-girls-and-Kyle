@@ -1,15 +1,21 @@
 #include "include/Leaf.h"
+#include "include/Iterator.h"
+#include "include/ConcreteIterator.h"
 
-Leaf::Leaf(Plant *p, int q) : plant(p), quantity(q)
+Leaf::Leaf(Plant *p, bool owns) : plant(p), ownsPlant(owns)
 {
 }
 
 Leaf::~Leaf()
 {
+    if (ownsPlant && plant != nullptr) {
+        delete plant;
+    }
 }
 
 double Leaf::getPrice()
 {
+    // Return the price of this single physical plant
     if (plant) {
         return plant->getPrice();
     }
@@ -34,15 +40,15 @@ void Leaf::remove(Order *order)
 }
 
 Order* Leaf::clone() const {
-    return new Leaf(*this);
+    // Don't clone the plant, just copy the pointer
+    // The cloned leaf should NOT own the plant to avoid double-delete
+    return new Leaf(plant, false);
 }
 
 std::string Leaf::getName() const {
     return plant->getName();
 }
 
-// Order *Leaf::getChild(int index)
-// {
-//     return nullptr;
-// }
-
+Iterator* Leaf::createIterator() {
+    return new ConcreteIterator(this);
+}

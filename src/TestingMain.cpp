@@ -1,74 +1,28 @@
 #include <iostream>
-#include <vector>
 
 // Plant hierarchy
 #include "include/Plant.h"
-#include "include/Flower.h"
 #include "include/Rose.h"
 #include "include/Daisy.h"
-#include "include/Strelitzia.h"
-#include "include/Vegetable.h"
-#include "include/Potato.h"
-#include "include/Radish.h"
-#include "include/Succulent.h"
-#include "include/Aloe.h"
 #include "include/Cactus.h"
-#include "include/OtherPlant.h"
-#include "include/VenusFlyTrap.h"
 
 // Factories
 #include "include/RoseFactory.h"
 #include "include/DaisyFactory.h"
-//#include "include/StrelitziaFactory.h"
-#include "include/PotatoFactory.h"
-#include "include/RadishFactory.h"
-#include "include/AloeFactory.h"
 #include "include/CactusFactory.h"
-#include "include/VenusFlyTrapFactory.h"
 
 // Care system
 #include "include/CareScheduler.h"
-#include "include/CareStrategy.h"
-#include "include/FlowerCareStrategy.h"
-#include "include/VegetableCareStrategy.h"
-#include "include/SucculentCareStrategy.h"
-
-// States
-#include "include/PlantState.h"
 #include "include/SeedlingState.h"
-#include "include/GrowingState.h"
-#include "include/MatureState.h"
-#include "include/FloweringState.h"
 
-// Mediator and colleagues
-#include "include/NurseryMediator.h"
-#include "include/NurseryCoordinator.h"
-#include "include/Greenhouse.h"
-#include "include/SalesFloor.h"
-
-// People
-#include "include/Customer.h"
-#include "include/DerivedCustomers.h"
-#include "include/StaffMembers.h"
-#include "include/SalesAssistant.h"
-#include "include/FloorManager.h"
-#include "include/NurseryOwner.h"
-
-// Requests
-#include "include/Request.h"
-
-// Orders
+// Orders and Iterator
 #include "include/Order.h"
 #include "include/ConcreteOrder.h"
+#include "include/Leaf.h"
 #include "include/FinalOrder.h"
-
-// Payment
-#include "include/PaymentProcessor.h"
-#include "include/CashPayment.h"
-#include "include/CreditCardPayment.h"
+#include "include/Iterator.h"
 
 // Decorators
-#include "include/Decorator.h"
 #include "include/RibbonDecorator.h"
 #include "include/GiftWrapDecorator.h"
 #include "include/DecorativePotDecorator.h"
@@ -80,259 +34,134 @@ void printSeparator() {
 }
 
 int main() {
-    cout << "=== NURSERY SYSTEM TEST ===" << endl;
+    cout << "=== ITERATOR PATTERN DEMO ===" << endl;
     
-    // ============================================
-    // STEP 1: Setup the nursery infrastructure
-    // ============================================
     printSeparator();
-    cout << "STEP 1: Setting up nursery infrastructure" << endl;
+    cout << "STEP 1: Creating plants with factories" << endl;
     
-    NurseryCoordinator* coordinator = new NurseryCoordinator();
-    Greenhouse* greenhouse = new Greenhouse(coordinator, 3, 3);
-    SalesFloor* salesFloor = new SalesFloor(coordinator, 3, 3);
+    CareScheduler* scheduler = new CareScheduler();
     
-    coordinator->setGreenhouse(greenhouse);
-    coordinator->setSalesFloor(salesFloor);
-    coordinator->registerColleague(greenhouse);
-    coordinator->registerColleague(salesFloor);
+    RoseFactory roseFactory;
+    DaisyFactory daisyFactory;
+    CactusFactory cactusFactory;
     
-    cout << "✓ Nursery infrastructure created" << endl;
+    Plant* rose1 = roseFactory.buildPlant(scheduler);
+    Plant* rose2 = roseFactory.buildPlant(scheduler);
+    Plant* daisy = daisyFactory.buildPlant(scheduler);
+    Plant* cactus = cactusFactory.buildPlant(scheduler);
     
-    // ============================================
-    // STEP 2: Create staff members (Chain of Responsibility)
-    // ============================================
+    rose1->setPrice(25.0);
+    rose2->setPrice(25.0);
+    daisy->setPrice(15.0);
+    cactus->setPrice(20.0);
+    
+    cout << "✓ Created 4 plants:" << endl;
+    cout << "  - Rose #1: R" << rose1->getPrice() << endl;
+    cout << "  - Rose #2: R" << rose2->getPrice() << endl;
+    cout << "  - Daisy: R" << daisy->getPrice() << endl;
+    cout << "  - Cactus: R" << cactus->getPrice() << endl;
+    
     printSeparator();
-    cout << "STEP 2: Hiring staff members" << endl;
+    cout << "STEP 2: Decorating plants" << endl;
     
-    SalesAssistant* assistant = new SalesAssistant(coordinator, "Alice", "SA-001");
-    FloorManager* manager = new FloorManager(coordinator, "Bob", "FM-001");
-    NurseryOwner* owner = new NurseryOwner(coordinator, "Carol", "NO-001");
+    Plant* decoratedRose1 = new GiftWrapDecorator(new RibbonDecorator(rose1));
+    cout << "✓ Rose #1 decorated with ribbon and gift wrap" << endl;
+    cout << "  Price: R" << decoratedRose1->getPrice() << endl;
     
-    // Setup chain of responsibility
-    assistant->setNext(manager);
-    manager->setNext(owner);
+    Plant* decoratedDaisy = new DecorativePotDecorator(daisy, "red");
+    cout << "✓ Daisy decorated with red pot" << endl;
+    cout << "  Price: R" << decoratedDaisy->getPrice() << endl;
     
-    coordinator->registerColleague(assistant);
-    coordinator->registerColleague(manager);
-    coordinator->registerColleague(owner);
+    cout << "✓ Rose #2 and Cactus remain undecorated" << endl;
     
-    cout << "✓ Staff members hired and chain established" << endl;
-    
-   // ============================================
-// STEP 3: Create plants using factories
-// ============================================
-printSeparator();
-cout << "STEP 3: Growing plants in greenhouse" << endl;
-
-CareScheduler* scheduler = new CareScheduler();
-
-// Create different types of plants
-RoseFactory roseFactory;
-DaisyFactory daisyFactory;
-PotatoFactory potatoFactory;
-AloeFactory aloeFactory;
-CactusFactory cactusFactory;
-
-// Pass scheduler to factories
-Plant* rose = roseFactory.buildPlant(scheduler);
-Plant* daisy = daisyFactory.buildPlant(scheduler);
-Plant* potato = potatoFactory.buildPlant(scheduler);
-Plant* aloe = aloeFactory.buildPlant(scheduler);
-Plant* cactus = cactusFactory.buildPlant(scheduler);
-    
-    cout << "✓ Created 5 different plants" << endl;
-    
-    // Add plants to greenhouse
-    greenhouse->addPlant(rose, 0, 0);
-    greenhouse->addPlant(daisy, 0, 1);
-    greenhouse->addPlant(potato, 1, 0);
-    greenhouse->addPlant(aloe, 1, 1);
-    greenhouse->addPlant(cactus, 2, 0);
-    
-    cout << "✓ Plants added to greenhouse" << endl;
-    
-    // ============================================
-    // STEP 4: Age plants and perform care
-    // ============================================
     printSeparator();
-    cout << "STEP 4: Aging and caring for plants" << endl;
+    cout << "STEP 3: Building customer order" << endl;
     
-    // Age plants through multiple days
-    for (int day = 1; day <= 25; day++) {
-        if (day % 5 == 0) {
-            cout << "Day " << day << ": Performing daily care..." << endl;
+    ConcreteOrder* mainOrder = new ConcreteOrder("Customer Shopping Cart");
+    
+    // Leaf now owns and will delete the plants
+    Leaf* item1 = new Leaf(decoratedRose1, 1, true);
+    mainOrder->add(item1);
+    cout << "✓ Added decorated Rose #1 to cart" << endl;
+    
+    Leaf* item2 = new Leaf(rose2, 1, true);
+    mainOrder->add(item2);
+    cout << "✓ Added plain Rose #2 to cart" << endl;
+    
+    ConcreteOrder* giftBasket = new ConcreteOrder("Gift Basket");
+    Leaf* item3 = new Leaf(decoratedDaisy, 1, true);
+    Leaf* item4 = new Leaf(cactus, 1, true);
+    giftBasket->add(item3);
+    giftBasket->add(item4);
+    cout << "✓ Created nested Gift Basket with decorated Daisy and Cactus" << endl;
+    
+    mainOrder->add(giftBasket);
+    cout << "✓ Added Gift Basket to main cart" << endl;
+    
+    printSeparator();
+    cout << "STEP 4: Creating Final Order" << endl;
+    
+    FinalOrder* finalOrder = new FinalOrder("John Doe");
+    finalOrder->addOrder(mainOrder);
+    
+    cout << "✓ Final order created for John Doe" << endl;
+    
+    printSeparator();
+    cout << "STEP 5: Calculating total price using Iterator" << endl;
+    
+    double total = finalOrder->calculateTotalPrice();
+    cout << "\n💰 Total Price: R" << total << endl;
+    
+    printSeparator();
+    cout << "STEP 6: Generating order summary using Iterator" << endl;
+    
+    cout << "\n" << finalOrder->getSummary() << endl;
+    
+    printSeparator();
+    cout << "STEP 7: Printing invoice using Iterator" << endl;
+    
+    finalOrder->printInvoice();
+    
+    printSeparator();
+    cout << "STEP 8: Cloning Final Order using Iterator" << endl;
+    
+    FinalOrder* clonedOrder = finalOrder->clone();
+    cout << "\n✓ Order cloned successfully!" << endl;
+    cout << "\nCloned order invoice:" << endl;
+    clonedOrder->printInvoice();
+    
+    printSeparator();
+    cout << "STEP 9: Direct Iterator traversal demonstration" << endl;
+    
+    cout << "\nIterating through all items in main order:" << endl;
+    Iterator* it = mainOrder->createIterator();
+    int itemCount = 0;
+    it->first();
+    while (!it->isDone()) {
+        Order* item = it->currentItem();
+        if (item) {
+            itemCount++;
+            cout << "  Item " << itemCount << ": " << item->getName() 
+                 << " - R" << item->getPrice() << endl;
         }
-        
-        rose->dailyUpdate();
-        daisy->dailyUpdate();
-        potato->dailyUpdate();
-        aloe->dailyUpdate();
-        cactus->dailyUpdate();
-        
-        // Perform care to keep plants healthy
-        if (day % 3 == 0) {
-            rose->performCare();
-            daisy->performCare();
-            potato->performCare();
-            aloe->performCare();
-            cactus->performCare();
-        }
+        it->next();
     }
+    delete it;
     
-    cout << "✓ Plants aged 25 days" << endl;
-    cout << "Rose state: " << rose->getState()->getStateName() << endl;
-    cout << "Rose ready for sale: " << (rose->isReadyForSale() ? "Yes" : "No") << endl;
+    cout << "\n✓ Iterator found " << itemCount << " leaf items in composite structure" << endl;
     
-    // ============================================
-    // STEP 5: Move mature plants to sales floor
-    // ============================================
     printSeparator();
-    cout << "STEP 5: Moving mature plants to sales floor" << endl;
+    cout << "STEP 10: Cleanup" << endl;
     
-    if (rose->isReadyForSale()) {
-        greenhouse->removePlant(rose);
-        salesFloor->addPlantToDisplay(rose, 0, 0);
-        cout << "✓ Rose moved to sales floor" << endl;
-    }
-    
-    if (daisy->isReadyForSale()) {
-        greenhouse->removePlant(daisy);
-        salesFloor->addPlantToDisplay(daisy, 0, 1);
-        cout << "✓ Daisy moved to sales floor" << endl;
-    }
-    
-    // ============================================
-    // STEP 6: Create customers
-    // ============================================
-    printSeparator();
-    cout << "STEP 6: Customers entering nursery" << endl;
-    
-    RegularCustomer* customer1 = new RegularCustomer();
-    customer1->setMediator(coordinator);
-    customer1->setName("John Doe");
-    customer1->setId("CUST-001");
-    customer1->setBudget(500.0);
-    
-    WalkInCustomer* customer2 = new WalkInCustomer();
-    customer2->setMediator(coordinator);
-    customer2->setName("Jane Smith");
-    customer2->setId("CUST-002");
-    customer2->setBudget(200.0);
-    
-    coordinator->registerColleague(customer1);
-    coordinator->registerColleague(customer2);
-    
-    salesFloor->addCustomer(customer1);
-    salesFloor->addCustomer(customer2);
-    
-    cout << "✓ 2 customers entered the sales floor" << endl;
-    
-    // ============================================
-    // STEP 7: Customer requests (Chain of Responsibility)
-    // ============================================
-    printSeparator();
-    cout << "STEP 7: Processing customer requests" << endl;
-    
-    // Low-level request (handled by Sales Assistant)
-    Request* simpleRequest = customer1->createRequest("I would like to buy a Rose");
-    cout << "\nCustomer 1 request level: " << (int)simpleRequest->getLevel() << endl;
-    assistant->handleRequest(simpleRequest);
-    
-    // Medium-level request (handled by Floor Manager)
-    Request* bulkRequest = customer2->createRequest("I need 50 plants for a wedding");
-    cout << "\nCustomer 2 request level: " << (int)bulkRequest->getLevel() << endl;
-    assistant->handleRequest(bulkRequest);
-    
-    cout << "✓ Requests processed through chain of responsibility" << endl;
-    
-    // ============================================
-    // STEP 8: Customer shopping
-    // ============================================
-    printSeparator();
-    cout << "STEP 8: Customers adding plants to cart" << endl;
-    
-    // Customer 1 adds rose to cart
-    if (rose != nullptr && rose->isReadyForSale()) {
-        customer1->addToCart(rose);
-        cout << "✓ Customer 1 added Rose to cart" << endl;
-    }
-    
-    // Customer 2 adds daisy to cart
-    if (daisy != nullptr && daisy->isReadyForSale()) {
-        customer2->addToCart(daisy);
-        cout << "✓ Customer 2 added Daisy to cart" << endl;
-    }
-    
-    // ============================================
-    // STEP 9: Decorate plants (Decorator pattern)
-    // ============================================
-    printSeparator();
-    cout << "STEP 9: Decorating plants" << endl;
-    
-    cout << "\nOriginal Rose:" << endl;
-    cout << "Price: R" << rose->getPrice() << endl;
-    
-    // Wrap rose with decorators (note: in real system, you'd need to manage this carefully)
-    cout << "\nApplying decorations (conceptually):" << endl;
-    cout << "- Adding ribbon (+R15)" << endl;
-    cout << "- Adding gift wrap (+R20)" << endl;
-    cout << "- Adding red pot (+R80)" << endl;
-    
-    double decoratedPrice = rose->getPrice() + 15.0 + 20.0 + 80.0;
-    cout << "Total decorated price: R" << decoratedPrice << endl;
-    
-    // ============================================
-    // STEP 10: Checkout (Template Method + Prototype)
-    // ============================================
-    printSeparator();
-    cout << "STEP 10: Customers checking out" << endl;
-    
-    cout << "\n--- Customer 1 Checkout ---" << endl;
-    cout << "Cart size: " << customer1->getCartSize() << endl;
-    cout << "Total: R" << customer1->calculateTotal() << endl;
-    customer1->checkOut();
-    
-    cout << "\n--- Customer 2 Checkout ---" << endl;
-    cout << "Cart size: " << customer2->getCartSize() << endl;
-    cout << "Total: R" << customer2->calculateTotal() << endl;
-    customer2->checkOut();
-    
-    // ============================================
-    // STEP 11: Cleanup
-    // ============================================
-    printSeparator();
-    cout << "STEP 11: Closing nursery for the day" << endl;
-    
-    // Delete customers
-    delete customer1;
-    delete customer2;
-    
-    // Delete staff
-    delete assistant;
-    delete manager;
-    delete owner;
-    
-    // Delete plants
-    delete rose;
-    delete daisy;
-    delete potato;
-    delete aloe;
-    delete cactus;
-    
-    // Delete facilities
-    delete salesFloor;
-    delete greenhouse;
-    delete coordinator;
-    
-    // Delete scheduler
+    // FinalOrder deletion will cascade delete everything including plants via Leaf
+    delete finalOrder;
+    delete clonedOrder;
     delete scheduler;
     
     cout << "✓ All resources cleaned up" << endl;
     
     printSeparator();
-    cout << "\n=== TEST COMPLETED SUCCESSFULLY ===" << endl;
-    cout << "No segfaults or crashes detected!" << endl;
+    cout << "\n=== DEMO COMPLETED SUCCESSFULLY ===" << endl;
     
     return 0;
 }

@@ -1,9 +1,6 @@
-/**
- * @file FinalOrder.cpp
- * @brief Implements the FinalOrder Prototype class.
- */
-
 #include "include/FinalOrder.h"
+#include "include/Iterator.h"
+#include "include/ConcreteIterator.h"
 #include <iostream>
 
 FinalOrder::FinalOrder(const std::string& name)
@@ -12,7 +9,9 @@ FinalOrder::FinalOrder(const std::string& name)
 FinalOrder::FinalOrder(const FinalOrder& other)
     : customerName(other.customerName), totalPrice(other.totalPrice) {
     for (auto* o : other.orderList) {
-       orderList.push_back(o->clone());  // Deep copy
+        if (o) {
+            orderList.push_back(o->clone());
+        }
     }
 }
 
@@ -24,8 +23,16 @@ FinalOrder::~FinalOrder() {
 }
 
 FinalOrder* FinalOrder::clone() const {
-    std::cout << "[Prototype] Cloning FinalOrder for " << customerName << "...\n";
-    return new FinalOrder(*this);
+    std::cout << "[Prototype] Cloning FinalOrder for " << customerName << " using Iterator...\n";
+    FinalOrder* copy = new FinalOrder(customerName);
+    
+    for (auto* order : orderList) {
+        if (order) {
+            copy->addOrder(order->clone());
+        }
+    }
+    
+    return copy;
 }
 
 void FinalOrder::addOrder(Order* order) {
@@ -37,17 +44,45 @@ void FinalOrder::addOrder(Order* order) {
 
 double FinalOrder::calculateTotalPrice() const {
     double total = 0.0;
-    for (auto* o : orderList) {
-        total += o->getPrice();
+    
+    for (auto* order : orderList) {
+        if (order) {
+            Iterator* it = order->createIterator();
+            it->first();
+            while (!it->isDone()) {
+                Order* item = it->currentItem();
+                if (item) {
+                    total += item->getPrice();
+                }
+                it->next();
+            }
+            delete it;
+        }
     }
+    
     return total;
 }
 
 std::string FinalOrder::getSummary() const {
     std::string summary = "Order Summary for " + customerName + ":\n";
-    for (auto* o : orderList) {
-        summary += "- " + o->getName() + ": R" + std::to_string(o->getPrice()) + "\n";
+    
+    for (auto* order : orderList) {
+        if (order) {
+            summary += "- " + order->getName() + ":\n";
+            
+            Iterator* it = order->createIterator();
+            it->first();
+            while (!it->isDone()) {
+                Order* item = it->currentItem();
+                if (item) {
+                    summary += "  * " + item->getName() + ": R" + std::to_string(item->getPrice()) + "\n";
+                }
+                it->next();
+            }
+            delete it;
+        }
     }
+    
     summary += "Total: R" + std::to_string(calculateTotalPrice()) + "\n";
     return summary;
 }
@@ -55,9 +90,24 @@ std::string FinalOrder::getSummary() const {
 void FinalOrder::printInvoice() const {
     std::cout << "---------------------------------------\n";
     std::cout << "Invoice for: " << customerName << "\n";
-    for (auto* o : orderList) {
-        std::cout << "- " << o->getName() << " : R" << o->getPrice() << "\n";
+    
+    for (auto* order : orderList) {
+        if (order) {
+            std::cout << order->getName() << ":\n";
+            
+            Iterator* it = order->createIterator();
+            it->first();
+            while (!it->isDone()) {
+                Order* item = it->currentItem();
+                if (item) {
+                    std::cout << "  - " << item->getName() << " : R" << item->getPrice() << "\n";
+                }
+                it->next();
+            }
+            delete it;
+        }
     }
+    
     std::cout << "Total: R" << calculateTotalPrice() << "\n";
     std::cout << "---------------------------------------\n";
 }

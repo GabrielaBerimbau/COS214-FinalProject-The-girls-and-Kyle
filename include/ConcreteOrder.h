@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+class Iterator; 
 
 class ConcreteOrder : public Order {
     public:
@@ -22,6 +23,10 @@ class ConcreteOrder : public Order {
 
         virtual Order* clone() const override;
         virtual std::string getName() const override;
+
+        virtual Iterator* createIterator() override;
+        
+        std::vector<Order*> getChildren() const;
 
     private:
         std::vector<Order*> plantList;

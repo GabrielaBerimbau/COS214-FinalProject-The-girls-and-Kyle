@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+class Iterator;
+
 class Order { //composite pattern - Component
     public:
         virtual ~Order() = default;
@@ -26,6 +28,8 @@ class Order { //composite pattern - Component
      * @return The name or label for this order.
      */
     virtual std::string getName() const = 0;
+
+    virtual Iterator* createIterator() = 0;
 };
 
 #endif
