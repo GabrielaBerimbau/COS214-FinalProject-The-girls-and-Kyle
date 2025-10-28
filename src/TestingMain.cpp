@@ -80,17 +80,17 @@ int main() {
     ConcreteOrder* mainOrder = new ConcreteOrder("Customer Shopping Cart");
     
     // Leaf now owns and will delete the plants
-    Leaf* item1 = new Leaf(decoratedRose1, 1, true);
+    Leaf* item1 = new Leaf(decoratedRose1, true);
     mainOrder->add(item1);
     cout << "✓ Added decorated Rose #1 to cart" << endl;
     
-    Leaf* item2 = new Leaf(rose2, 1, true);
+    Leaf* item2 = new Leaf(rose2, true);
     mainOrder->add(item2);
     cout << "✓ Added plain Rose #2 to cart" << endl;
     
     ConcreteOrder* giftBasket = new ConcreteOrder("Gift Basket");
-    Leaf* item3 = new Leaf(decoratedDaisy, 1, true);
-    Leaf* item4 = new Leaf(cactus, 1, true);
+    Leaf* item3 = new Leaf(decoratedDaisy,  true);
+    Leaf* item4 = new Leaf(cactus,  true);
     giftBasket->add(item3);
     giftBasket->add(item4);
     cout << "✓ Created nested Gift Basket with decorated Daisy and Cactus" << endl;
