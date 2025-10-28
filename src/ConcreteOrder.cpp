@@ -1,4 +1,6 @@
 #include "include/ConcreteOrder.h"
+#include "include/Iterator.h"
+#include "include/ConcreteIterator.h"
 
 ConcreteOrder::ConcreteOrder(std::string orderN) : orderName(orderN) 
 {
@@ -6,7 +8,6 @@ ConcreteOrder::ConcreteOrder(std::string orderN) : orderName(orderN)
 
 ConcreteOrder::~ConcreteOrder() 
 {
-    // Memory management
 }
 
 double ConcreteOrder::getPrice()
@@ -15,7 +16,7 @@ double ConcreteOrder::getPrice()
     
     for (Order* plant : plantList) {
         if (plant) {
-            total += plant->getPrice();  //Recursive call
+            total += plant->getPrice();
         }
     }
     
@@ -64,7 +65,6 @@ void ConcreteOrder::remove(Order *order)
     }
 }
 
-
 Order* ConcreteOrder::clone() const {
     ConcreteOrder* copy = new ConcreteOrder(orderName);
     for (auto* child : plantList) {
@@ -77,4 +77,12 @@ Order* ConcreteOrder::clone() const {
 
 std::string ConcreteOrder::getName() const {
     return orderName;
+}
+
+Iterator* ConcreteOrder::createIterator() {
+    return new ConcreteIterator(this);
+}
+
+std::vector<Order*> ConcreteOrder::getChildren() const {
+    return plantList;
 }

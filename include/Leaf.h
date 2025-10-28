@@ -7,9 +7,11 @@
 #include <string>
 #include <iostream>
 
-class Leaf : public Order { //composite pattern - leaf
+class Iterator;
+
+class Leaf : public Order {
     public:
-        Leaf(Plant* p, int q);
+        Leaf(Plant* p, int q, bool ownsPlant = true);
         virtual ~Leaf();
 
         virtual double getPrice() override;
@@ -17,14 +19,16 @@ class Leaf : public Order { //composite pattern - leaf
 
         virtual void add(Order* order) override;
         virtual void remove(Order* order) override;
-        // virtual Order* getChild(int index) override;  //only for a composite
+        
         Order* clone() const override;
         std::string getName() const override;
-
+        
+        virtual Iterator* createIterator() override;
 
     private:
         Plant* plant;
         int quantity;
+        bool ownsPlant;
         
 };
 
