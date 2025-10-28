@@ -139,7 +139,12 @@ std::string Request::extractPlantName()const{
         for(const std::string& plantType: plantTypes){
             
             if(keyword == plantType){
-                return plantType;
+                // Capitalize first letter to match plant names
+                std::string result = plantType;
+                if(!result.empty()){
+                    result[0] = std::toupper(result[0]);
+                }
+                return result;
             }
         }
     }

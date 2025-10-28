@@ -188,6 +188,7 @@ void Plant::dailyUpdate() {
     if (waterLevel < 0) waterLevel = 0;
     nutrientLevel -= 5;
     if (nutrientLevel < 0) nutrientLevel = 0;
+    
     updateHealth();
     notify();
     if (state != nullptr) {

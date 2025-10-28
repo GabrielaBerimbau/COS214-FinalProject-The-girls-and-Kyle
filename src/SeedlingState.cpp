@@ -15,7 +15,7 @@ void SeedlingState::handleChange(Plant* plant) {
     int age = plant->getAge();
     int health = plant->getHealthLevel();
     
-    if (health < 10) {
+    if (health < 20) {
         std::cout << "Seedling " << plant->getID() << " has died due to poor health." << std::endl;
         plant->setState(new DeadState());
         //delete this;

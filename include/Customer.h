@@ -35,11 +35,18 @@ public:
     Plant* decoratePlantWithRibbon(Plant* plant);
     Plant* decoratePlantWithGiftWrap(Plant* plant);
     Plant* decoratePlantWithPot(Plant* plant, std::string color);
+
+    void decorateCartItemWithRibbon(int index);
+    void decorateCartItemWithGiftWrap(int index);
+    void decorateCartItemWithPot(int index, std::string color);
+    Plant* getPlantFromCart(int index) const;
     
     // Order Building (Composite Pattern)
     void startNewOrder(const std::string& orderName);
-    void addPlantToOrder(Plant* plant, int quantity = 1);
+    void addPlantToOrder(Plant* plant);
     ConcreteOrder* getCurrentOrder() const;
+    void addCartItemToOrder(int index);
+    void addEntireCartToOrder();
     
     // Final Order Creation (Prototype Pattern)
     FinalOrder* createFinalOrder();

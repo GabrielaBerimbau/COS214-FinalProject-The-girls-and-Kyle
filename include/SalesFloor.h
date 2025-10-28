@@ -141,6 +141,8 @@ class SalesFloor: public Colleague{
          * @return true if empty
          */
         bool isPositionEmpty(int row, int col)const;
+
+        std::string toString() const;
 };
 
 #endif

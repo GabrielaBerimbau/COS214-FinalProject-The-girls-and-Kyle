@@ -3,6 +3,7 @@
 #include "../include/Customer.h"
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 SalesFloor::SalesFloor(NurseryMediator* med, int numRows, int numCols): Colleague(med), rows(numRows), cols(numCols), currentNumberOfPlants(0){
     
@@ -216,4 +217,40 @@ bool SalesFloor::isPositionEmpty(int row, int col)const{
     }
     
     return displayGrid[row][col] == nullptr;
+}
+
+std::string SalesFloor::toString() const {
+    std::ostringstream output;
+    output << "=== SALES FLOOR STATUS ===\n";
+    output << "Plants on Display: " << currentNumberOfPlants << "/" << capacity << "\n";
+    output << "Current Customers: " << currentCustomers.size() << "\n";
+    output << "Grid Size: " << rows << "x" << cols << "\n\n";
+    
+    if (currentNumberOfPlants == 0) {
+        output << "No plants on display.\n";
+    } else {
+        output << "Plants for Sale:\n";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Plant* plant = displayGrid[i][j];
+                if (plant != nullptr) {
+                    output << "  Position (" << i << "," << j << "): "
+                           << plant->getName() << " (ID: " << plant->getID() 
+                           << ") - R" << plant->getPrice() << "\n";
+                }
+            }
+        }
+    }
+    
+    if (!currentCustomers.empty()) {
+        output << "\nCustomers Shopping:\n";
+        for (Customer* customer : currentCustomers) {
+            if (customer != nullptr) {
+                output << "  - " << customer->getName() 
+                       << " (ID: " << customer->getId() << ")\n";
+            }
+        }
+    }
+    
+    return output.str();
 }

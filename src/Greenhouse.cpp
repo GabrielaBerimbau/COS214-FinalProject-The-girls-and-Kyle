@@ -1,6 +1,7 @@
 #include "../include/Greenhouse.h"
 #include "../include/Plant.h"
 #include <iostream>
+#include <sstream>
 
 Greenhouse::Greenhouse(NurseryMediator* med, int numRows, int numCols): Colleague(med), currentNumberOfPlants(0), rows(numRows), cols(numCols) {
     
@@ -218,4 +219,31 @@ bool Greenhouse::isPositionEmpty(int row, int col)const{
     }
     
     return plantGrid[row][col] == nullptr;
+}
+
+std::string Greenhouse::toString() const {
+    std::ostringstream output;
+    output << "=== GREENHOUSE STATUS ===\n";
+    output << "Capacity: " << currentNumberOfPlants << "/" << capacity << "\n";
+    output << "Grid Size: " << rows << "x" << cols << "\n\n";
+    
+    if (currentNumberOfPlants == 0) {
+        output << "Greenhouse is empty.\n";
+    } else {
+        output << "Plants in Greenhouse:\n";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Plant* plant = plantGrid[i][j];
+                if (plant != nullptr) {
+                    output << "  Position (" << i << "," << j << "): "
+                           << plant->getName() << " (ID: " << plant->getID() << ") - "
+                           << plant->getState()->getStateName() << " - "
+                           << (plant->isReadyForSale() ? "Ready for sale" : "Still growing")
+                           << "\n";
+                }
+            }
+        }
+    }
+    
+    return output.str();
 }

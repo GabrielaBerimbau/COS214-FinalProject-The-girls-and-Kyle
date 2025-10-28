@@ -137,6 +137,9 @@ class Greenhouse: public Colleague{
          * @return true if empty or out of bounds
          */
         bool isPositionEmpty(int row, int col) const;
+        
+
+        std::string toString() const;
 };
 
 #endif

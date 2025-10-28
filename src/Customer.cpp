@@ -108,6 +108,71 @@ Plant* Customer::decoratePlantWithPot(Plant* plant, std::string color) {
     return decorated;
 }
 
+Plant* Customer::getPlantFromCart(int index) const {
+    if (index < 0 || index >= static_cast<int>(cart.size())) {
+        std::cout << "Invalid cart index: " << index << "\n";
+        return nullptr;
+    }
+    return cart[index];
+}
+
+void Customer::decorateCartItemWithRibbon(int index) {
+    if (index < 0 || index >= static_cast<int>(cart.size())) {
+        std::cout << "Invalid cart index: " << index << "\n";
+        return;
+    }
+    
+    Plant* originalPlant = cart[index];
+    if (originalPlant == nullptr) {
+        std::cout << "No plant at index " << index << "\n";
+        return;
+    }
+    
+    Plant* decorated = new RibbonDecorator(originalPlant);
+    cart[index] = decorated;
+    
+    std::cout << "Added ribbon to plant at cart position " << index 
+              << ". New price: R" << decorated->getPrice() << "\n";
+}
+
+void Customer::decorateCartItemWithGiftWrap(int index) {
+    if (index < 0 || index >= static_cast<int>(cart.size())) {
+        std::cout << "Invalid cart index: " << index << "\n";
+        return;
+    }
+    
+    Plant* originalPlant = cart[index];
+    if (originalPlant == nullptr) {
+        std::cout << "No plant at index " << index << "\n";
+        return;
+    }
+    
+    Plant* decorated = new GiftWrapDecorator(originalPlant);
+    cart[index] = decorated;
+    
+    std::cout << "Added gift wrap to plant at cart position " << index 
+              << ". New price: R" << decorated->getPrice() << "\n";
+}
+
+void Customer::decorateCartItemWithPot(int index, std::string color) {
+    if (index < 0 || index >= static_cast<int>(cart.size())) {
+        std::cout << "Invalid cart index: " << index << "\n";
+        return;
+    }
+    
+    Plant* originalPlant = cart[index];
+    if (originalPlant == nullptr) {
+        std::cout << "No plant at index " << index << "\n";
+        return;
+    }
+    
+    Plant* decorated = new DecorativePotDecorator(originalPlant, color);
+    cart[index] = decorated;
+    
+    std::cout << "Added " << color << " pot to plant at cart position " << index 
+              << ". New price: R" << decorated->getPrice() << "\n";
+}
+
 // ============ Order Building (Composite Pattern) ============
 
 void Customer::startNewOrder(const std::string& orderName) {
@@ -119,7 +184,7 @@ void Customer::startNewOrder(const std::string& orderName) {
     std::cout << "Started new order: " << orderName << "\n";
 }
 
-void Customer::addPlantToOrder(Plant* plant, int quantity) {
+void Customer::addPlantToOrder(Plant* plant) {
     if (currentOrder == nullptr) {
         std::cout << "No active order. Call startNewOrder() first.\n";
         return;
@@ -130,12 +195,53 @@ void Customer::addPlantToOrder(Plant* plant, int quantity) {
         return;
     }
 
-    for (int i = 0; i < quantity; i++) {
-        Leaf* leaf = new Leaf(plant, false);
-        currentOrder->add(leaf);
+    // Each plant is a unique physical object
+    Leaf* leaf = new Leaf(plant, false);
+    currentOrder->add(leaf);
+    
+    std::cout << "Added plant to order\n";
+}
+
+void Customer::addCartItemToOrder(int index) {
+    if (currentOrder == nullptr) {
+        std::cout << "No active order. Call startNewOrder() first.\n";
+        return;
     }
     
-    std::cout << "Added " << quantity << " plant(s) to order\n";
+    if (index < 0 || index >= static_cast<int>(cart.size())) {
+        std::cout << "Invalid cart index: " << index << "\n";
+        return;
+    }
+    
+    Plant* plant = cart[index];
+    if (plant == nullptr) {
+        std::cout << "No plant at cart index " << index << "\n";
+        return;
+    }
+    
+    addPlantToOrder(plant);
+    std::cout << "Added plant from cart position " << index << " to order\n";
+}
+
+void Customer::addEntireCartToOrder() {
+    if (currentOrder == nullptr) {
+        std::cout << "No active order. Call startNewOrder() first.\n";
+        return;
+    }
+    
+    if (cart.empty()) {
+        std::cout << "Cart is empty. Nothing to add to order.\n";
+        return;
+    }
+    
+    std::cout << "Adding entire cart to order...\n";
+    for (size_t i = 0; i < cart.size(); i++) {
+        Plant* plant = cart[i];
+        if (plant != nullptr) {
+            addPlantToOrder(plant);
+        }
+    }
+    std::cout << "Added " << cart.size() << " plant(s) from cart to order.\n";
 }
 
 ConcreteOrder* Customer::getCurrentOrder() const {

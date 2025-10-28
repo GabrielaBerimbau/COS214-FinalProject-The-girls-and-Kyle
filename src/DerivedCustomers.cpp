@@ -29,7 +29,7 @@ void CorporateCustomer::checkOut() {
     
     for (Plant* plant : cart) {
         if (plant != nullptr) {
-            addPlantToOrder(plant, 1);
+            addPlantToOrder(plant);
         }
     }
     
@@ -91,7 +91,7 @@ void RegularCustomer::checkOut() {
     
     for (Plant* plant : cart) {
         if (plant != nullptr) {
-            addPlantToOrder(plant, 1);
+            addPlantToOrder(plant);
         }
     }
     
@@ -149,7 +149,7 @@ void WalkInCustomer::checkOut() {
     
     for (Plant* plant : cart) {
         if (plant != nullptr) {
-            addPlantToOrder(plant, 1);
+            addPlantToOrder(plant);
         }
     }
     
