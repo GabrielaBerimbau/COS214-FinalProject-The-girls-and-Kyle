@@ -56,14 +56,14 @@ class Decorator : public Plant {
          * 
          * @return Total price of the decorated plant
          */
-        virtual double getPrice() = 0;
+        virtual double getPrice() const override;
 
         /**
          * @brief Returns description including decoration details
          * 
          * @return String description of the decorated plant
          */
-        virtual std::string description() = 0;
+        virtual std::string description() const override;
 
         // Override virtual methods from Plant base class
         void dailyUpdate() override;

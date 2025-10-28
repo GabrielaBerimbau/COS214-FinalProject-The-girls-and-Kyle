@@ -3,14 +3,14 @@
 RibbonDecorator::RibbonDecorator(Plant *plant) : Decorator(plant) {
 }
 
-double RibbonDecorator::getPrice() {
+double RibbonDecorator::getPrice() const {
     if (plant) {
         return plant->getPrice() + RIBBON_PRICE;
     }
     return RIBBON_PRICE;
 }
 
-std::string RibbonDecorator::description() {
+std::string RibbonDecorator::description() const {
     if (plant) {
         std::ostringstream output;
         output << plant->description();
