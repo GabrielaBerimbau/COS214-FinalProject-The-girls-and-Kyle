@@ -1,25 +1,21 @@
-// #include "RibbonDecorator.h"
 #include "include/RibbonDecorator.h"
 
-
-RibbonDecorator::RibbonDecorator(Plant *plant) : Decorator(plant)
-{
+RibbonDecorator::RibbonDecorator(Plant *plant) : Decorator(plant) {
 }
 
-double RibbonDecorator::getPrice()
-{
+double RibbonDecorator::getPrice() {
     if (plant) {
         return plant->getPrice() + RIBBON_PRICE;
     }
+    return RIBBON_PRICE;
 }
 
-std::string RibbonDecorator::description()
-{
+std::string RibbonDecorator::description() {
     if (plant) {
         std::ostringstream output;
         output << plant->description();
         output << "Decoration: ribbon\n";
-
         return output.str();
     }
+    return "Decoration: ribbon\n";
 }

@@ -36,7 +36,7 @@
  * @see GiftWrapDecorator
  * @see DecorativePotDecorator
  */
-class Decorator {
+class Decorator : public Plant {
     public:
         /**
          * @brief Constructs a Decorator wrapping the specified plant
@@ -64,6 +64,10 @@ class Decorator {
          * @return String description of the decorated plant
          */
         virtual std::string description() = 0;
+
+        // Override virtual methods from Plant base class
+        void dailyUpdate() override;
+        std::string toString() const override;
 
     protected:
         /**
