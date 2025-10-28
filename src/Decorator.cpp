@@ -1,7 +1,7 @@
 #include "include/Decorator.h"
 
 Decorator::Decorator(Plant* p) 
-    : Plant(p->getName(), p->getID(), nullptr, nullptr), plant(p) {
+    : Plant(*p), plant(p) {
 }
 
 Decorator::~Decorator() {
@@ -19,4 +19,18 @@ std::string Decorator::toString() const {
         return plant->toString();
     }
     return "Empty Decorator";
+}
+
+double Decorator::getPrice() const {
+    if (plant) {
+        return plant->getPrice();
+    }
+    return 0.0;
+}
+
+std::string Decorator::description() const {
+    if (plant) {
+        return plant->description();
+    }
+    return "";
 }

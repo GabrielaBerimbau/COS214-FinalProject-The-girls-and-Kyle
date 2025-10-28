@@ -53,14 +53,14 @@ class DecorativePotDecorator : public Decorator {
          * 
          * @return Total price (wrapped plant price + POT_PRICE)
          */
-        double getPrice() override;
+        double getPrice() const override;
 
         /**
          * @brief Returns description with decorative pot notation including color
          * 
          * @return String in format: "[plant description] in [color] pot"
          */
-        std::string description() override;
+        std::string description() const override;
 
     private:
         /**

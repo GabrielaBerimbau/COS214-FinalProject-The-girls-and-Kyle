@@ -13,6 +13,16 @@ Plant::Plant(const std::string& name, const std::string& id,
       healthLevel(100), readyForSale(false), price(0.0) {
 }
 
+Plant::Plant(const Plant& other)
+    : plantName(other.plantName), plantID(other.plantID), 
+      strategy(nullptr), state(nullptr),
+      age(other.age), waterLevel(other.waterLevel), 
+      sunlightExposure(other.sunlightExposure), nutrientLevel(other.nutrientLevel),
+      healthLevel(other.healthLevel), readyForSale(other.readyForSale), 
+      price(other.price) {
+
+}
+
 Plant::~Plant() {
     if (strategy != nullptr) {
         delete strategy;

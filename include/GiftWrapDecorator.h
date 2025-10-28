@@ -52,14 +52,14 @@ class GiftWrapDecorator : public Decorator {
          * 
          * @return Total price (wrapped plant price + GIFT_WRAP_PRICE)
          */
-        double getPrice() override;
+        double getPrice() const override;
 
         /**
          * @brief Returns description with gift wrapping notation
          * 
          * @return String in format: "[plant description] with gift wrapping"
          */
-        std::string description() override;
+        std::string description() const override;
 
     private:
         /**

@@ -4,14 +4,14 @@ DecorativePotDecorator::DecorativePotDecorator(Plant *plant, std::string colour)
     : Decorator(plant), potColour(colour) {
 }
 
-double DecorativePotDecorator::getPrice() {
+double DecorativePotDecorator::getPrice() const {
     if (plant) {
         return plant->getPrice() + POT_PRICE;
     }
     return POT_PRICE;
 }
 
-std::string DecorativePotDecorator::description() {
+std::string DecorativePotDecorator::description() const {
     if (plant) {
         std::ostringstream output;
         output << plant->description();

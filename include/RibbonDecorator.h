@@ -52,14 +52,14 @@ class RibbonDecorator : public Decorator { //inherits from decorator
          * 
          * @return Total price (wrapped plant price + RIBBON_PRICE)
          */
-        double getPrice() override;
+        double getPrice() const override;
 
         /**
          * @brief Returns description with ribbon decoration notation
          * 
          * @return String in format: "[plant description] with ribbon"
          */
-        std::string description() override;
+        std::string description() const override;
 
 
     private: 

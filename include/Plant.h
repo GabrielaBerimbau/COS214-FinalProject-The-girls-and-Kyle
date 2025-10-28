@@ -27,6 +27,7 @@ private:
 public:
     Plant(const std::string& name, const std::string& id, 
           CareStrategy* careStrategy, PlantState* initialState);
+    Plant(const Plant& other);
     virtual ~Plant();
 
     void performCare();
@@ -53,7 +54,7 @@ public:
     void updateHealth();
     bool isReadyForSale() const;
     void setReadyForSale(bool ready);
-    double getPrice() const;
+    virtual double getPrice() const;
     void setPrice(double newPrice);
     
     void incrementAge();
