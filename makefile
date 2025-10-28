@@ -84,7 +84,7 @@ VALGRIND_FLAGS = --leak-check=full \
 # Default target - builds main programs (not tests)
 all: $(MAIN_EXEC) $(DEMO_EXEC)
 	@echo ""
-	@echo "✓ Build complete!"
+	@echo "	 Build complete"
 	@echo "  Run programs:"
 	@echo "    make run       - Run TestingMain"
 	@echo "    make run-demo  - Run Demo"
@@ -121,6 +121,7 @@ $(BUILD_DIR):
 
 # Compile common object files (with raylib includes)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+	@echo "Compiling..."
 	@$(CXX) $(CXXFLAGS) -I$(RAYLIB_INCLUDE) -c $< -o $@
 
 # Compile test object files (with gtest includes)
