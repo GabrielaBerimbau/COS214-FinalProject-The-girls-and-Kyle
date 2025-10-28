@@ -2,22 +2,31 @@
 #include "include/Plant.h"
 #include "include/Request.h"
 #include "include/NurseryMediator.h"
+#include "include/ConcreteOrder.h"
+#include "include/FinalOrder.h"
+#include "include/Leaf.h"
+#include "include/RibbonDecorator.h"
+#include "include/GiftWrapDecorator.h"
+#include "include/DecorativePotDecorator.h"
 #include <algorithm>
 #include <iostream>
 
 Customer::Customer(NurseryMediator* m, const std::string& name, 
                    const std::string& id, double initialBudget)
-    : Person(m, name, id), budget(initialBudget), currentRequest(nullptr) {
+    : Person(m, name, id), budget(initialBudget), currentRequest(nullptr), currentOrder(nullptr) {
 }
 
 Customer::~Customer() {
-    // Don't delete plants in cart - we don't own them
     cart.clear();
     
-    // Clean up current request if exists
     if (currentRequest != nullptr) {
         delete currentRequest;
         currentRequest = nullptr;
+    }
+    
+    if (currentOrder != nullptr) {
+        delete currentOrder;
+        currentOrder = nullptr;
     }
 }
 
@@ -29,7 +38,6 @@ void Customer::addToCart(Plant* plant) {
         return;
     }
     
-    // Check if plant already in cart
     auto it = std::find(cart.begin(), cart.end(), plant);
     if (it != cart.end()) {
         std::cout << "Plant already in cart.\n";
@@ -65,16 +73,99 @@ int Customer::getCartSize() const {
     return cart.size();
 }
 
+// ============ Plant Decoration ============
+
+Plant* Customer::decoratePlantWithRibbon(Plant* plant) {
+    if (plant == nullptr) {
+        std::cout << "Cannot decorate null plant.\n";
+        return nullptr;
+    }
+    
+    Plant* decorated = new RibbonDecorator(plant);
+    std::cout << "Added ribbon decoration to plant.\n";
+    return decorated;
+}
+
+Plant* Customer::decoratePlantWithGiftWrap(Plant* plant) {
+    if (plant == nullptr) {
+        std::cout << "Cannot decorate null plant.\n";
+        return nullptr;
+    }
+    
+    Plant* decorated = new GiftWrapDecorator(plant);
+    std::cout << "Added gift wrap to plant.\n";
+    return decorated;
+}
+
+Plant* Customer::decoratePlantWithPot(Plant* plant, std::string color) {
+    if (plant == nullptr) {
+        std::cout << "Cannot decorate null plant.\n";
+        return nullptr;
+    }
+    
+    Plant* decorated = new DecorativePotDecorator(plant, color);
+    std::cout << "Added " << color << " decorative pot to plant.\n";
+    return decorated;
+}
+
+// ============ Order Building (Composite Pattern) ============
+
+void Customer::startNewOrder(const std::string& orderName) {
+    if (currentOrder != nullptr) {
+        delete currentOrder;
+    }
+    
+    currentOrder = new ConcreteOrder(orderName);
+    std::cout << "Started new order: " << orderName << "\n";
+}
+
+void Customer::addPlantToOrder(Plant* plant, int quantity) {
+    if (currentOrder == nullptr) {
+        std::cout << "No active order. Call startNewOrder() first.\n";
+        return;
+    }
+    
+    if (plant == nullptr) {
+        std::cout << "Cannot add null plant to order.\n";
+        return;
+    }
+    
+    Leaf* leaf = new Leaf(plant, quantity);
+    currentOrder->add(leaf);
+    
+    std::cout << "Added plant to order (Qty: " << quantity << ")\n";
+}
+
+ConcreteOrder* Customer::getCurrentOrder() const {
+    return currentOrder;
+}
+
+// ============ Final Order Creation (Prototype Pattern) ============
+
+FinalOrder* Customer::createFinalOrder() {
+    if (currentOrder == nullptr) {
+        std::cout << "No order to finalize.\n";
+        return nullptr;
+    }
+    
+    FinalOrder* finalOrder = new FinalOrder(getName());
+    finalOrder->addOrder(currentOrder);
+    
+    std::cout << "Created final order for " << getName() << "\n";
+    std::cout << "Total: R" << finalOrder->calculateTotalPrice() << "\n";
+    
+    currentOrder = nullptr;
+    
+    return finalOrder;
+}
+
 // ============ Budget Operations ============
 
 double Customer::calculateTotal() const {
-    double total = 0.0;
-    for (const Plant* plant : cart) {
-        if (plant != nullptr) {
-            total += plant->getPrice();
-        }
+    if (currentOrder == nullptr) {
+        return 0.0;
     }
-    return total;
+    return currentOrder->getPrice();
 }
 
 bool Customer::canAfford(double amount) const {
@@ -98,13 +189,13 @@ bool Customer::deductFromBudget(double amount) {
     }
     
     if (!canAfford(amount)) {
-        std::cout << "Insufficient funds. Budget: $" << budget 
-                  << ", Required: $" << amount << "\n";
+        std::cout << "Insufficient funds. Budget: R" << budget 
+                  << ", Required: R" << amount << "\n";
         return false;
     }
     
     budget -= amount;
-    std::cout << "Deducted $" << amount << " from budget. Remaining: $" 
+    std::cout << "Deducted R" << amount << " from budget. Remaining: R" 
               << budget << "\n";
     return true;
 }
@@ -112,7 +203,6 @@ bool Customer::deductFromBudget(double amount) {
 // ============ Request/Staff Interaction ============
 
 Request* Customer::createRequest(const std::string& message) {
-    // Clean up old request if exists
     if (currentRequest != nullptr) {
         delete currentRequest;
     }
@@ -140,15 +230,11 @@ void Customer::submitRequest() {
     
     std::cout << "Submitting request through mediator...\n";
     mediator->notify(this);
-    
-    // The mediator will coordinate with appropriate staff
-    // based on the Request's level
 }
 
 void Customer::receiveResponse(const std::string& response) {
     std::cout << getName() << " received response: " << response << "\n";
     
-    // Mark current request as handled
     if (currentRequest != nullptr) {
         currentRequest->markHandled();
     }
@@ -183,9 +269,6 @@ void Customer::browseSalesFloor() {
     
     std::cout << getName() << " browsing sales floor...\n";
     mediator->notify(this);
-    
-    // Mediator coordinates with SalesFloor to show available plants
-    // This might trigger GUI updates in the game context
 }
 
 // ============ Legacy Methods ============

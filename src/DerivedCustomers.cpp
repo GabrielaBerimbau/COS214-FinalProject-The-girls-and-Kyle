@@ -24,47 +24,42 @@ void CorporateCustomer::checkOut() {
         return;
     }
     
-    double total = calculateTotal();
-    std::cout << "Cart total: $" << total << "\n";
-    std::cout << "Budget: $" << budget << "\n";
+    std::cout << "Building order from cart...\n";
+    startNewOrder("Corporate Order - " + getName());
     
-    if (!canAfford(total)) {
-        std::cout << "Insufficient funds for purchase!\n";
+    for (Plant* plant : cart) {
+        if (plant != nullptr) {
+            addPlantToOrder(plant, 1);
+        }
+    }
+    
+    FinalOrder* finalOrder = createFinalOrder();
+    if (finalOrder == nullptr) {
+        std::cout << "Failed to create final order.\n";
         return;
     }
     
-    // Corporate customers may need approval for large orders
+    double total = finalOrder->calculateTotalPrice();
+    std::cout << "Order total: R" << total << "\n";
+    std::cout << "Budget: R" << budget << "\n";
+    
+    if (!canAfford(total)) {
+        std::cout << "Insufficient funds for purchase!\n";
+        delete finalOrder;
+        return;
+    }
+    
     if (getCartSize() > 10) {
         std::cout << "Large bulk order detected. Processing approval...\n";
     }
     
-    // Create FinalOrder from cart
-    FinalOrder* finalOrder = new FinalOrder(getName());
-    
-    // Add each plant from cart as a ConcreteOrder
-    for (Plant* plant : cart) {
-        if (plant != nullptr) {
-            std::vector<std::string> items;
-            items.push_back(plant->getName());
-            ConcreteOrder* order = new ConcreteOrder(
-                plant->getName(), 
-                items, 
-                plant->getPrice()
-            );
-            finalOrder->addOrder(order);
-        }
-    }
-    
-    // Notify mediator of purchase
     if (mediator) {
         mediator->processPurchase();
     }
     
-    // Use credit card payment for corporate
     PaymentProcessor* processor = new CreditCardPayment();
     processor->processTransaction(finalOrder);
     
-    // Deduct from budget
     if (deductFromBudget(total)) {
         std::cout << "Corporate purchase successful!\n";
         clearCart();
@@ -91,43 +86,38 @@ void RegularCustomer::checkOut() {
         return;
     }
     
-    double total = calculateTotal();
-    std::cout << "Cart total: $" << total << "\n";
-    std::cout << "Budget: $" << budget << "\n";
+    std::cout << "Building order from cart...\n";
+    startNewOrder("Order - " + getName());
     
-    if (!canAfford(total)) {
-        std::cout << "Insufficient funds for purchase!\n";
-        return;
-    }
-    
-    // Create FinalOrder from cart
-    FinalOrder* finalOrder = new FinalOrder(getName());
-    
-    // Add each plant from cart as a ConcreteOrder
     for (Plant* plant : cart) {
         if (plant != nullptr) {
-            std::vector<std::string> items;
-            items.push_back(plant->getName());
-            ConcreteOrder* order = new ConcreteOrder(
-                plant->getName(), 
-                items, 
-                plant->getPrice()
-            );
-            finalOrder->addOrder(order);
+            addPlantToOrder(plant, 1);
         }
     }
     
-    // Notify mediator of purchase
+    FinalOrder* finalOrder = createFinalOrder();
+    if (finalOrder == nullptr) {
+        std::cout << "Failed to create final order.\n";
+        return;
+    }
+    
+    double total = finalOrder->calculateTotalPrice();
+    std::cout << "Order total: R" << total << "\n";
+    std::cout << "Budget: R" << budget << "\n";
+    
+    if (!canAfford(total)) {
+        std::cout << "Insufficient funds for purchase!\n";
+        delete finalOrder;
+        return;
+    }
+    
     if (mediator) {
         mediator->processPurchase();
     }
     
-    // Regular customers can choose payment method
-    // For now, default to credit card
     PaymentProcessor* processor = new CreditCardPayment();
     processor->processTransaction(finalOrder);
     
-    // Deduct from budget
     if (deductFromBudget(total)) {
         std::cout << "Purchase successful! Thank you for shopping with us.\n";
         clearCart();
@@ -154,42 +144,38 @@ void WalkInCustomer::checkOut() {
         return;
     }
     
-    double total = calculateTotal();
-    std::cout << "Cart total: $" << total << "\n";
-    std::cout << "Budget: $" << budget << "\n";
+    std::cout << "Building order from cart...\n";
+    startNewOrder("Walk-In Order - " + getName());
     
-    if (!canAfford(total)) {
-        std::cout << "Insufficient funds for purchase!\n";
-        return;
-    }
-    
-    // Create FinalOrder from cart
-    FinalOrder* finalOrder = new FinalOrder(getName());
-    
-    // Add each plant from cart as a ConcreteOrder
     for (Plant* plant : cart) {
         if (plant != nullptr) {
-            std::vector<std::string> items;
-            items.push_back(plant->getName());
-            ConcreteOrder* order = new ConcreteOrder(
-                plant->getName(), 
-                items, 
-                plant->getPrice()
-            );
-            finalOrder->addOrder(order);
+            addPlantToOrder(plant, 1);
         }
     }
     
-    // Notify mediator of purchase
+    FinalOrder* finalOrder = createFinalOrder();
+    if (finalOrder == nullptr) {
+        std::cout << "Failed to create final order.\n";
+        return;
+    }
+    
+    double total = finalOrder->calculateTotalPrice();
+    std::cout << "Order total: R" << total << "\n";
+    std::cout << "Budget: R" << budget << "\n";
+    
+    if (!canAfford(total)) {
+        std::cout << "Insufficient funds for purchase!\n";
+        delete finalOrder;
+        return;
+    }
+    
     if (mediator) {
         mediator->processPurchase();
     }
     
-    // Walk-in customers typically pay cash
     PaymentProcessor* processor = new CashPayment();
     processor->processTransaction(finalOrder);
     
-    // Deduct from budget
     if (deductFromBudget(total)) {
         std::cout << "Purchase complete! Have a great day.\n";
         clearCart();
