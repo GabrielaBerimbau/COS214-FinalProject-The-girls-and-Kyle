@@ -8,6 +8,11 @@ ConcreteOrder::ConcreteOrder(std::string orderN) : orderName(orderN)
 
 ConcreteOrder::~ConcreteOrder() 
 {
+    // Delete all child orders
+    for (Order* child : plantList) {
+        delete child;
+    }
+    plantList.clear();
 }
 
 double ConcreteOrder::getPrice()
