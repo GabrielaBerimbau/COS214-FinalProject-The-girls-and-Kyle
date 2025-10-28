@@ -22,6 +22,12 @@ Plant::~Plant() {
         delete state;
         state = nullptr;
     }
+    
+    // Delete owned observers
+    for (PlantObserver* observer : ownedObservers) {
+        delete observer;
+    }
+    ownedObservers.clear();
     observers.clear();
 }
 
@@ -70,6 +76,13 @@ void Plant::attach(PlantObserver* observer) {
     auto it = std::find(observers.begin(), observers.end(), observer);
     if (it == observers.end()) {
         observers.push_back(observer);
+    }
+}
+
+void Plant::addOwnedObserver(PlantObserver* observer) {
+    if (observer != nullptr) {
+        ownedObservers.push_back(observer);
+        // Observer attaches itself in its constructor
     }
 }
 
@@ -208,3 +221,10 @@ std::string Plant::description() const {
     return output.str();
 
 }
+
+
+
+CareStrategy* Plant::getCareStrategy()const {
+     return strategy;
+      }
+

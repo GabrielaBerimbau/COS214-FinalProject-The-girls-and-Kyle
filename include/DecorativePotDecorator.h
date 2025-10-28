@@ -66,7 +66,7 @@ class DecorativePotDecorator : public Decorator {
         /**
          * @brief Fixed cost for decorative pot service
          */ 
-        static const double POT_PRICE = 80.0;
+        static constexpr double POT_PRICE = 80.0;
 
         /**
          * @brief Color of the decorative pot

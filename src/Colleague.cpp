@@ -1,15 +1,13 @@
-#include "include/Colleague.h"
+#include "../include/Colleague.h" // since the file is in a diff directory (and one back)
 
-Colleague::Colleague(NurseryMediator* m) : mediator(m) {
+Colleague::Colleague(NurseryMediator* med): mediator(med){}
+
+Colleague::~Colleague(){}
+
+void Colleague::setMediator(NurseryMediator* med){
+    mediator = med;
 }
 
-Colleague::~Colleague() {
-}
-
-void Colleague::setMediator(NurseryMediator* m) {
-    mediator = m;
-}
-
-NurseryMediator* Colleague::getMediator() const {
+NurseryMediator* Colleague::getMediator()const{
     return mediator;
 }

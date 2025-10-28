@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-class CareStrategy;
-class PlantState;
-class PlantObserver;
+#include "CareStrategy.h"
+#include "PlantState.h"
+#include "PlantObserver.h"
 
 class Plant {
 private:
@@ -22,6 +22,7 @@ private:
     bool readyForSale;
     double price;
     std::vector<PlantObserver*> observers;
+    std::vector<PlantObserver*> ownedObservers;
 
 public:
     Plant(const std::string& name, const std::string& id, 
@@ -37,6 +38,7 @@ public:
     void attach(PlantObserver* observer);
     void detach(PlantObserver* observer);
     void notify();
+    void addOwnedObserver(PlantObserver* observer); 
 
     std::string getName() const;
     std::string getID() const;
@@ -55,11 +57,14 @@ public:
     void setPrice(double newPrice);
     
     void incrementAge();
-    void dailyUpdate();
+    virtual void dailyUpdate();
     void updateCondition();
     
     virtual std::string toString() const;
     virtual std::string description() const;
+
+
+    CareStrategy* getCareStrategy() const;
 };
 
 #endif

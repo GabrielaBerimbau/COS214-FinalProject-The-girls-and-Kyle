@@ -2,6 +2,7 @@
 #define PLANT_FACTORY_H
 
 class Plant;
+class CareScheduler;
 
 /**
  * Base Creator (Factory Method).
@@ -11,8 +12,8 @@ class PlantFactory {
 public:
     virtual ~PlantFactory() {}
 
-    // Factory Method
-    virtual Plant* buildPlant() const = 0;
+    Plant* buildPlant(CareScheduler* scheduler) const;
+
 };
 
 #endif // PLANT_FACTORY_H

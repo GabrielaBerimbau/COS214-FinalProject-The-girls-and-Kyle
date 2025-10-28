@@ -66,7 +66,7 @@ class RibbonDecorator : public Decorator { //inherits from decorator
         /**
          * @brief Fixed cost for ribbon decoration service
          */
-        static const double RIBBON_PRICE = 15.0;
+        static constexpr double RIBBON_PRICE = 15.0;
 
 };
 

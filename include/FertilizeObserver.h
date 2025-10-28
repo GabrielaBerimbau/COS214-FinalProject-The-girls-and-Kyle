@@ -7,15 +7,14 @@ class CareScheduler;
 class Plant;
 
 class FertilizeObserver : public PlantObserver {
+private:
+    CareScheduler* scheduler_;
+    Plant* plant_;
+    
 public:
     FertilizeObserver(CareScheduler* scheduler, Plant* plant);
-    virtual ~FertilizeObserver() {}
-
-    virtual void update();
-
-private:
-    CareScheduler* scheduler_; // not owned
-    Plant* plant_;             // not owned
+    virtual ~FertilizeObserver();
+    virtual void update(Plant* plant) override;
 };
 
 #endif // FERTILIZE_OBSERVER_H
