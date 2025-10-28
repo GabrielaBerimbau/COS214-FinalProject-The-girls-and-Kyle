@@ -20,6 +20,9 @@ class ConcreteOrder : public Order {
         virtual void remove(Order* order) override;
         // virtual Order* getChild(int index) override; //only for a composite
 
+        virtual Order* clone() const override;
+        virtual std::string getName() const override;
+
     private:
         std::vector<Order*> plantList;
         std::string orderName;
