@@ -74,6 +74,9 @@ class NurseryCoordinator: public NurseryMediator{
          * @return true if purchase completed successfully, false if not
          */
         bool coordinatePurchaseWorkflow(std::string customerId, std::string plantName);
+
+        bool transferPlantToCustomer(std::string plantName, Customer* customer);
+        bool returnPlantToDisplay(Plant* plant);
 };
 
 #endif

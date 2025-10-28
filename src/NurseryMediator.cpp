@@ -37,7 +37,7 @@ Plant* NurseryMediator::requestPlantFromStaff(std::string plantName){
             Plant* plantType = gh->findPlant(plantName);
 
             if(plantType != nullptr){
-                std::cout << "Mediator: '" << plantName << "' plant found in the greenhousen\n";
+                std::cout << "Mediator: '" << plantName << "' plant found in the greenhouse\n";
                 return plantType;
             }
         }
@@ -118,4 +118,111 @@ void NurseryMediator::removeColleague(Colleague* colleague) {
         colleagues.erase(it);
         std::cout << "Mediator: Colleague removed\n";
     }
+}
+
+bool NurseryMediator::transferPlantToCustomer(std::string plantName, Customer* customer){
+    if(customer == nullptr){
+        std::cout << "Mediator: Cannot transfer to a null customer\n";
+
+        return false;
+    }
+    
+    std::cout << "Mediator: Transferring '" << plantName << "' to customer " << customer->getName() << "\n";
+    
+    Plant* plant = nullptr;
+    
+    // first try to find on salesfloor and then transfer it
+    for(Colleague* colleague: colleagues) {
+        SalesFloor* sf = dynamic_cast<SalesFloor*>(colleague);
+
+        if(sf != nullptr){
+            std::vector<Plant*> displayPlants = sf->getDisplayPlants();
+
+            for(Plant* p: displayPlants){
+                if(p != nullptr && p->getName() == plantName){
+                    plant = p;
+
+                    sf->removePlantFromDisplay(plant);
+                    std::cout << "Mediator: Removed the plant from sales floor\n";
+    
+                    break;
+                }
+            }
+
+            if(plant != nullptr){
+                break;
+            } 
+        }
+    }
+    
+    // try the greenhouse if it isn't on the salesfloor
+    if(plant == nullptr){
+        for(Colleague* colleague : colleagues){
+            Greenhouse* gh = dynamic_cast<Greenhouse*>(colleague);
+
+            if(gh != nullptr){
+                plant = gh->findPlant(plantName);
+
+                if(plant != nullptr){
+
+                    if(!plant->isReadyForSale()){
+                        std::cout << "Mediator: Plant is not ready for sale yet\n";
+                        return false;
+                    }
+
+                    gh->removePlant(plant);
+                    std::cout << "Mediator: Removed plant from the greenhouse\n";
+
+                    break;
+                }
+            }
+        }
+    }
+    
+    // add the plant to a customers cart if it was found
+    if(plant != nullptr){
+        customer->addToCart(plant);
+        std::cout << "Mediator: Successfully transferred plant to customer\n";
+        
+        return true;
+    }
+    
+    std::cout << "Mediator: Plant '" << plantName << "' not found\n";
+    return false;
+}
+
+bool NurseryMediator::returnPlantToDisplay(Plant* plant){
+    if(plant == nullptr){
+        std::cout << "Mediator: Cannot return a null plant\n";
+        return false;
+    }
+    
+    std::cout << "Mediator: Returning plant '" << plant->getName() << "' to sales floor\n";
+    
+    // add plant back to the salesfloor
+    for(Colleague* colleague: colleagues){
+        SalesFloor* sf = dynamic_cast<SalesFloor*>(colleague);
+
+        if(sf != nullptr){
+            for(int i = 0; i < sf->getRows(); i++){
+                for(int j = 0; j < sf->getColumns(); j++){
+
+                    if(sf->isPositionEmpty(i, j)){
+                        bool successSF = sf->addPlantToDisplay(plant, i, j);
+
+                        if(successSF){
+                            std::cout << "Mediator: Plant returned to sales floor at (" << i << "," << j << ")\n";
+
+                            return true;
+                        }
+                    }
+                }
+            }
+            std::cout << "Mediator: Sales floor is full, cannot return plant\n";
+            return false;
+        }
+    }
+    
+    std::cout << "Mediator: Sales floor not found\n";
+    return false;
 }

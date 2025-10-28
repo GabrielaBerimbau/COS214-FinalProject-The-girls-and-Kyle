@@ -67,6 +67,8 @@ public:
     // Legacy Methods
     void giveCustomerPlant(Plant* plant);
     std::string plantNotInStock();
+
+    bool returnPlantToDisplay(Plant* plant);
 };
 
 #endif

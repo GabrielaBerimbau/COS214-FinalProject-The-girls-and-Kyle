@@ -251,15 +251,13 @@ void Customer::requestPlantByName(const std::string& plantName) {
     }
     
     std::cout << getName() << " requesting plant: " << plantName << "\n";
+
+    // prevents the same plant from being in two places at once
+    bool success = mediator->transferPlantToCustomer(plantName, this);
     
-    Plant* plant = mediator->requestPlantFromStaff(plantName);
-    
-    if (plant != nullptr) {
-        std::cout << "Plant found! Adding to cart.\n";
-        addToCart(plant);
-    } else {
-        std::string msg = mediator->plantUnavailable();
-        std::cout << msg << "\n";
+    if (!success) { 
+        std::string message = mediator->plantUnavailable();
+        std::cout << message << "\n";
     }
 }
 
@@ -286,4 +284,36 @@ std::string Customer::plantNotInStock() {
         return mediator->plantUnavailable();
     }
     return "Plant is not available.";
+}
+
+bool Customer::returnPlantToDisplay(Plant* plant) {
+    if (plant == nullptr) {
+        std::cout << "Cannot return a null plant.\n";
+        return false;
+    }
+    
+    auto it = std::find(cart.begin(), cart.end(), plant);
+    if (it == cart.end()) {
+        std::cout << "Plant not in cart.\n";
+        return false;
+    }
+    
+    if (mediator == nullptr) {
+        std::cout << "No mediator available.\n";
+        return false;
+    }
+    
+    cart.erase(it);
+    std::cout << "Removed plant " << plant->getID() << " from cart.\n";
+    
+    bool success = mediator->returnPlantToDisplay(plant);
+    
+    if (!success) {
+        cart.push_back(plant);
+        std::cout << "Failed to return plant, added back to cart.\n";
+
+        return false;
+    }
+    
+    return true;
 }

@@ -171,3 +171,15 @@ bool NurseryCoordinator::coordinatePurchaseWorkflow(std::string customerId, std:
 
     return false;
 }
+
+bool NurseryCoordinator::transferPlantToCustomer(std::string plantName, Customer* customer) {
+    std::cout << "NurseryCoordinator: Coordinating plant transfer\n";
+    
+    return NurseryMediator::transferPlantToCustomer(plantName, customer);
+}
+
+bool NurseryCoordinator::returnPlantToDisplay(Plant* plant) {
+    std::cout << "NurseryCoordinator: Coordinating plant return\n";
+    
+    return NurseryMediator::returnPlantToDisplay(plant);
+}
