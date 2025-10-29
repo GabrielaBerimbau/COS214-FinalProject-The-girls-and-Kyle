@@ -1,5 +1,6 @@
 /**
  * @file CashPayment.cpp
+ * @author Gabi de Gouveia
  * @brief Implements cash payment using the Template Method pattern.
  */
 #include "include/CashPayment.h"
