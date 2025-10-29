@@ -4,7 +4,10 @@
 #include "CareStrategy.h"
 #include <iostream>
 
-
+/**
+ * @class SucculentCareStrategy
+ * @brief Care strategy for succulent plants
+ */
 class SucculentCareStrategy : public CareStrategy {
     public:
         void water(Plant* plant) override;
