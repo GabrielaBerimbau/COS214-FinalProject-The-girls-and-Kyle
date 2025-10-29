@@ -105,6 +105,21 @@ void SalesFloorScreen::Update() {
     if (requestOverlayActive) {
         UpdateRequestOverlay();
     } else {
+        // CRITICAL: Validate selection before updating
+        if (selectedPlant != nullptr) {
+            SalesFloor* salesFloor = manager->GetSalesFloor();
+            if (salesFloor != nullptr) {
+                // Check if selected plant is still at the selected position
+                Plant* currentPlant = salesFloor->getPlantAt(selectedRow, selectedCol);
+                if (currentPlant != selectedPlant) {
+                    // Plant has been removed (via request or other means)
+                    selectedPlant = nullptr;
+                    selectedRow = -1;
+                    selectedCol = -1;
+                }
+            }
+        }
+        
         UpdateGrid();
         UpdateButtons();
     }
@@ -212,16 +227,14 @@ void SalesFloorScreen::HandleAddToCart() {
     
     if (customer == nullptr || salesFloor == nullptr || mediator == nullptr) return;
     
-    // Use the mediator to transfer the plant to the customer
-    // This will remove it from the sales floor and add it to the cart
     std::string plantName = selectedPlant->getName();
     std::string plantID = selectedPlant->getID();
     
     std::cout << "[SalesFloorScreen] Attempting to add " << plantName 
-              << " (ID: " << plantID << ") to cart" << std::endl;
+              << " (ID: " << plantID << ") at position (" << selectedRow << "," << selectedCol << ") to cart" << std::endl;
     
-    // The mediator will handle removing from sales floor and adding to cart
-    bool success = mediator->transferPlantToCustomer(plantName, customer);
+    // FIXED: Use position-based transfer instead of name-based
+    bool success = mediator->transferPlantFromPosition(selectedRow, selectedCol, customer);
     
     if (success) {
         std::cout << "[SalesFloorScreen] Successfully added " << plantName << " to cart" << std::endl;
@@ -260,8 +273,7 @@ void SalesFloorScreen::HandleMakeRequest() {
             responseText = "Request could not be handled at this time.";
         }
     }
-    
-    delete request;
+
 }
 
 void SalesFloorScreen::Draw() {
@@ -461,8 +473,16 @@ void SalesFloorScreen::DrawRightPanel() {
         DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, WHITE);
         yPos += 15;
         
+        // Calculate total from cart
+        double cartTotal = 0.0;
+        for (Plant* p : cart) {
+            if (p != nullptr) {
+                cartTotal += p->getPrice();
+            }
+        }
+        
         std::ostringstream totalStream;
-        totalStream << "Total: R" << std::fixed << std::setprecision(2) << customer->calculateTotal();
+        totalStream << "Total: R" << std::fixed << std::setprecision(2) << cartTotal;
         DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, GREEN);
     }
     

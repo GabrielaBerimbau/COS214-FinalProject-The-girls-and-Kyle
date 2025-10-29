@@ -36,8 +36,9 @@ private:
     Rectangle fertilizeButton;
     Rectangle adjustSunlightButton;
     Rectangle performFullCareButton;
-    Rectangle transferToSalesFloorButton;  // NEW
+    Rectangle transferToSalesFloorButton;
     Rectangle runSchedulerButton;
+    Rectangle advanceDayButton;  // NEW
     Rectangle backButton;
     
     // Button hover states
@@ -45,8 +46,9 @@ private:
     bool fertilizeHovered;
     bool sunlightHovered;
     bool fullCareHovered;
-    bool transferHovered;  // NEW
+    bool transferHovered;
     bool schedulerHovered;
+    bool advanceDayHovered;  // NEW
     bool backHovered;
     
     // Care scheduler info
@@ -64,6 +66,7 @@ private:
     void DrawPlantInCell(Plant* plant, int row, int col);
     void DrawButtons();
     void DrawSchedulerInfo();
+    void DrawDayCounter();  // NEW
     
     void HandlePlantSelection(int row, int col);
     void HandleWaterPlant();
@@ -72,6 +75,7 @@ private:
     void HandleFullCare();
     void HandleTransferToSalesFloor();
     void HandleRunScheduler();
+    void HandleAdvanceDay();  // NEW
     
 public:
     StaffGreenhouseScreen(ScreenManager* mgr);

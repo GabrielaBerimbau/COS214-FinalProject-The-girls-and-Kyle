@@ -23,6 +23,7 @@ StaffGreenhouseScreen::StaffGreenhouseScreen(ScreenManager* mgr)
       fullCareHovered(false),
       transferHovered(false),
       schedulerHovered(false),
+      advanceDayHovered(false),
       backHovered(false),
       scheduledTasksCount(0) {
     
@@ -70,7 +71,7 @@ void StaffGreenhouseScreen::InitializeButtons() {
     int buttonX = screenWidth - rightPanelWidth + 20;
     int startY = 60;
     
-    // Care action buttons (removed prune)
+    // Care action buttons
     waterButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(startY),
@@ -99,7 +100,7 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight + 10)
     };
     
-    // Transfer button (NEW)
+    // Transfer button
     transferToSalesFloorButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(startY + (buttonHeight + buttonSpacing) * 4 + 30),
@@ -107,10 +108,18 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight + 10)
     };
     
+    // Advance Day button (NEW)
+    advanceDayButton = Rectangle{
+        static_cast<float>(buttonX),
+        static_cast<float>(screenHeight - 200),
+        static_cast<float>(buttonWidth),
+        static_cast<float>(buttonHeight + 10)
+    };
+    
     // Scheduler button
     runSchedulerButton = Rectangle{
         static_cast<float>(buttonX),
-        static_cast<float>(screenHeight - 150),
+        static_cast<float>(screenHeight - 130),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
@@ -118,7 +127,7 @@ void StaffGreenhouseScreen::InitializeButtons() {
     // Back button
     backButton = Rectangle{
         static_cast<float>(buttonX),
-        static_cast<float>(screenHeight - 90),
+        static_cast<float>(screenHeight - 70),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
@@ -153,12 +162,13 @@ void StaffGreenhouseScreen::UpdateGrid() {
 void StaffGreenhouseScreen::UpdateButtons() {
     Vector2 mousePos = GetMousePosition();
     
-    // Update hover states (removed prune)
+    // Update hover states
     waterHovered = CheckCollisionPointRec(mousePos, waterButton);
     fertilizeHovered = CheckCollisionPointRec(mousePos, fertilizeButton);
     sunlightHovered = CheckCollisionPointRec(mousePos, adjustSunlightButton);
     fullCareHovered = CheckCollisionPointRec(mousePos, performFullCareButton);
     transferHovered = CheckCollisionPointRec(mousePos, transferToSalesFloorButton);
+    advanceDayHovered = CheckCollisionPointRec(mousePos, advanceDayButton);  // NEW
     schedulerHovered = CheckCollisionPointRec(mousePos, runSchedulerButton);
     backHovered = CheckCollisionPointRec(mousePos, backButton);
     
@@ -174,6 +184,8 @@ void StaffGreenhouseScreen::UpdateButtons() {
             HandleFullCare();
         } else if (transferHovered && selectedPlant != nullptr) {
             HandleTransferToSalesFloor();
+        } else if (advanceDayHovered) {  // NEW
+            HandleAdvanceDay();
         } else if (schedulerHovered) {
             HandleRunScheduler();
         } else if (backHovered) {
@@ -207,7 +219,7 @@ void StaffGreenhouseScreen::HandleWaterPlant() {
     CareStrategy* strategy = selectedPlant->getStrategy();
     if (strategy != nullptr) {
         strategy->water(selectedPlant);
-        selectedPlant->updateHealth();  // FIX: Update health after care
+        selectedPlant->updateHealth();
         std::cout << "[StaffGreenhouseScreen] Watered plant " << selectedPlant->getID() 
                   << " - Water: " << selectedPlant->getWaterLevel() 
                   << "%, Health: " << selectedPlant->getHealthLevel() << "%" << std::endl;
@@ -220,7 +232,7 @@ void StaffGreenhouseScreen::HandleFertilizePlant() {
     CareStrategy* strategy = selectedPlant->getStrategy();
     if (strategy != nullptr) {
         strategy->fertilize(selectedPlant);
-        selectedPlant->updateHealth();  // FIX: Update health after care
+        selectedPlant->updateHealth();
         std::cout << "[StaffGreenhouseScreen] Fertilized plant " << selectedPlant->getID() 
                   << " - Nutrients: " << selectedPlant->getNutrientLevel() 
                   << "%, Health: " << selectedPlant->getHealthLevel() << "%" << std::endl;
@@ -233,7 +245,7 @@ void StaffGreenhouseScreen::HandleAdjustSunlight() {
     CareStrategy* strategy = selectedPlant->getStrategy();
     if (strategy != nullptr) {
         strategy->adjustSunlight(selectedPlant);
-        selectedPlant->updateHealth();  // FIX: Update health after care
+        selectedPlant->updateHealth();
         std::cout << "[StaffGreenhouseScreen] Adjusted sunlight for plant " << selectedPlant->getID() 
                   << " - Sunlight: " << selectedPlant->getSunlightExposure() 
                   << "%, Health: " << selectedPlant->getHealthLevel() << "%" << std::endl;
@@ -244,7 +256,7 @@ void StaffGreenhouseScreen::HandleFullCare() {
     if (selectedPlant == nullptr) return;
     
     selectedPlant->performCare();
-    selectedPlant->updateHealth();  // FIX: Update health after care
+    selectedPlant->updateHealth();
     std::cout << "[StaffGreenhouseScreen] Performed full care on plant " << selectedPlant->getID() 
               << " - Health: " << selectedPlant->getHealthLevel() << "%" << std::endl;
 }
@@ -252,7 +264,6 @@ void StaffGreenhouseScreen::HandleFullCare() {
 void StaffGreenhouseScreen::HandleTransferToSalesFloor() {
     if (selectedPlant == nullptr) return;
     
-    // Check if plant is ready for sale
     if (!selectedPlant->isReadyForSale()) {
         std::cout << "[StaffGreenhouseScreen] Plant " << selectedPlant->getID() 
                   << " is not ready for sale yet! (State: " 
@@ -268,22 +279,17 @@ void StaffGreenhouseScreen::HandleTransferToSalesFloor() {
         return;
     }
     
-    // Find empty spot on sales floor
     bool transferred = false;
     for (int row = 0; row < salesFloor->getRows() && !transferred; row++) {
         for (int col = 0; col < salesFloor->getColumns() && !transferred; col++) {
             if (salesFloor->isPositionEmpty(row, col)) {
-                // Remove from greenhouse
                 greenhouse->removePlant(selectedPlant);
-                
-                // Add to sales floor
                 salesFloor->addPlantToDisplay(selectedPlant, row, col);
                 
                 std::cout << "[StaffGreenhouseScreen] Transferred " << selectedPlant->getName() 
                           << " (ID: " << selectedPlant->getID() 
                           << ") to sales floor at (" << row << "," << col << ")" << std::endl;
                 
-                // Clear selection
                 selectedPlant = nullptr;
                 selectedRow = -1;
                 selectedCol = -1;
@@ -296,6 +302,12 @@ void StaffGreenhouseScreen::HandleTransferToSalesFloor() {
     if (!transferred) {
         std::cout << "[StaffGreenhouseScreen] Sales floor is full! Cannot transfer plant." << std::endl;
     }
+}
+
+void StaffGreenhouseScreen::HandleAdvanceDay() {
+    std::cout << "[StaffGreenhouseScreen] Advancing day manually..." << std::endl;
+    manager->PerformDailyUpdate();
+    std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
 }
 
 void StaffGreenhouseScreen::HandleRunScheduler() {
@@ -327,7 +339,11 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
     yPos += 35;
     
     DrawText("Greenhouse Manager", 20, yPos, 16, LIGHTGRAY);
-    yPos += 45;
+    yPos += 30;
+    
+    // Draw day counter
+    DrawDayCounter();
+    yPos += 60;
     
     DrawLine(20, yPos, leftPanelWidth - 20, yPos, WHITE);
     yPos += 15;
@@ -384,10 +400,6 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
         sunStream << "Sunlight: " << selectedPlant->getSunlightExposure() << "%";
         DrawText(sunStream.str().c_str(), 20, yPos, 14, GOLD);
         yPos += 30;
-        
-        std::string readyText = selectedPlant->isReadyForSale() ? "✓ Ready for Sale" : "✗ Still Growing";
-        Color readyColor = selectedPlant->isReadyForSale() ? GREEN : ORANGE;
-        DrawText(readyText.c_str(), 20, yPos, 14, readyColor);
         
     } else {
         DrawText("INSTRUCTIONS:", 20, yPos, 16, YELLOW);
@@ -553,7 +565,7 @@ void StaffGreenhouseScreen::DrawButtons() {
              18,
              WHITE);
     
-    // Transfer button (NEW)
+    // Transfer button
     bool canTransfer = hasSelection && selectedPlant->isReadyForSale();
     Color transferColor = canTransfer ? 
                           (transferHovered ? Color{0, 120, 200, 255} : Color{50, 150, 220, 255}) : GRAY;
@@ -566,6 +578,18 @@ void StaffGreenhouseScreen::DrawButtons() {
              transferToSalesFloorButton.y + (transferToSalesFloorButton.height - 16) / 2,
              16,
              canTransfer ? WHITE : DARKGRAY);
+    
+    // Advance Day button (NEW)
+    Color advanceDayColor = advanceDayHovered ? Color{255, 200, 0, 255} : Color{255, 150, 0, 255};
+    DrawRectangleRec(advanceDayButton, advanceDayColor);
+    DrawRectangleLinesEx(advanceDayButton, 3, BLACK);
+    const char* advanceDayText = "Advance Day";
+    int advanceDayTextWidth = MeasureText(advanceDayText, 16);
+    DrawText(advanceDayText,
+             advanceDayButton.x + (advanceDayButton.width - advanceDayTextWidth) / 2,
+             advanceDayButton.y + (advanceDayButton.height - 16) / 2,
+             16,
+             BLACK);
     
     // Run scheduler button
     Color schedulerColor = schedulerHovered ? Color{200, 150, 50, 255} : Color{150, 100, 50, 255};
@@ -593,7 +617,7 @@ void StaffGreenhouseScreen::DrawButtons() {
 }
 
 void StaffGreenhouseScreen::DrawSchedulerInfo() {
-    int yPos = screenHeight - 180;
+    int yPos = screenHeight - 250;
     
     DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, DARKGRAY);
     yPos += 10;
@@ -607,4 +631,13 @@ void StaffGreenhouseScreen::DrawSchedulerInfo() {
     } else {
         DrawText("No tasks", screenWidth - rightPanelWidth + 20, yPos, 12, GRAY);
     }
+}
+
+void StaffGreenhouseScreen::DrawDayCounter() {
+    int days = manager->GetDaysCounter();
+    
+    std::ostringstream dayStream;
+    dayStream << "Day: " << days;
+    
+    DrawText(dayStream.str().c_str(), 20, 85, 24, GOLD);
 }
