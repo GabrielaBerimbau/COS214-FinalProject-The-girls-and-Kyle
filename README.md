@@ -1,10 +1,10 @@
 # COS214-FinalProject-The-girls-and-Kyle
 
 
-
 ![Lint](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/lint.yml/badge.svg?branch=Dev)
 ![Build](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/build.yml/badge.svg?branch=Dev)
 ![Test](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/test.yml/badge.svg?branch=Dev)
+![Coverage](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/coverage.yml/badge.svg?branch=Dev)
 ![Docs](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/doxygen.yml/badge.svg?branch=Dev)
 
 
