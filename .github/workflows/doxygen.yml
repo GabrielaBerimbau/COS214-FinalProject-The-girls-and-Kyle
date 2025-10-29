@@ -3,6 +3,7 @@ name: Doxygen Docs
 on:
   push:
     branches: [dev,Dev, main ]
+  workflow_dispatch: {}   # allows manual “Run workflow” in Actions
 
 jobs:
   doxygen:
