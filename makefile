@@ -5,7 +5,7 @@
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I.
+CXXFLAGS = -std=c++17 -Wall -Wextra -I. -Iinclude
 TEST_FLAGS = -pthread
 
 # ============================================================================
@@ -115,15 +115,15 @@ $(GTEST_LIB_DIR)/libgtest.a:
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
 
-# Compile common object files
+# Compile common object files (backend)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	@echo "Compiling $<..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Compile GUI object files (with raylib includes)
+# Compile GUI object files (with raylib includes AND GUI directory for headers)
 $(BUILD_DIR)/gui_%.o: $(GUI_DIR)/%.cpp | $(BUILD_DIR) $(RAYLIB_LIB_DIR)/libraylib.a
 	@echo "Compiling GUI $<..."
-	@$(CXX) $(CXXFLAGS) -I$(RAYLIB_INCLUDE) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -I$(RAYLIB_INCLUDE) -I$(GUI_DIR) -c $< -o $@
 
 # Compile test object files (with gtest includes)
 $(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp | $(BUILD_DIR) $(GTEST_LIB_DIR)/libgtest.a
@@ -321,4 +321,4 @@ clean-docs:
 # ============================================================================
 
 .PHONY: all build-all testing demo gui test test-verbose test-filter \
-        clean clean-all rebuild rebuild-all show-sources help valgrind
+        clean clean-all rebuild rebuild-all show-sources help valgrind clean-docs

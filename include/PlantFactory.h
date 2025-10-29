@@ -12,7 +12,7 @@ class PlantFactory {
 public:
     virtual ~PlantFactory() {}
 
-    Plant* buildPlant(CareScheduler* scheduler) const;
+    virtual Plant* buildPlant(CareScheduler* scheduler = nullptr) const = 0;
 
 };
 
