@@ -16,16 +16,49 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install compiler & deps (cmake + raylib deps)
+      # Restore APT cache (deb archives)
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-${{ runner.os }}-${{ hashFiles('**/makefile') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
+
+      # Restore compiler cache
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('**/makefile','include/**/*','src/**/*') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      # Restore build/ to speed incremental rebuilds
+      - name: Cache build directory
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: build-${{ runner.os }}-${{ hashFiles('**/makefile') }}
+          restore-keys: |
+            build-${{ runner.os }}-
+
+      - name: Install compiler & deps (cmake + raylib deps + ccache)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake make g++ \
+            build-essential cmake make g++ ccache \
             libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
             libgl1-mesa-dev mesa-common-dev libasound2-dev libpulse-dev \
             libudev-dev libdrm-dev libgbm-dev
 
-      - name: Build (Makefile)
+      - name: Build (Makefile) with ccache
+        env:
+          CC: ccache gcc
+          CXX: ccache g++
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
         run: |
+          ccache -z || true
           make clean || true
           make -j"$(nproc)" build-all
+          ccache -s || true
