@@ -1,0 +1,48 @@
+name: Lint
+
+on:
+  push:
+    branches: [ Dev, dev, main, feature/** ]
+  pull_request:
+    branches: [ Dev, dev, main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install linters
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck clang-format
+
+      # cppcheck: warn-only (does not fail the job/PR)
+      - name: cppcheck (report only)
+        run: |
+          cppcheck --enable=warning,performance,portability,style \
+                   --inline-suppr --std=c++17 \
+                   -I include include src tests \
+                   2> cppcheck.txt || true
+      - name: Upload cppcheck report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cppcheck-report
+          path: cppcheck.txt
+          if-no-files-found: ignore
+
+      # clang-format: show a diff but do not fail
+      - name: clang-format (diff only)
+        run: |
+          files=$(find include src tests -type f \( -name '*.h' -o -name '*.hpp' -o -name '*.cpp' \))
+          for f in $files; do
+            diff -u "$f" <(clang-format -style=file "$f") || true
+          done | tee clang-format.diff
+      - name: Upload clang-format diff
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-format-diff
+          path: clang-format.diff
+          if-no-files-found: ignore
