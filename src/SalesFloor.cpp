@@ -19,10 +19,16 @@ SalesFloor::SalesFloor(NurseryMediator* med, int numRows, int numCols): Colleagu
 }
 
 SalesFloor::~SalesFloor() {
-    for (int i = 0; i < rows; i++) { // deleteing of plants will be managed elsewhere
+    // Delete all plants still on display
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (displayGrid[i][j] != nullptr) {
+                delete displayGrid[i][j];
+                displayGrid[i][j] = nullptr;
+            }
+        }
         displayGrid[i].clear();
     }
-
     displayGrid.clear();
     currentCustomers.clear();
 }

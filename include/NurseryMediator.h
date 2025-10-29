@@ -13,7 +13,7 @@ class Customer;
  * @brief Mediator that coordinates communication between different nursery components
  */
 class NurseryMediator{
-    protected: // changed to protected for NurseryCoordinator
+    protected:
         std::vector<Colleague*> colleagues;
 
     public:
@@ -53,12 +53,6 @@ class NurseryMediator{
         bool staffChecksGreenHouse(std::string plantName);
 
         /**
-         * @brief Give a plant to a customer
-         * @param plant The plant to give to the customer
-         */
-        void giveCustomerPlant(Plant* plant);
-
-        /**
          * @brief Get a notification when plant is unavailable
          * @return String describing unavailable plant
          */
@@ -85,7 +79,24 @@ class NurseryMediator{
         bool transferPlantToCustomer(std::string plantName, Customer* customer);
         
         /**
-         * @brief Return a plant from customers cart back to sales floor
+         * @brief Transfer plant from specific salesfloor position to customer
+         * @param row Row position on salesfloor
+         * @param col Column position on salesfloor
+         * @param customer The customer receiving the plant
+         * @return true if successful, false if not
+         */
+        bool transferPlantFromPosition(int row, int col, Customer* customer);
+        
+        /**
+         * @brief Staff adds plant to customer cart (for request handling)
+         * @param plantName Name of the plant to add
+         * @param customer The customer receiving the plant
+         * @return true if successful, false if not
+         */
+        bool staffAddPlantToCustomerCart(std::string plantName, Customer* customer);
+        
+        /**
+         * @brief Return a plant from customer cart back to sales floor
          * @param plant The plant to return
          * @return true if successful, false if not
          */

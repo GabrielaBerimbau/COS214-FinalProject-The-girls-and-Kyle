@@ -24,13 +24,11 @@ void CorporateCustomer::checkOut() {
         return;
     }
     
-    std::cout << "Building order from cart...\n";
-    startNewOrder("Corporate Order - " + getName());
-    
-    for (Plant* plant : cart) {
-        if (plant != nullptr) {
-            addPlantToOrder(plant);
-        }
+    // Build order if not already done
+    if (getCurrentOrder() == nullptr) {
+        std::cout << "Building order from cart...\n";
+        startNewOrder("Corporate Order - " + getName());
+        addEntireCartToOrder();
     }
     
     FinalOrder* finalOrder = createFinalOrder();
@@ -41,7 +39,7 @@ void CorporateCustomer::checkOut() {
     
     double total = finalOrder->calculateTotalPrice();
     std::cout << "Order total: R" << total << "\n";
-    std::cout << "Budget: R" << budget << "\n";
+    std::cout << "Budget: R" << getBudget() << "\n";
     
     if (!canAfford(total)) {
         std::cout << "Insufficient funds for purchase!\n";
@@ -86,13 +84,11 @@ void RegularCustomer::checkOut() {
         return;
     }
     
-    std::cout << "Building order from cart...\n";
-    startNewOrder("Order - " + getName());
-    
-    for (Plant* plant : cart) {
-        if (plant != nullptr) {
-            addPlantToOrder(plant);
-        }
+    // Build order if not already done
+    if (getCurrentOrder() == nullptr) {
+        std::cout << "Building order from cart...\n";
+        startNewOrder("Order - " + getName());
+        addEntireCartToOrder();
     }
     
     FinalOrder* finalOrder = createFinalOrder();
@@ -103,7 +99,7 @@ void RegularCustomer::checkOut() {
     
     double total = finalOrder->calculateTotalPrice();
     std::cout << "Order total: R" << total << "\n";
-    std::cout << "Budget: R" << budget << "\n";
+    std::cout << "Budget: R" << getBudget() << "\n";
     
     if (!canAfford(total)) {
         std::cout << "Insufficient funds for purchase!\n";
@@ -144,13 +140,11 @@ void WalkInCustomer::checkOut() {
         return;
     }
     
-    std::cout << "Building order from cart...\n";
-    startNewOrder("Walk-In Order - " + getName());
-    
-    for (Plant* plant : cart) {
-        if (plant != nullptr) {
-            addPlantToOrder(plant);
-        }
+    // Build order if not already done
+    if (getCurrentOrder() == nullptr) {
+        std::cout << "Building order from cart...\n";
+        startNewOrder("Walk-In Order - " + getName());
+        addEntireCartToOrder();
     }
     
     FinalOrder* finalOrder = createFinalOrder();
@@ -161,7 +155,7 @@ void WalkInCustomer::checkOut() {
     
     double total = finalOrder->calculateTotalPrice();
     std::cout << "Order total: R" << total << "\n";
-    std::cout << "Budget: R" << budget << "\n";
+    std::cout << "Budget: R" << getBudget() << "\n";
     
     if (!canAfford(total)) {
         std::cout << "Insufficient funds for purchase!\n";

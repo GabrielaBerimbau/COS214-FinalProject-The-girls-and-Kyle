@@ -8,15 +8,21 @@
 #include "include/RibbonDecorator.h"
 #include "include/GiftWrapDecorator.h"
 #include "include/DecorativePotDecorator.h"
+#include "include/StaffMembers.h"
 #include <algorithm>
 #include <iostream>
 
 Customer::Customer(NurseryMediator* m, const std::string& name, 
                    const std::string& id, double initialBudget)
     : Person(m, name, id), budget(initialBudget), currentRequest(nullptr), currentOrder(nullptr) {
+    std::cout << "[Customer] " << name << " created with budget R" << initialBudget << "\n";
 }
 
 Customer::~Customer() {
+    // Clear cart - delete all plants we own
+    for (Plant* plant : cart) {
+        delete plant;
+    }
     cart.clear();
     
     if (currentRequest != nullptr) {
@@ -30,39 +36,80 @@ Customer::~Customer() {
     }
 }
 
-// ============ Cart Management ============
+// ============ CART MANAGEMENT (via Mediator) ============
 
-void Customer::addToCart(Plant* plant) {
-    if (plant == nullptr) {
-        std::cout << "Cannot add null plant to cart.\n";
-        return;
+bool Customer::addPlantFromSalesFloor(const std::string& plantName) {
+    if (mediator == nullptr) {
+        std::cout << "[Customer] No mediator available.\n";
+        return false;
     }
     
-    auto it = std::find(cart.begin(), cart.end(), plant);
-    if (it != cart.end()) {
-        std::cout << "Plant already in cart.\n";
-        return;
+    std::cout << "[Customer] " << getName() << " requesting plant: " << plantName << "\n";
+    
+    bool success = mediator->transferPlantToCustomer(plantName, this);
+    
+    if (!success) {
+        std::cout << "[Customer] " << mediator->plantUnavailable() << "\n";
     }
     
-    cart.push_back(plant);
-    std::cout << "Added plant " << plant->getID() << " to cart.\n";
+    return success;
 }
 
-void Customer::removeFromCart(Plant* plant) {
-    if (plant == nullptr) {
-        return;
+bool Customer::addPlantFromSalesFloorPosition(int row, int col) {
+    if (mediator == nullptr) {
+        std::cout << "[Customer] No mediator available.\n";
+        return false;
     }
     
-    auto it = std::find(cart.begin(), cart.end(), plant);
-    if (it != cart.end()) {
-        cart.erase(it);
-        std::cout << "Removed plant " << plant->getID() << " from cart.\n";
+    std::cout << "[Customer] " << getName() << " requesting plant at position (" 
+              << row << "," << col << ")\n";
+    
+    bool success = mediator->transferPlantFromPosition(row, col, this);
+    
+    return success;
+}
+
+bool Customer::returnPlantToSalesFloor(int cartIndex) {
+    if (cartIndex < 0 || cartIndex >= static_cast<int>(cart.size())) {
+        std::cout << "[Customer] Invalid cart index: " << cartIndex << "\n";
+        return false;
     }
+    
+    Plant* plant = cart[cartIndex];
+    if (plant == nullptr) {
+        std::cout << "[Customer] No plant at cart index " << cartIndex << "\n";
+        return false;
+    }
+    
+    if (mediator == nullptr) {
+        std::cout << "[Customer] No mediator available.\n";
+        return false;
+    }
+    
+    std::cout << "[Customer] " << getName() << " returning plant " 
+              << plant->getID() << " to sales floor\n";
+    
+    // Try to return via mediator FIRST
+    bool success = mediator->returnPlantToDisplay(plant);
+    
+    if (success) {
+        // Only remove from cart if mediator succeeded
+        cart.erase(cart.begin() + cartIndex);
+        std::cout << "[Customer] Successfully returned plant to sales floor.\n";
+    } else {
+        std::cout << "[Customer] Failed to return plant to sales floor.\n";
+    }
+    
+    return success;
 }
 
 void Customer::clearCart() {
+    // Delete all plants in cart
+    for (Plant* plant : cart) {
+        delete plant;
+    }
     cart.clear();
-    std::cout << "Cart cleared.\n";
+    std::cout << "[Customer] Cart cleared.\n";
 }
 
 std::vector<Plant*> Customer::getCart() const {
@@ -73,44 +120,11 @@ int Customer::getCartSize() const {
     return cart.size();
 }
 
-// ============ Plant Decoration ============
-
-Plant* Customer::decoratePlantWithRibbon(Plant* plant) {
-    if (plant == nullptr) {
-        std::cout << "Cannot decorate null plant.\n";
-        return nullptr;
-    }
-    
-    Plant* decorated = new RibbonDecorator(plant);
-    std::cout << "Added ribbon decoration to plant.\n";
-    return decorated;
-}
-
-Plant* Customer::decoratePlantWithGiftWrap(Plant* plant) {
-    if (plant == nullptr) {
-        std::cout << "Cannot decorate null plant.\n";
-        return nullptr;
-    }
-    
-    Plant* decorated = new GiftWrapDecorator(plant);
-    std::cout << "Added gift wrap to plant.\n";
-    return decorated;
-}
-
-Plant* Customer::decoratePlantWithPot(Plant* plant, std::string color) {
-    if (plant == nullptr) {
-        std::cout << "Cannot decorate null plant.\n";
-        return nullptr;
-    }
-    
-    Plant* decorated = new DecorativePotDecorator(plant, color);
-    std::cout << "Added " << color << " decorative pot to plant.\n";
-    return decorated;
-}
+// ============ PLANT DECORATION (operates on cart) ============
 
 Plant* Customer::getPlantFromCart(int index) const {
     if (index < 0 || index >= static_cast<int>(cart.size())) {
-        std::cout << "Invalid cart index: " << index << "\n";
+        std::cout << "[Customer] Invalid cart index: " << index << "\n";
         return nullptr;
     }
     return cart[index];
@@ -118,156 +132,142 @@ Plant* Customer::getPlantFromCart(int index) const {
 
 void Customer::decorateCartItemWithRibbon(int index) {
     if (index < 0 || index >= static_cast<int>(cart.size())) {
-        std::cout << "Invalid cart index: " << index << "\n";
+        std::cout << "[Customer] Invalid cart index: " << index << "\n";
         return;
     }
     
     Plant* originalPlant = cart[index];
     if (originalPlant == nullptr) {
-        std::cout << "No plant at index " << index << "\n";
+        std::cout << "[Customer] No plant at index " << index << "\n";
         return;
     }
     
     Plant* decorated = new RibbonDecorator(originalPlant);
     cart[index] = decorated;
     
-    std::cout << "Added ribbon to plant at cart position " << index 
+    std::cout << "[Customer] Added ribbon to plant at cart position " << index 
               << ". New price: R" << decorated->getPrice() << "\n";
 }
 
 void Customer::decorateCartItemWithGiftWrap(int index) {
     if (index < 0 || index >= static_cast<int>(cart.size())) {
-        std::cout << "Invalid cart index: " << index << "\n";
+        std::cout << "[Customer] Invalid cart index: " << index << "\n";
         return;
     }
     
     Plant* originalPlant = cart[index];
     if (originalPlant == nullptr) {
-        std::cout << "No plant at index " << index << "\n";
+        std::cout << "[Customer] No plant at index " << index << "\n";
         return;
     }
     
     Plant* decorated = new GiftWrapDecorator(originalPlant);
     cart[index] = decorated;
     
-    std::cout << "Added gift wrap to plant at cart position " << index 
+    std::cout << "[Customer] Added gift wrap to plant at cart position " << index 
               << ". New price: R" << decorated->getPrice() << "\n";
 }
 
 void Customer::decorateCartItemWithPot(int index, std::string color) {
     if (index < 0 || index >= static_cast<int>(cart.size())) {
-        std::cout << "Invalid cart index: " << index << "\n";
+        std::cout << "[Customer] Invalid cart index: " << index << "\n";
         return;
     }
     
     Plant* originalPlant = cart[index];
     if (originalPlant == nullptr) {
-        std::cout << "No plant at index " << index << "\n";
+        std::cout << "[Customer] No plant at index " << index << "\n";
         return;
     }
     
     Plant* decorated = new DecorativePotDecorator(originalPlant, color);
     cart[index] = decorated;
     
-    std::cout << "Added " << color << " pot to plant at cart position " << index 
+    std::cout << "[Customer] Added " << color << " pot to plant at cart position " << index 
               << ". New price: R" << decorated->getPrice() << "\n";
 }
 
-// ============ Order Building (Composite Pattern) ============
+// ============ ORDER BUILDING (Composite Pattern) ============
 
 void Customer::startNewOrder(const std::string& orderName) {
     if (currentOrder != nullptr) {
+        std::cout << "[Customer] Warning: Deleting existing order to start new one.\n";
         delete currentOrder;
     }
     
     currentOrder = new ConcreteOrder(orderName);
-    std::cout << "Started new order: " << orderName << "\n";
-}
-
-void Customer::addPlantToOrder(Plant* plant) {
-    if (currentOrder == nullptr) {
-        std::cout << "No active order. Call startNewOrder() first.\n";
-        return;
-    }
-    
-    if (plant == nullptr) {
-        std::cout << "Cannot add null plant to order.\n";
-        return;
-    }
-
-    // Each plant is a unique physical object
-    Leaf* leaf = new Leaf(plant, false);
-    currentOrder->add(leaf);
-    
-    std::cout << "Added plant to order\n";
+    std::cout << "[Customer] Started new order: " << orderName << "\n";
 }
 
 void Customer::addCartItemToOrder(int index) {
     if (currentOrder == nullptr) {
-        std::cout << "No active order. Call startNewOrder() first.\n";
+        std::cout << "[Customer] No active order. Call startNewOrder() first.\n";
         return;
     }
     
     if (index < 0 || index >= static_cast<int>(cart.size())) {
-        std::cout << "Invalid cart index: " << index << "\n";
+        std::cout << "[Customer] Invalid cart index: " << index << "\n";
         return;
     }
     
     Plant* plant = cart[index];
     if (plant == nullptr) {
-        std::cout << "No plant at cart index " << index << "\n";
+        std::cout << "[Customer] No plant at cart index " << index << "\n";
         return;
     }
     
-    addPlantToOrder(plant);
-    std::cout << "Added plant from cart position " << index << " to order\n";
+    // Create Leaf with ownsPlant=false (cart still owns the plant)
+    Leaf* leaf = new Leaf(plant, false);
+    currentOrder->add(leaf);
+    
+    std::cout << "[Customer] Added plant from cart position " << index << " to order\n";
 }
 
 void Customer::addEntireCartToOrder() {
     if (currentOrder == nullptr) {
-        std::cout << "No active order. Call startNewOrder() first.\n";
+        std::cout << "[Customer] No active order. Call startNewOrder() first.\n";
         return;
     }
     
     if (cart.empty()) {
-        std::cout << "Cart is empty. Nothing to add to order.\n";
+        std::cout << "[Customer] Cart is empty. Nothing to add to order.\n";
         return;
     }
     
-    std::cout << "Adding entire cart to order...\n";
+    std::cout << "[Customer] Adding entire cart to order...\n";
     for (size_t i = 0; i < cart.size(); i++) {
         Plant* plant = cart[i];
         if (plant != nullptr) {
-            addPlantToOrder(plant);
+            Leaf* leaf = new Leaf(plant, false);
+            currentOrder->add(leaf);
         }
     }
-    std::cout << "Added " << cart.size() << " plant(s) from cart to order.\n";
+    std::cout << "[Customer] Added " << cart.size() << " plant(s) from cart to order.\n";
 }
 
 ConcreteOrder* Customer::getCurrentOrder() const {
     return currentOrder;
 }
 
-// ============ Final Order Creation (Prototype Pattern) ============
+// ============ ORDER FINALIZATION (Prototype Pattern) ============
 
 FinalOrder* Customer::createFinalOrder() {
     if (currentOrder == nullptr) {
-        std::cout << "No order to finalize.\n";
+        std::cout << "[Customer] No order to finalize.\n";
         return nullptr;
     }
     
     FinalOrder* finalOrder = new FinalOrder(getName());
     finalOrder->addOrder(currentOrder);
     
-    std::cout << "Created final order for " << getName() << "\n";
-    std::cout << "Total: R" << finalOrder->calculateTotalPrice() << "\n";
+    std::cout << "[Customer] Created final order for " << getName() << "\n";
+    std::cout << "[Customer] Total: R" << finalOrder->calculateTotalPrice() << "\n";
     
+    // Reset current order (FinalOrder now owns it)
     currentOrder = nullptr;
     
     return finalOrder;
 }
-
-// ============ Budget Operations ============
 
 double Customer::calculateTotal() const {
     if (currentOrder == nullptr) {
@@ -275,6 +275,48 @@ double Customer::calculateTotal() const {
     }
     return currentOrder->getPrice();
 }
+
+// ============ STAFF INTERACTION (Chain of Responsibility) ============
+
+Request* Customer::createRequest(const std::string& message) {
+    if (currentRequest != nullptr) {
+        delete currentRequest;
+    }
+    
+    currentRequest = new Request(message, this);
+    currentRequest->parseRequest(message);
+    std::cout << "[Customer] Created request: " << message << "\n";
+    return currentRequest;
+}
+
+void Customer::submitRequestToStaff(StaffMembers* firstHandler) {
+    if (firstHandler == nullptr) {
+        std::cout << "[Customer] No staff handler available.\n";
+        return;
+    }
+    
+    if (currentRequest == nullptr) {
+        std::cout << "[Customer] No request to submit. Call createRequest() first.\n";
+        return;
+    }
+    
+    std::cout << "[Customer] " << getName() << " submitting request to staff...\n";
+    firstHandler->handleRequest(currentRequest);
+}
+
+void Customer::receiveResponse(const std::string& response) {
+    std::cout << "[Customer] " << getName() << " received response: " << response << "\n";
+    
+    if (currentRequest != nullptr) {
+        currentRequest->markHandled();
+    }
+}
+
+Request* Customer::getCurrentRequest() const {
+    return currentRequest;
+}
+
+// ============ BUDGET OPERATIONS ============
 
 bool Customer::canAfford(double amount) const {
     return budget >= amount;
@@ -287,139 +329,54 @@ double Customer::getBudget() const {
 void Customer::setBudget(double amount) {
     if (amount >= 0) {
         budget = amount;
+        std::cout << "[Customer] Budget set to R" << budget << "\n";
     }
 }
 
 bool Customer::deductFromBudget(double amount) {
     if (amount < 0) {
-        std::cout << "Cannot deduct negative amount.\n";
+        std::cout << "[Customer] Cannot deduct negative amount.\n";
         return false;
     }
     
     if (!canAfford(amount)) {
-        std::cout << "Insufficient funds. Budget: R" << budget 
+        std::cout << "[Customer] Insufficient funds. Budget: R" << budget 
                   << ", Required: R" << amount << "\n";
         return false;
     }
     
     budget -= amount;
-    std::cout << "Deducted R" << amount << " from budget. Remaining: R" 
+    std::cout << "[Customer] Deducted R" << amount << " from budget. Remaining: R" 
               << budget << "\n";
     return true;
 }
 
-// ============ Request/Staff Interaction ============
+// ============ PRIVATE METHODS (friend access only) ============
 
-Request* Customer::createRequest(const std::string& message) {
-    if (currentRequest != nullptr) {
-        delete currentRequest;
-    }
-    
-    currentRequest = new Request(message);
-    currentRequest->parseRequest(message);
-    std::cout << "Created request: " << message << "\n";
-    return currentRequest;
-}
-
-Request* Customer::getCurrentRequest() const {
-    return currentRequest;
-}
-
-void Customer::submitRequest() {
-    if (mediator == nullptr) {
-        std::cout << "No mediator available to submit request.\n";
-        return;
-    }
-    
-    if (currentRequest == nullptr) {
-        std::cout << "No request to submit.\n";
-        return;
-    }
-    
-    std::cout << "Submitting request through mediator...\n";
-    mediator->notify(this);
-}
-
-void Customer::receiveResponse(const std::string& response) {
-    std::cout << getName() << " received response: " << response << "\n";
-    
-    if (currentRequest != nullptr) {
-        currentRequest->markHandled();
-    }
-}
-
-// ============ Plant Interaction (via Mediator) ============
-
-void Customer::requestPlantByName(const std::string& plantName) {
-    if (mediator == nullptr) {
-        std::cout << "No mediator available.\n";
-        return;
-    }
-    
-    std::cout << getName() << " requesting plant: " << plantName << "\n";
-
-    // prevents the same plant from being in two places at once
-    bool success = mediator->transferPlantToCustomer(plantName, this);
-    
-    if (!success) { 
-        std::string message = mediator->plantUnavailable();
-        std::cout << message << "\n";
-    }
-}
-
-void Customer::browseSalesFloor() {
-    if (mediator == nullptr) {
-        std::cout << "No mediator available.\n";
-        return;
-    }
-    
-    std::cout << getName() << " browsing sales floor...\n";
-    mediator->notify(this);
-}
-
-// ============ Legacy Methods ============
-
-void Customer::giveCustomerPlant(Plant* plant) {
-    if (plant != nullptr) {
-        addToCart(plant);
-    }
-}
-
-std::string Customer::plantNotInStock() {
-    if (mediator != nullptr) {
-        return mediator->plantUnavailable();
-    }
-    return "Plant is not available.";
-}
-
-bool Customer::returnPlantToDisplay(Plant* plant) {
+void Customer::addToCart(Plant* plant) {
     if (plant == nullptr) {
-        std::cout << "Cannot return a null plant.\n";
-        return false;
+        std::cout << "[Customer] Cannot add null plant to cart.\n";
+        return;
     }
     
     auto it = std::find(cart.begin(), cart.end(), plant);
-    if (it == cart.end()) {
-        std::cout << "Plant not in cart.\n";
-        return false;
+    if (it != cart.end()) {
+        std::cout << "[Customer] Plant already in cart.\n";
+        return;
     }
     
-    if (mediator == nullptr) {
-        std::cout << "No mediator available.\n";
-        return false;
-    }
-    
-    cart.erase(it);
-    std::cout << "Removed plant " << plant->getID() << " from cart.\n";
-    
-    bool success = mediator->returnPlantToDisplay(plant);
-    
-    if (!success) {
-        cart.push_back(plant);
-        std::cout << "Failed to return plant, added back to cart.\n";
+    cart.push_back(plant);
+    std::cout << "[Customer] Added plant " << plant->getID() << " to cart.\n";
+}
 
-        return false;
+void Customer::removeFromCart(Plant* plant) {
+    if (plant == nullptr) {
+        return;
     }
     
-    return true;
+    auto it = std::find(cart.begin(), cart.end(), plant);
+    if (it != cart.end()) {
+        cart.erase(it);
+        std::cout << "[Customer] Removed plant " << plant->getID() << " from cart.\n";
+    }
 }

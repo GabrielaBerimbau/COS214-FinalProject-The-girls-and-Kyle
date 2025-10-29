@@ -1,13 +1,16 @@
 #include "../include/Request.h"
+#include "../include/Customer.h"
 #include <algorithm>
 #include <sstream>
 #include <iostream>
 
-Request::Request(const std::string& msg): message(msg), level(RequestLevel::LOW), handled(false){
+Request::Request(const std::string& msg, Customer* customer)
+    : message(msg), level(RequestLevel::LOW), handled(false), requestingCustomer(customer) {
     parseRequest(msg);
 }
 
-Request::Request(): message(""), level(RequestLevel::LOW), handled(false){}
+Request::Request()
+    : message(""), level(RequestLevel::LOW), handled(false), requestingCustomer(nullptr) {}
 
 Request::~Request(){}
 
@@ -74,7 +77,6 @@ RequestLevel Request::determineLevel(const std::vector<std::string>& keywords)co
         }
     }
     
-    
     return RequestLevel::LOW;
 }
 
@@ -110,18 +112,18 @@ std::string Request::toString()const{
     if(level == RequestLevel::LOW){
         levelStr = "LOW";
     } 
-
     else if(level == RequestLevel::MEDIUM){
         levelStr = "MEDIUM";
     } 
-
     else{
         levelStr = "HIGH";
     }
     
     std::string handledStr = handled ? "Yes" : "No";
+    std::string customerStr = requestingCustomer ? requestingCustomer->getName() : "Unknown";
     
-    return "Request: '" + message + "' [Level: " + levelStr + ", Handled: " + handledStr + "]";
+    return "Request: '" + message + "' [Customer: " + customerStr + 
+           ", Level: " + levelStr + ", Handled: " + handledStr + "]";
 }
 
 std::string Request::extractPlantName()const{
@@ -150,4 +152,8 @@ std::string Request::extractPlantName()const{
     }
     
     return "";
+}
+
+Customer* Request::getCustomer() const {
+    return requestingCustomer;
 }
