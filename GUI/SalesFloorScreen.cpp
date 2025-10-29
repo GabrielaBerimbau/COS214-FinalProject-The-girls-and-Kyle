@@ -226,7 +226,7 @@ void SalesFloorScreen::HandleAddToCart() {
     if (success) {
         std::cout << "[SalesFloorScreen] Successfully added " << plantName << " to cart" << std::endl;
         
-        // Clear selection
+        // CRITICAL FIX: Clear selection to prevent dangling pointer
         selectedRow = -1;
         selectedCol = -1;
         selectedPlant = nullptr;
@@ -408,20 +408,47 @@ void SalesFloorScreen::DrawRightPanel() {
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
     
-    // Draw cart items
+    // Draw cart items with remove buttons
     std::vector<Plant*> cart = customer->getCart();
     int yPos = 60;
     
     if (cart.empty()) {
         DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, LIGHTGRAY);
     } else {
+        Vector2 mousePos = GetMousePosition();
+        
         for (size_t i = 0; i < cart.size(); i++) {
             Plant* plant = cart[i];
             if (plant != nullptr) {
-                std::string itemText = "- " + plant->getName();
-                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 20, yPos, 14, WHITE);
+                // Draw remove button (X)
+                int removeX = screenWidth - rightPanelWidth + 20;
+                int removeY = yPos;
+                Rectangle removeBtn = Rectangle{
+                    static_cast<float>(removeX),
+                    static_cast<float>(removeY),
+                    20,
+                    20
+                };
+                
+                bool removeHovered = CheckCollisionPointRec(mousePos, removeBtn);
+                Color removeBtnColor = removeHovered ? RED : Color{150, 50, 50, 255};
+                DrawRectangleRec(removeBtn, removeBtnColor);
+                DrawRectangleLinesEx(removeBtn, 1, BLACK);
+                DrawText("X", removeX + 6, removeY + 3, 14, WHITE);
+                
+                // Handle remove click
+                if (removeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    std::cout << "[SalesFloorScreen] Removing item " << i << " from cart" << std::endl;
+                    customer->returnPlantToSalesFloor(i);
+                    break; // Exit loop since cart changed
+                }
+                
+                // Draw plant name (indented)
+                std::string itemText = plant->getName();
+                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 45, yPos + 3, 14, WHITE);
                 yPos += 25;
                 
+                // Draw price
                 std::ostringstream priceStream;
                 priceStream << "  R" << std::fixed << std::setprecision(2) << plant->getPrice();
                 DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, YELLOW);
