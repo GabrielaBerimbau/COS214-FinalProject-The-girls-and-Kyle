@@ -2,17 +2,20 @@
  * @file Decorator.h
  * @brief Defines the abstract Decorator base class for plant decorations
  * @author Gabriela Berimbau
- * @date 2025-10-26
+ * @date 2025-10-26 
  * 
  * This file contains the declaration of the Decorator abstract base class, which serves
- * as the foundation for the Decorator pattern implementation. It provides a common
- * interface for all concrete decorators that add features and enhancements to plant objects.
+ * as the foundation for the Decorator pattern implementation. It inherits from Plant and
+ * wraps another Plant object, providing a common interface for all concrete decorators
+ * that add features and enhancements to plant objects.
  * 
  * @see Plant
  * @see RibbonDecorator
  * @see GiftWrapDecorator
  * @see DecorativePotDecorator
  */
+
+//  ========== TESTING WORKFLOWS ===========
 
 #ifndef DECORATOR_H
 #define DECORATOR_H
@@ -61,12 +64,29 @@ class Decorator : public Plant {
         /**
          * @brief Returns description including decoration details
          * 
+         * Overrides Plant's description() method to append decoration information
+         * to the wrapped plant's description.
+         * 
          * @return String description of the decorated plant
          */
         virtual std::string description() const override;
 
-        // Override virtual methods from Plant base class
+        /**
+         * @brief Performs daily update on the wrapped plant
+         * 
+         * Delegates the daily update operation to the wrapped plant, ensuring
+         * that decorated plants maintain their lifecycle and care requirements.
+         */
         void dailyUpdate() override;
+
+        /**
+         * @brief Returns string representation of the decorated plant
+         * 
+         * Delegates to the wrapped plant's toString() method to maintain
+         * consistent string representation throughout the decoration chain.
+         * 
+         * @return String representation of the plant
+         */
         std::string toString() const override;
 
     protected:
