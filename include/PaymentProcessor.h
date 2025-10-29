@@ -1,5 +1,6 @@
 /**
  * @file PaymentProcessor.h
+ * @author Gabi de Gouveia
  * @brief Abstract base class implementing the Template Method pattern for all payment types.
  */
 
