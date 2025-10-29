@@ -1,6 +1,13 @@
 # COS214-FinalProject-The-girls-and-Kyle
 
-[![CI](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/ci.yml/badge.svg)](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions)
+
+
+![Lint](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/lint.yml/badge.svg?branch=Dev)
+![Build](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/build.yml/badge.svg?branch=Dev)
+![Test](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/test.yml/badge.svg?branch=Dev)
+![Docs](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/doxygen.yml/badge.svg?branch=Dev)
+
+
 ![Top Language](https://img.shields.io/github/languages/top/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle)
 ![Languages Count](https://img.shields.io/github/languages/count/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle)
 ![Build System](https://img.shields.io/badge/build-Makefile-lightgrey)
