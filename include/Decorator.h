@@ -2,7 +2,7 @@
  * @file Decorator.h
  * @brief Defines the abstract Decorator base class for plant decorations
  * @author Gabriela Berimbau
- * @date 2025-10-26
+ * @date 2025-10-26 
  * 
  * This file contains the declaration of the Decorator abstract base class, which serves
  * as the foundation for the Decorator pattern implementation. It inherits from Plant and
@@ -14,6 +14,8 @@
  * @see GiftWrapDecorator
  * @see DecorativePotDecorator
  */
+
+//  ========== TESTING WORKFLOWS ===========
 
 #ifndef DECORATOR_H
 #define DECORATOR_H
