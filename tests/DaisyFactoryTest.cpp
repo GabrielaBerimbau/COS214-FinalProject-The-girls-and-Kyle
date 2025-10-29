@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-// Include the actual header files based on the implementation
 #include "include/DaisyFactory.h"
 #include "include/Daisy.h"
 #include "include/Plant.h"
