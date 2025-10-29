@@ -246,13 +246,13 @@ void ScreenManager::LoadAssets() {
     // Load plant textures
     plantTextures["Rose"] = LoadTexture("assets/rose.png");
     plantTextures["Daisy"] = LoadTexture("assets/daisy.png");
-    plantTextures["Cactus"] = LoadTexture("assets/cactus.png");
+    plantTextures["Cactus"] = LoadTexture("assets/cactus2.png");
     plantTextures["Aloe"] = LoadTexture("assets/aloe.png");
     plantTextures["Potato"] = LoadTexture("assets/potato.png");
     plantTextures["Strelitzia"] = LoadTexture("assets/strelitzia.png");
     plantTextures["Radish"] = LoadTexture("assets/radish.png");
     plantTextures["Monstera"] = LoadTexture("assets/monstera.png");
-    plantTextures["Venus Fly Trap"] = LoadTexture("assets/venusflytrap.png");
+    plantTextures["Venus Fly Trap"] = LoadTexture("assets/VenusFlyTrap.png");
     
     // Load pot textures
     std::vector<std::string> potColors = {
