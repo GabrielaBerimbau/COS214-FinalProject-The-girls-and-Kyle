@@ -1,5 +1,11 @@
 # COS214-FinalProject-The-girls-and-Kyle
 
+[![CI](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions/workflows/ci.yml/badge.svg)](https://github.com/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle/actions)
+![Top Language](https://img.shields.io/github/languages/top/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle)
+![Languages Count](https://img.shields.io/github/languages/count/GabrielaBerimbau/COS214-FinalProject-The-girls-and-Kyle)
+![Build System](https://img.shields.io/badge/build-Makefile-lightgrey)
+![License](https://img.shields.io/badge/license-Academic-lightgrey)
+
 ## Initial Setup
 
 ### Prerequisites
