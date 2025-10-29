@@ -3,6 +3,10 @@
 
 #include "CareStrategy.h"
 
+/**
+ * @class VegetableCareStrategy
+ * @brief Care strategy for vegetable plants
+ */
 class VegetableCareStrategy : public CareStrategy {
 public:
     void water(Plant* plant) override;
