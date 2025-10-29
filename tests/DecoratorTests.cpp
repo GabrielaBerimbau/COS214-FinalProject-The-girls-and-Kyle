@@ -214,8 +214,9 @@ TEST_F(DecoratorTest, DailyUpdatePropagatesThroughDecorators) {
     
     int initialAge = decoratedPlant->getAge();
     decoratedPlant->dailyUpdate();
-    
-    EXPECT_EQ(decoratedPlant->getAge(), initialAge + 1);
+    int newAge = initialAge++;
+
+    EXPECT_EQ(decoratedPlant->getAge(), newAge);
     
     delete decoratedPlant;
 }
