@@ -13,7 +13,7 @@
  */
 void VegetableCareStrategy::water(Plant* plant) {
     // Vegetables need regular, moderate watering
-    plant->setWaterLevel(plant->getWaterLevel() + 30);
+    plant->setWaterLevel(plant->getWaterLevel() + 100);
     std::cout << "Watering vegetable - regular watering schedule" << std::endl;
     (void)plant;
 }

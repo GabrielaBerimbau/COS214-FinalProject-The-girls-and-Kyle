@@ -13,7 +13,7 @@
  */
 void FlowerCareStrategy::water(Plant* plant) {
     // Flowers need specific moisture levels
-    plant->setWaterLevel(plant->getWaterLevel() + 25);
+    plant->setWaterLevel(plant->getWaterLevel() + 50);
     std::cout << "Watering flower - maintaining optimal moisture" << std::endl;
     (void)plant;
 }
