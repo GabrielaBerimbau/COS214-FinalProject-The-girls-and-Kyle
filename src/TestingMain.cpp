@@ -1,167 +1,211 @@
 #include <iostream>
-
-// Plant hierarchy
+#include "include/NurseryMediator.h"
+#include "include/NurseryCoordinator.h"
+#include "include/SalesFloor.h"
+#include "include/Greenhouse.h"
+#include "include/Customer.h"
+#include "include/DerivedCustomers.h"
+#include "include/StaffMembers.h"
+#include "include/SalesAssistant.h"
+#include "include/FloorManager.h"
+#include "include/NurseryOwner.h"
 #include "include/Plant.h"
-#include "include/Rose.h"
-#include "include/Daisy.h"
-#include "include/Cactus.h"
-
-// Factories
 #include "include/RoseFactory.h"
 #include "include/DaisyFactory.h"
 #include "include/CactusFactory.h"
-
-// Care system
 #include "include/CareScheduler.h"
-#include "include/SeedlingState.h"
-
-// Orders and Iterator
-#include "include/Order.h"
-#include "include/ConcreteOrder.h"
-#include "include/Leaf.h"
 #include "include/FinalOrder.h"
-#include "include/Iterator.h"
 
-// Decorators
-#include "include/RibbonDecorator.h"
-#include "include/GiftWrapDecorator.h"
-#include "include/DecorativePotDecorator.h"
-
-using namespace std;
-
-void printSeparator() {
-    cout << "\n========================================\n";
+void printSeparator(const std::string& title = "") {
+    std::cout << "\n";
+    std::cout << "================================================\n";
+    if (!title.empty()) {
+        std::cout << "  " << title << "\n";
+        std::cout << "================================================\n";
+    }
 }
 
 int main() {
-    cout << "=== ITERATOR PATTERN DEMO ===" << endl;
+    std::cout << "=== SIMPLIFIED CUSTOMER CLASS DEMO ===\n";
+    std::cout << "Testing new customer interface with proper mediator usage\n";
     
-    printSeparator();
-    cout << "STEP 1: Creating plants with factories" << endl;
+    // ============ SETUP ============
+    printSeparator("SETUP: Creating Nursery Infrastructure");
     
+    NurseryMediator* mediator = new NurseryMediator();
+    SalesFloor* salesFloor = new SalesFloor(mediator, 3, 3);
+    Greenhouse* greenhouse = new Greenhouse(mediator, 2, 2);
+    
+    mediator->registerColleague(salesFloor);
+    mediator->registerColleague(greenhouse);
+    
+    // Create staff chain
+    SalesAssistant* assistant = new SalesAssistant(mediator, "Alice", "SA-001");
+    FloorManager* manager = new FloorManager(mediator, "Bob", "FM-001");
+    NurseryOwner* owner = new NurseryOwner(mediator, "Carol", "NO-001");
+    
+    assistant->setNext(manager);
+    manager->setNext(owner);
+    
+    mediator->registerColleague(assistant);
+    mediator->registerColleague(manager);
+    mediator->registerColleague(owner);
+    
+    // Create plants
     CareScheduler* scheduler = new CareScheduler();
-    
     RoseFactory roseFactory;
     DaisyFactory daisyFactory;
     CactusFactory cactusFactory;
     
     Plant* rose1 = roseFactory.buildPlant(scheduler);
     Plant* rose2 = roseFactory.buildPlant(scheduler);
-    Plant* daisy = daisyFactory.buildPlant(scheduler);
-    Plant* cactus = cactusFactory.buildPlant(scheduler);
+    Plant* daisy1 = daisyFactory.buildPlant(scheduler);
+    Plant* cactus1 = cactusFactory.buildPlant(scheduler);
     
-    rose1->setPrice(25.0);
-    rose2->setPrice(25.0);
-    daisy->setPrice(15.0);
-    cactus->setPrice(20.0);
+    rose1->setPrice(50.0);
+    rose2->setPrice(50.0);
+    daisy1->setPrice(30.0);
+    cactus1->setPrice(40.0);
     
-    cout << "✓ Created 4 plants:" << endl;
-    cout << "  - Rose #1: R" << rose1->getPrice() << endl;
-    cout << "  - Rose #2: R" << rose2->getPrice() << endl;
-    cout << "  - Daisy: R" << daisy->getPrice() << endl;
-    cout << "  - Cactus: R" << cactus->getPrice() << endl;
+    // Mark plants as ready for sale
+    rose1->setReadyForSale(true);
+    rose2->setReadyForSale(true);
+    daisy1->setReadyForSale(true);
+    cactus1->setReadyForSale(true);
     
-    printSeparator();
-    cout << "STEP 2: Decorating plants" << endl;
+    // Place on sales floor
+    salesFloor->addPlantToDisplay(rose1, 0, 0);
+    salesFloor->addPlantToDisplay(daisy1, 0, 1);
+    salesFloor->addPlantToDisplay(cactus1, 1, 0);
+    salesFloor->addPlantToDisplay(rose2, 1, 1);
     
-    Plant* decoratedRose1 = new GiftWrapDecorator(new RibbonDecorator(rose1));
-    cout << "✓ Rose #1 decorated with ribbon and gift wrap" << endl;
-    cout << "  Price: R" << decoratedRose1->getPrice() << endl;
+    std::cout << "✓ Created 3x3 sales floor with 4 plants\n";
+    std::cout << "✓ Created staff chain: Assistant → Manager → Owner\n";
     
-    Plant* decoratedDaisy = new DecorativePotDecorator(daisy, "red");
-    cout << "✓ Daisy decorated with red pot" << endl;
-    cout << "  Price: R" << decoratedDaisy->getPrice() << endl;
+    // Create customer
+    RegularCustomer* customer = new RegularCustomer();
+    customer->setMediator(mediator);
+    customer->setName("John Doe");
+    customer->setId("CUST-001");
+    customer->setBudget(500.0);
+    mediator->registerColleague(customer);
     
-    cout << "✓ Rose #2 and Cactus remain undecorated" << endl;
+    // ============ TEST 1: Add plant by name ============
+    printSeparator("TEST 1: Add Plant from Sales Floor by Name");
     
-    printSeparator();
-    cout << "STEP 3: Building customer order" << endl;
+    std::cout << "Customer requesting 'Rose' by name...\n";
+    bool success = customer->addPlantFromSalesFloor("Rose");
     
-    ConcreteOrder* mainOrder = new ConcreteOrder("Customer Shopping Cart");
+    std::cout << "\nResult: " << (success ? "SUCCESS" : "FAILED") << "\n";
+    std::cout << "Cart size: " << customer->getCartSize() << "\n";
     
-    // Leaf now owns and will delete the plants
-    Leaf* item1 = new Leaf(decoratedRose1, true);
-    mainOrder->add(item1);
-    cout << "✓ Added decorated Rose #1 to cart" << endl;
+    // ============ TEST 2: Add plant by position ============
+    printSeparator("TEST 2: Add Plant from Sales Floor by Position");
     
-    Leaf* item2 = new Leaf(rose2, true);
-    mainOrder->add(item2);
-    cout << "✓ Added plain Rose #2 to cart" << endl;
+    std::cout << "Customer requesting plant at position (0,1)...\n";
+    success = customer->addPlantFromSalesFloorPosition(0, 1);
     
-    ConcreteOrder* giftBasket = new ConcreteOrder("Gift Basket");
-    Leaf* item3 = new Leaf(decoratedDaisy,  true);
-    Leaf* item4 = new Leaf(cactus,  true);
-    giftBasket->add(item3);
-    giftBasket->add(item4);
-    cout << "✓ Created nested Gift Basket with decorated Daisy and Cactus" << endl;
+    std::cout << "\nResult: " << (success ? "SUCCESS" : "FAILED") << "\n";
+    std::cout << "Cart size: " << customer->getCartSize() << "\n";
     
-    mainOrder->add(giftBasket);
-    cout << "✓ Added Gift Basket to main cart" << endl;
+    // ============ TEST 3: Decorate plants in cart ============
+    printSeparator("TEST 3: Decorate Plants in Cart");
     
-    printSeparator();
-    cout << "STEP 4: Creating Final Order" << endl;
+    std::cout << "Original price of item 0: R" << customer->getPlantFromCart(0)->getPrice() << "\n";
     
-    FinalOrder* finalOrder = new FinalOrder("John Doe");
-    finalOrder->addOrder(mainOrder);
+    customer->decorateCartItemWithRibbon(0);
+    std::cout << "After ribbon: R" << customer->getPlantFromCart(0)->getPrice() << "\n";
     
-    cout << "✓ Final order created for John Doe" << endl;
+    customer->decorateCartItemWithGiftWrap(0);
+    std::cout << "After gift wrap: R" << customer->getPlantFromCart(0)->getPrice() << "\n";
     
-    printSeparator();
-    cout << "STEP 5: Calculating total price using Iterator" << endl;
+    customer->decorateCartItemWithPot(1, "blue");
+    std::cout << "Item 1 with blue pot: R" << customer->getPlantFromCart(1)->getPrice() << "\n";
     
-    double total = finalOrder->calculateTotalPrice();
-    cout << "\n💰 Total Price: R" << total << endl;
+    // ============ TEST 4: Return plant to sales floor ============
+    printSeparator("TEST 4: Return Plant to Sales Floor");
     
-    printSeparator();
-    cout << "STEP 6: Generating order summary using Iterator" << endl;
+    std::cout << "Current cart size: " << customer->getCartSize() << "\n";
+    std::cout << "Returning plant at cart index 1...\n";
     
-    cout << "\n" << finalOrder->getSummary() << endl;
+    success = customer->returnPlantToSalesFloor(1);
     
-    printSeparator();
-    cout << "STEP 7: Printing invoice using Iterator" << endl;
+    std::cout << "\nResult: " << (success ? "SUCCESS" : "FAILED") << "\n";
+    std::cout << "New cart size: " << customer->getCartSize() << "\n";
+    std::cout << "Plants on sales floor: " << salesFloor->getNumberOfPlants() << "\n";
     
-    finalOrder->printInvoice();
+    // ============ TEST 5: Staff request handling ============
+    printSeparator("TEST 5: Staff Request Handling");
     
-    printSeparator();
-    cout << "STEP 8: Cloning Final Order using Iterator" << endl;
+    std::cout << "Customer creating request for 'Cactus'...\n";
+    Request* request = customer->createRequest("I want a Cactus plant please");
     
-    FinalOrder* clonedOrder = finalOrder->clone();
-    cout << "\n✓ Order cloned successfully!" << endl;
-    cout << "\nCloned order invoice:" << endl;
-    clonedOrder->printInvoice();
+    std::cout << "\nSubmitting request to staff chain...\n";
+    customer->submitRequestToStaff(assistant);
     
-    printSeparator();
-    cout << "STEP 9: Direct Iterator traversal demonstration" << endl;
+    std::cout << "\nCart size after staff handled request: " << customer->getCartSize() << "\n";
     
-    cout << "\nIterating through all items in main order:" << endl;
-    Iterator* it = mainOrder->createIterator();
-    int itemCount = 0;
-    it->first();
-    while (!it->isDone()) {
-        Order* item = it->currentItem();
-        if (item) {
-            itemCount++;
-            cout << "  Item " << itemCount << ": " << item->getName() 
-                 << " - R" << item->getPrice() << endl;
-        }
-        it->next();
+    // ============ TEST 6: Build order from cart ============
+    printSeparator("TEST 6: Build and Finalize Order");
+    
+    std::cout << "Current cart contents:\n";
+    for (int i = 0; i < customer->getCartSize(); i++) {
+        Plant* p = customer->getPlantFromCart(i);
+        std::cout << "  [" << i << "] " << p->getName() << " - R" << p->getPrice() << "\n";
     }
-    delete it;
     
-    cout << "\n✓ Iterator found " << itemCount << " leaf items in composite structure" << endl;
+    std::cout << "\nStarting new order...\n";
+    customer->startNewOrder("John's Order");
     
-    printSeparator();
-    cout << "STEP 10: Cleanup" << endl;
+    std::cout << "Adding entire cart to order...\n";
+    customer->addEntireCartToOrder();
     
-    // FinalOrder deletion will cascade delete everything including plants via Leaf
-    delete finalOrder;
-    delete clonedOrder;
+    std::cout << "\nCreating final order...\n";
+    FinalOrder* finalOrder = customer->createFinalOrder();
+    
+    if (finalOrder) {
+        std::cout << "\n" << finalOrder->getSummary() << "\n";
+        
+        double total = finalOrder->calculateTotalPrice();
+        std::cout << "Can customer afford R" << total << "? " 
+                  << (customer->canAfford(total) ? "YES" : "NO") << "\n";
+        
+        delete finalOrder;
+    }
+    
+    // ============ TEST 7: Clear cart ============
+    printSeparator("TEST 7: Clear Cart");
+    
+    std::cout << "Cart size before clear: " << customer->getCartSize() << "\n";
+    customer->clearCart();
+    std::cout << "Cart size after clear: " << customer->getCartSize() << "\n";
+    
+    // ============ TEST 8: High-level request (escalation) ============
+    printSeparator("TEST 8: Request Escalation Through Chain");
+    
+    std::cout << "Customer creating HIGH priority complaint...\n";
+    Request* complaint = customer->createRequest("I want a refund immediately!");
+    
+    std::cout << "\nSubmitting complaint to staff chain...\n";
+    customer->submitRequestToStaff(assistant);
+    
+    std::cout << "\nRequest handled: " << (complaint->isHandled() ? "YES" : "NO") << "\n";
+    
+    // ============ CLEANUP ============
+    printSeparator("CLEANUP");
+    
+    delete assistant;
+    delete manager;
+    delete owner;
+    delete customer;
+    delete salesFloor;
+    delete greenhouse;
     delete scheduler;
+    delete mediator;
     
-    cout << "✓ All resources cleaned up" << endl;
+    std::cout << "✓ All resources cleaned up\n";
     
-    printSeparator();
-    cout << "\n=== DEMO COMPLETED SUCCESSFULLY ===" << endl;
+    printSeparator("DEMO COMPLETED SUCCESSFULLY");
     
     return 0;
 }

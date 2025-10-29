@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+class Customer;
+
 /**
  * @enum RequestLevel
  * @brief Priority levels for requests in chain of responsibility
@@ -23,6 +25,7 @@ class Request{
         std::string message;
         RequestLevel level;
         bool handled;
+        Customer* requestingCustomer;
         
         /**
          * @brief Extract keywords from sentence
@@ -40,10 +43,11 @@ class Request{
         
     public:
         /**
-         * @brief Constructor with message
+         * @brief Constructor with message and customer
          * @param msg Customer request message
+         * @param customer Pointer to customer making request
          */
-        Request(const std::string& msg);
+        Request(const std::string& msg, Customer* customer);
         
         /**
          * @brief Default constructor
@@ -101,6 +105,12 @@ class Request{
          * @return Plant name if found, empty string otherwise
          */
         std::string extractPlantName()const;
+        
+        /**
+         * @brief Get the customer who made this request
+         * @return Pointer to requesting customer
+         */
+        Customer* getCustomer() const;
 };
 
 #endif

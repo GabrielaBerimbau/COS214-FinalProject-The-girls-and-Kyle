@@ -10,6 +10,7 @@ class Request;
 class Order;
 class ConcreteOrder;
 class FinalOrder;
+class StaffMembers;
 
 class Customer : public Person {
 protected:
@@ -24,58 +25,52 @@ public:
     
     virtual ~Customer();
     
-    // Cart Management
-    void addToCart(Plant* plant);
-    void removeFromCart(Plant* plant);
+    // ============ CART MANAGEMENT (via Mediator) ============
+    bool addPlantFromSalesFloor(const std::string& plantName);
+    bool addPlantFromSalesFloorPosition(int row, int col);
+    bool returnPlantToSalesFloor(int cartIndex);
     void clearCart();
     std::vector<Plant*> getCart() const;
     int getCartSize() const;
     
-    // Plant Decoration
-    Plant* decoratePlantWithRibbon(Plant* plant);
-    Plant* decoratePlantWithGiftWrap(Plant* plant);
-    Plant* decoratePlantWithPot(Plant* plant, std::string color);
-
+    // ============ PLANT DECORATION (operates on cart) ============
     void decorateCartItemWithRibbon(int index);
     void decorateCartItemWithGiftWrap(int index);
     void decorateCartItemWithPot(int index, std::string color);
     Plant* getPlantFromCart(int index) const;
     
-    // Order Building (Composite Pattern)
+    // ============ ORDER BUILDING (Composite Pattern) ============
     void startNewOrder(const std::string& orderName);
-    void addPlantToOrder(Plant* plant);
-    ConcreteOrder* getCurrentOrder() const;
     void addCartItemToOrder(int index);
     void addEntireCartToOrder();
+    ConcreteOrder* getCurrentOrder() const;
     
-    // Final Order Creation (Prototype Pattern)
+    // ============ ORDER FINALIZATION (Prototype Pattern) ============
     FinalOrder* createFinalOrder();
-    
-    // Budget Operations
     double calculateTotal() const;
+    
+    // ============ STAFF INTERACTION (Chain of Responsibility) ============
+    Request* createRequest(const std::string& message);
+    void submitRequestToStaff(StaffMembers* firstHandler);
+    void receiveResponse(const std::string& response);
+    Request* getCurrentRequest() const;
+    
+    // ============ BUDGET OPERATIONS ============
     bool canAfford(double amount) const;
     double getBudget() const;
     void setBudget(double amount);
     bool deductFromBudget(double amount);
     
-    // Request/Staff Interaction
-    Request* createRequest(const std::string& message);
-    Request* getCurrentRequest() const;
-    void submitRequest();
-    void receiveResponse(const std::string& response);
-    
-    // Plant Interaction (via Mediator)
-    void requestPlantByName(const std::string& plantName);
-    void browseSalesFloor();
-    
-    // Checkout
+    // ============ CHECKOUT ============
     virtual void checkOut() = 0;
-    
-    // Legacy Methods
-    void giveCustomerPlant(Plant* plant);
-    std::string plantNotInStock();
 
-    bool returnPlantToDisplay(Plant* plant);
+private:
+    // Internal cart operations (only mediator and friends can call)
+    void addToCart(Plant* plant);
+    void removeFromCart(Plant* plant);
+    
+    friend class NurseryMediator;
+    friend class NurseryCoordinator;
 };
 
 #endif

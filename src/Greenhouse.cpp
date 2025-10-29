@@ -16,10 +16,16 @@ Greenhouse::Greenhouse(NurseryMediator* med, int numRows, int numCols): Colleagu
 }
 
 Greenhouse::~Greenhouse(){
-    for(int i = 0; i < rows; i++){ // plants will be deleted elsewhere
+    // Delete all plants still in greenhouse
+    for(int i = 0; i < rows; i++){
+        for(int j = 0; j < cols; j++){
+            if(plantGrid[i][j] != nullptr){
+                delete plantGrid[i][j];
+                plantGrid[i][j] = nullptr;
+            }
+        }
         plantGrid[i].clear();
     }
-
     plantGrid.clear();
 }
 
