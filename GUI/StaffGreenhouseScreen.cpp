@@ -25,7 +25,12 @@ StaffGreenhouseScreen::StaffGreenhouseScreen(ScreenManager* mgr)
       schedulerHovered(false),
       advanceDayHovered(false),
       backHovered(false),
-      scheduledTasksCount(0) {
+      scheduledTasksCount(0),
+      schedulerOverlayActive(false),
+      schedulerTasksExecuted(false),
+      runAllHovered(false),
+      runOneHovered(false),
+      closeOverlayHovered(false) {
     
     gridRows = 6;
     gridCols = 8;
@@ -35,19 +40,16 @@ StaffGreenhouseScreen::StaffGreenhouseScreen(ScreenManager* mgr)
 }
 
 StaffGreenhouseScreen::~StaffGreenhouseScreen() {
-    // Nothing to clean up
 }
 
 void StaffGreenhouseScreen::InitializeLayout() {
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
     
-    // Layout: 20% | 60% | 20%
     leftPanelWidth = screenWidth / 5;
     middlePanelWidth = screenWidth * 3 / 5;
     rightPanelWidth = screenWidth / 5;
     
-    // Calculate grid cell size
     int availableWidth = middlePanelWidth - 20;
     int availableHeight = screenHeight - 80;
     
@@ -56,7 +58,6 @@ void StaffGreenhouseScreen::InitializeLayout() {
     
     cellSize = (cellSizeByWidth < cellSizeByHeight) ? cellSizeByWidth : cellSizeByHeight;
     
-    // Center the grid
     int gridTotalWidth = cellSize * gridCols;
     int gridTotalHeight = cellSize * gridRows;
     
@@ -71,7 +72,6 @@ void StaffGreenhouseScreen::InitializeButtons() {
     int buttonX = screenWidth - rightPanelWidth + 20;
     int startY = 60;
     
-    // Care action buttons
     waterButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(startY),
@@ -100,7 +100,6 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight + 10)
     };
     
-    // Transfer button
     transferToSalesFloorButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(startY + (buttonHeight + buttonSpacing) * 4 + 30),
@@ -108,7 +107,6 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight + 10)
     };
     
-    // Advance Day button (NEW)
     advanceDayButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(screenHeight - 200),
@@ -116,7 +114,6 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight + 10)
     };
     
-    // Scheduler button
     runSchedulerButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(screenHeight - 130),
@@ -124,7 +121,6 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight)
     };
     
-    // Back button
     backButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(screenHeight - 70),
@@ -134,14 +130,17 @@ void StaffGreenhouseScreen::InitializeButtons() {
 }
 
 void StaffGreenhouseScreen::Update() {
-    // Update scheduled tasks count
     CareScheduler* scheduler = manager->GetCareScheduler();
     if (scheduler != nullptr) {
         scheduledTasksCount = scheduler->empty() ? 0 : 1;
     }
     
-    UpdateGrid();
-    UpdateButtons();
+    if (schedulerOverlayActive) {
+        UpdateSchedulerOverlay();
+    } else {
+        UpdateGrid();
+        UpdateButtons();
+    }
 }
 
 void StaffGreenhouseScreen::UpdateGrid() {
@@ -162,17 +161,15 @@ void StaffGreenhouseScreen::UpdateGrid() {
 void StaffGreenhouseScreen::UpdateButtons() {
     Vector2 mousePos = GetMousePosition();
     
-    // Update hover states
     waterHovered = CheckCollisionPointRec(mousePos, waterButton);
     fertilizeHovered = CheckCollisionPointRec(mousePos, fertilizeButton);
     sunlightHovered = CheckCollisionPointRec(mousePos, adjustSunlightButton);
     fullCareHovered = CheckCollisionPointRec(mousePos, performFullCareButton);
     transferHovered = CheckCollisionPointRec(mousePos, transferToSalesFloorButton);
-    advanceDayHovered = CheckCollisionPointRec(mousePos, advanceDayButton);  // NEW
+    advanceDayHovered = CheckCollisionPointRec(mousePos, advanceDayButton);
     schedulerHovered = CheckCollisionPointRec(mousePos, runSchedulerButton);
     backHovered = CheckCollisionPointRec(mousePos, backButton);
     
-    // Handle button clicks
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (waterHovered && selectedPlant != nullptr) {
             HandleWaterPlant();
@@ -184,13 +181,49 @@ void StaffGreenhouseScreen::UpdateButtons() {
             HandleFullCare();
         } else if (transferHovered && selectedPlant != nullptr) {
             HandleTransferToSalesFloor();
-        } else if (advanceDayHovered) {  // NEW
+        } else if (advanceDayHovered) {
             HandleAdvanceDay();
         } else if (schedulerHovered) {
             HandleRunScheduler();
         } else if (backHovered) {
             manager->SwitchScreen(GameScreen::START);
         }
+    }
+}
+
+void StaffGreenhouseScreen::UpdateSchedulerOverlay() {
+    Vector2 mousePos = GetMousePosition();
+    
+    runAllHovered = CheckCollisionPointRec(mousePos, runAllButton);
+    runOneHovered = CheckCollisionPointRec(mousePos, runOneButton);
+    closeOverlayHovered = CheckCollisionPointRec(mousePos, closeOverlayButton);
+    
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (runAllHovered) {
+            HandleRunAllScheduled();
+        } else if (runOneHovered) {
+            HandleRunOneScheduled();
+        } else if (closeOverlayHovered) {
+            // Close and advance day if we executed tasks
+            if (schedulerTasksExecuted) {
+                std::cout << "[StaffGreenhouseScreen] Closing overlay and advancing day..." << std::endl;
+                manager->PerformDailyUpdate();
+                std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
+            }
+            schedulerOverlayActive = false;
+            schedulerTasksExecuted = false;
+        }
+    }
+    
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        // Close and advance day if we executed tasks
+        if (schedulerTasksExecuted) {
+            std::cout << "[StaffGreenhouseScreen] Closing overlay (ESC) and advancing day..." << std::endl;
+            manager->PerformDailyUpdate();
+            std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
+        }
+        schedulerOverlayActive = false;
+        schedulerTasksExecuted = false;
     }
 }
 
@@ -313,11 +346,46 @@ void StaffGreenhouseScreen::HandleAdvanceDay() {
 void StaffGreenhouseScreen::HandleRunScheduler() {
     CareScheduler* scheduler = manager->GetCareScheduler();
     if (scheduler != nullptr && !scheduler->empty()) {
-        std::cout << "[StaffGreenhouseScreen] Running care scheduler..." << std::endl;
-        scheduler->runAll();
-        std::cout << "[StaffGreenhouseScreen] Scheduler tasks completed" << std::endl;
+        schedulerOverlayActive = true;
+        schedulerTasksExecuted = false;
+        std::cout << "[StaffGreenhouseScreen] Opening scheduler overlay..." << std::endl;
     } else {
         std::cout << "[StaffGreenhouseScreen] No tasks in scheduler" << std::endl;
+    }
+}
+
+void StaffGreenhouseScreen::HandleRunAllScheduled() {
+    CareScheduler* scheduler = manager->GetCareScheduler();
+    if (scheduler != nullptr && !scheduler->empty()) {
+        std::cout << "[StaffGreenhouseScreen] Running all scheduled tasks..." << std::endl;
+        scheduler->runAll();
+        schedulerTasksExecuted = true;
+        std::cout << "[StaffGreenhouseScreen] All tasks completed. Close overlay to advance day." << std::endl;
+        schedulerOverlayActive = false;
+        
+        // Advance day immediately after running all
+        manager->PerformDailyUpdate();
+        std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
+        schedulerTasksExecuted = false;
+    }
+}
+
+void StaffGreenhouseScreen::HandleRunOneScheduled() {
+    CareScheduler* scheduler = manager->GetCareScheduler();
+    if (scheduler != nullptr && !scheduler->empty()) {
+        std::cout << "[StaffGreenhouseScreen] Running one scheduled task..." << std::endl;
+        scheduler->runNext();
+        schedulerTasksExecuted = true;
+        
+        if (scheduler->empty()) {
+            std::cout << "[StaffGreenhouseScreen] All tasks completed" << std::endl;
+            schedulerOverlayActive = false;
+            
+            // Advance day after completing all tasks
+            manager->PerformDailyUpdate();
+            std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
+            schedulerTasksExecuted = false;
+        }
     }
 }
 
@@ -327,6 +395,10 @@ void StaffGreenhouseScreen::Draw() {
     DrawLeftPanel();
     DrawMiddlePanel();
     DrawRightPanel();
+    
+    if (schedulerOverlayActive) {
+        DrawSchedulerOverlay();
+    }
 }
 
 void StaffGreenhouseScreen::DrawLeftPanel() {
@@ -341,7 +413,6 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
     DrawText("Greenhouse Manager", 20, yPos, 16, LIGHTGRAY);
     yPos += 30;
     
-    // Draw day counter
     DrawDayCounter();
     yPos += 60;
     
@@ -497,7 +568,6 @@ void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, DARKGREEN);
     }
     
-    // Health bar at bottom
     int healthBarWidth = cellSize - 10;
     int healthBarHeight = 4;
     int healthBarX = x + 5;
@@ -513,7 +583,6 @@ void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
 void StaffGreenhouseScreen::DrawButtons() {
     bool hasSelection = selectedPlant != nullptr;
     
-    // Water button
     Color waterColor = hasSelection ? 
                        (waterHovered ? Color{0, 150, 255, 255} : SKYBLUE) : GRAY;
     DrawRectangleRec(waterButton, waterColor);
@@ -526,7 +595,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              hasSelection ? WHITE : DARKGRAY);
     
-    // Fertilize button
     Color fertColor = hasSelection ? 
                       (fertilizeHovered ? Color{100, 200, 100, 255} : Color{150, 255, 150, 255}) : GRAY;
     DrawRectangleRec(fertilizeButton, fertColor);
@@ -539,7 +607,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              hasSelection ? BLACK : DARKGRAY);
     
-    // Sunlight button
     Color sunColor = hasSelection ? 
                      (sunlightHovered ? Color{255, 180, 0, 255} : GOLD) : GRAY;
     DrawRectangleRec(adjustSunlightButton, sunColor);
@@ -552,7 +619,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              hasSelection ? BLACK : DARKGRAY);
     
-    // Full care button
     Color fullCareColor = hasSelection ? 
                           (fullCareHovered ? Color{100, 50, 150, 255} : Color{150, 100, 200, 255}) : GRAY;
     DrawRectangleRec(performFullCareButton, fullCareColor);
@@ -565,7 +631,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              18,
              WHITE);
     
-    // Transfer button
     bool canTransfer = hasSelection && selectedPlant->isReadyForSale();
     Color transferColor = canTransfer ? 
                           (transferHovered ? Color{0, 120, 200, 255} : Color{50, 150, 220, 255}) : GRAY;
@@ -579,7 +644,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              canTransfer ? WHITE : DARKGRAY);
     
-    // Advance Day button (NEW)
     Color advanceDayColor = advanceDayHovered ? Color{255, 200, 0, 255} : Color{255, 150, 0, 255};
     DrawRectangleRec(advanceDayButton, advanceDayColor);
     DrawRectangleLinesEx(advanceDayButton, 3, BLACK);
@@ -591,7 +655,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              BLACK);
     
-    // Run scheduler button
     Color schedulerColor = schedulerHovered ? Color{200, 150, 50, 255} : Color{150, 100, 50, 255};
     DrawRectangleRec(runSchedulerButton, schedulerColor);
     DrawRectangleLinesEx(runSchedulerButton, 2, BLACK);
@@ -603,7 +666,6 @@ void StaffGreenhouseScreen::DrawButtons() {
              15,
              WHITE);
     
-    // Back button
     Color backColor = backHovered ? DARKGRAY : Color{100, 100, 100, 255};
     DrawRectangleRec(backButton, backColor);
     DrawRectangleLinesEx(backButton, 2, BLACK);
@@ -640,4 +702,166 @@ void StaffGreenhouseScreen::DrawDayCounter() {
     dayStream << "Day: " << days;
     
     DrawText(dayStream.str().c_str(), 20, 85, 24, GOLD);
+}
+
+void StaffGreenhouseScreen::DrawSchedulerOverlay() {
+    DrawRectangle(0, 0, screenWidth, screenHeight, Color{0, 0, 0, 180});
+    
+    int overlayWidth = 650;
+    int overlayHeight = 500;
+    int overlayX = (screenWidth - overlayWidth) / 2;
+    int overlayY = (screenHeight - overlayHeight) / 2;
+    
+    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, Color{40, 40, 60, 255});
+    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY), 
+                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)}, 
+                        3, GOLD);
+    
+    const char* title = "CARE SCHEDULER";
+    int titleWidth = MeasureText(title, 24);
+    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, WHITE);
+    
+    int yPos = overlayY + 60;
+    
+    CareScheduler* scheduler = manager->GetCareScheduler();
+    if (scheduler != nullptr && !scheduler->empty()) {
+        DrawText("Next 3 Queued Tasks:", overlayX + 20, yPos, 18, YELLOW);
+        yPos += 30;
+        
+        // Get all plants and identify which need care
+        Greenhouse* greenhouse = manager->GetGreenhouse();
+        if (greenhouse != nullptr) {
+            std::vector<Plant*> allPlants = greenhouse->getAllPlants();
+            
+            std::vector<std::string> taskList;
+            
+            // Build list of tasks in order
+            for (Plant* plant : allPlants) {
+                if (plant != nullptr) {
+                    if (plant->getWaterLevel() < 30) {
+                        std::ostringstream task;
+                        task << "Water " << plant->getName() << " (ID: " << plant->getID() 
+                             << ") - Water: " << plant->getWaterLevel() << "%";
+                        taskList.push_back(task.str());
+                    }
+                    if (plant->getNutrientLevel() < 30) {
+                        std::ostringstream task;
+                        task << "Fertilize " << plant->getName() << " (ID: " << plant->getID() 
+                             << ") - Nutrients: " << plant->getNutrientLevel() << "%";
+                        taskList.push_back(task.str());
+                    }
+                    if (plant->getSunlightExposure() < 40) {
+                        std::ostringstream task;
+                        task << "Adjust Sunlight for " << plant->getName() << " (ID: " << plant->getID() 
+                             << ") - Light: " << plant->getSunlightExposure() << "%";
+                        taskList.push_back(task.str());
+                    }
+                }
+            }
+            
+            // Display next 3 tasks
+            int tasksToShow = taskList.size() < 3 ? taskList.size() : 3;
+            for (int i = 0; i < tasksToShow; i++) {
+                std::ostringstream taskNum;
+                taskNum << (i + 1) << ". " << taskList[i];
+                
+                // Color code by task type
+                Color taskColor = WHITE;
+                if (taskList[i].find("Water") != std::string::npos) {
+                    taskColor = SKYBLUE;
+                } else if (taskList[i].find("Fertilize") != std::string::npos) {
+                    taskColor = Color{150, 255, 150, 255};
+                } else if (taskList[i].find("Sunlight") != std::string::npos) {
+                    taskColor = GOLD;
+                }
+                
+                DrawText(taskNum.str().c_str(), overlayX + 30, yPos, 14, taskColor);
+                yPos += 25;
+            }
+            
+            yPos += 10;
+            
+            // Show total remaining
+            if (taskList.size() > 3) {
+                std::ostringstream remaining;
+                remaining << "...and " << (taskList.size() - 3) << " more tasks";
+                DrawText(remaining.str().c_str(), overlayX + 30, yPos, 14, LIGHTGRAY);
+                yPos += 25;
+            }
+            
+            // Show total count
+            std::ostringstream totalText;
+            totalText << "Total: " << taskList.size() << " tasks queued";
+            DrawText(totalText.str().c_str(), overlayX + 30, yPos, 16, YELLOW);
+            yPos += 15;
+        }
+        
+        yPos += 20;
+        DrawLine(overlayX + 20, yPos, overlayX + overlayWidth - 20, yPos, DARKGRAY);
+        yPos += 25;
+        
+        DrawText("Choose an action:", overlayX + 20, yPos, 16, WHITE);
+        yPos += 35;
+    }
+    
+    // Draw buttons with proper spacing
+    int buttonWidth = 240;
+    int buttonHeight = 50;
+    int buttonSpacing = 15;
+    int buttonX = overlayX + (overlayWidth - buttonWidth) / 2;
+    
+    // Update button positions
+    runAllButton.x = buttonX;
+    runAllButton.y = yPos;
+    runAllButton.width = buttonWidth;
+    runAllButton.height = buttonHeight;
+    
+    runOneButton.x = buttonX;
+    runOneButton.y = yPos + buttonHeight + buttonSpacing;
+    runOneButton.width = buttonWidth;
+    runOneButton.height = buttonHeight;
+    
+    closeOverlayButton.x = overlayX + overlayWidth / 2 - 60;
+    closeOverlayButton.y = overlayY + overlayHeight - 55;
+    closeOverlayButton.width = 120;
+    closeOverlayButton.height = 40;
+    
+    // Draw Run All button
+    Color runAllColor = runAllHovered ? DARKGREEN : GREEN;
+    DrawRectangleRec(runAllButton, runAllColor);
+    DrawRectangleLinesEx(runAllButton, 2, BLACK);
+    const char* runAllText = "Run All & Advance Day";
+    int runAllTextWidth = MeasureText(runAllText, 16);
+    DrawText(runAllText,
+             runAllButton.x + (runAllButton.width - runAllTextWidth) / 2,
+             runAllButton.y + (runAllButton.height - 16) / 2,
+             16,
+             WHITE);
+    
+    // Draw Run One button
+    Color runOneColor = runOneHovered ? ORANGE : Color{255, 150, 50, 255};
+    DrawRectangleRec(runOneButton, runOneColor);
+    DrawRectangleLinesEx(runOneButton, 2, BLACK);
+    const char* runOneText = "Run One Task";
+    int runOneTextWidth = MeasureText(runOneText, 16);
+    DrawText(runOneText,
+             runOneButton.x + (runOneButton.width - runOneTextWidth) / 2,
+             runOneButton.y + (runOneButton.height - 16) / 2,
+             16,
+             WHITE);
+    
+    // Draw Close button
+    Color closeColor = closeOverlayHovered ? DARKGRAY : GRAY;
+    DrawRectangleRec(closeOverlayButton, closeColor);
+    DrawRectangleLinesEx(closeOverlayButton, 2, BLACK);
+    const char* closeText = schedulerTasksExecuted ? "Close & Advance Day" : "Close";
+    int closeTextWidth = MeasureText(closeText, 14);
+    DrawText(closeText,
+             closeOverlayButton.x + (closeOverlayButton.width - closeTextWidth) / 2,
+             closeOverlayButton.y + (closeOverlayButton.height - 14) / 2,
+             14,
+             WHITE);
+    
+    const char* escText = schedulerTasksExecuted ? "Press ESC to close & advance day" : "Press ESC to close";
+    DrawText(escText, overlayX + 20, overlayY + overlayHeight - 20, 12, DARKGRAY);
 }
