@@ -2,9 +2,9 @@ name: C++ Lint • Build • Test
 
 on:
   push:
-    branches: [ dev, main, feature/** ]
+    branches: [ Dev,dev, main, feature/** ]
   pull_request:
-    branches: [ dev, main ]
+    branches: [ Dev,dev, main ]
 
 jobs:
   lint-build-test:

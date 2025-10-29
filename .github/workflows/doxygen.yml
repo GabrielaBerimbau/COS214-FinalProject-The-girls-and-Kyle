@@ -2,7 +2,7 @@ name: Doxygen Docs
 
 on:
   push:
-    branches: [ main ]
+    branches: [dev,Dev, main ]
 
 jobs:
   doxygen:
