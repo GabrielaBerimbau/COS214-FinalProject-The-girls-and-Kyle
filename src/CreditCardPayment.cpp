@@ -1,5 +1,6 @@
 /**
  * @file CreditCardPayment.cpp
+ * @author Gabi de Gouveia
  * @brief Implements credit card payment processing logic.
  */
 
