@@ -27,7 +27,7 @@ void OtherPlantCareStrategy::water(Plant* plant) {
  */
 void OtherPlantCareStrategy::fertilize(Plant* plant) {
     // Standard fertilization
-    plant->setNutrientLevel(plant->getNutrientLevel() + 15);
+    plant->setNutrientLevel(plant->getNutrientLevel() + 10);
     std::cout << "Fertilizing plant - standard feeding" << std::endl;
 }
 

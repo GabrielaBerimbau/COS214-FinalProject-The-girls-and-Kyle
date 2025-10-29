@@ -1,5 +1,6 @@
 /**
  * @file PaymentProcessor.cpp
+ * @author Gabi de Gouveia
  * @brief Implements the Template Method algorithm for payment processing.
  */
 
