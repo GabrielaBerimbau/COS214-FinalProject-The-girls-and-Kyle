@@ -8,6 +8,8 @@ class Plant;
 /**
  * @class MatureState
  * @brief Concrete state representing the mature stage of a plant's lifecycle
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
  * This class implements the State pattern for plants that have reached full maturity.
  * Mature plants are fully grown, ready for sale, and represent the most stable stage
@@ -26,13 +28,15 @@ public:
     /**
      * @brief Constructor for MatureState
      * 
-     * Prints a message indicating the plant has entered the mature state
-     * and is ready for sale
+     * Initializes the mature state and outputs a message indicating
+     * the plant has reached full maturity and is ready for sale.
      */
     MatureState();
     
     /**
      * @brief Destructor for MatureState
+     * 
+     * Cleans up the mature state object.
      */
     ~MatureState();
     
@@ -51,6 +55,9 @@ public:
 
     /**
      * @brief Get the name of this state
+     * 
+     * Returns a string identifier for the mature state, used for
+     * display purposes and state identification throughout the system.
      * 
      * @return std::string Returns "Mature"
      */

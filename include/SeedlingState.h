@@ -9,15 +9,8 @@ class Plant;
 /**
  * @class SeedlingState
  * @brief Concrete state representing the seedling stage of a plant's lifecycle
- * 
- * This class implements the State pattern for plants in their earliest growth stage.
- * Seedlings are young, vulnerable plants that require frequent care and monitoring.
- * 
- * Characteristics of seedling state:
- * - Requires frequent watering (alerts when water level < 40%)
- * - Vulnerable to poor health conditions
- * - Transitions to GrowingState after approximately 7 days with decent health (≥50%)
- * - May transition to DeadState if health drops too low (<10%)
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  */
 class SeedlingState : public PlantState {
 public:
@@ -25,11 +18,15 @@ public:
      * @brief Constructor for SeedlingState
      * 
      * Prints a message indicating the plant has entered the seedling state
+     * Initializes the seedling state and outputs a message indicating
+     * the plant has entered this stage of growth.
      */
     SeedlingState();
     
     /**
      * @brief Destructor for SeedlingState
+     * 
+     * Cleans up the seedling state object.
      */
     ~SeedlingState();
     
@@ -47,6 +44,9 @@ public:
 
     /**
      * @brief Get the name of this state
+     * 
+     * Returns a string identifier for the seedling state, used for
+     * display purposes and state identification throughout the system.
      * 
      * @return std::string Returns "Seedling"
      */

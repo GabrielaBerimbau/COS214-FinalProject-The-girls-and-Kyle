@@ -8,6 +8,8 @@ class Plant;
 /**
  * @class PlantState
  * @brief Abstract base class representing a state in the plant lifecycle (state design pattern)
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
  * This class is part of the State design pattern implementation for managing
  * plant lifecycle stages. Each concrete state (SeedlingState, GrowingState, MatureState, 

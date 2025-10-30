@@ -8,6 +8,8 @@ class Plant;
 /**
  * @class GrowingState
  * @brief Concrete state representing the active growth stage of a plant's lifecycle
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
  * This class implements the State pattern for plants in their growth stage.
  * Growing plants are in an active development phase, requiring regular care
@@ -25,12 +27,16 @@ public:
     /**
      * @brief Constructor for GrowingState
      * 
-     * Prints a message indicating the plant has entered the growing state
+     * Prints a message indicating the plant has entered the growing state.
+     * Initializes the growing state and outputs a message indicating
+     * the plant has entered this active growth stage.
      */
     GrowingState();
     
     /**
      * @brief Destructor for GrowingState
+     * 
+     * Cleans up the growing state object.
      */
     ~GrowingState();
     
@@ -49,6 +55,9 @@ public:
 
     /**
      * @brief Get the name of this state
+     * 
+     * Returns a string identifier for the growing state, used for
+     * display purposes and state identification throughout the system.
      * 
      * @return std::string Returns "Growing"
      */

@@ -8,6 +8,8 @@ class Plant;
 /**
  * @class DeadState
  * @brief Concrete state representing the terminal stage of a plant's lifecycle
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
  * This class implements the State pattern for plants that have died due to
  * poor health or neglect. This is a terminal state with no further transitions.
@@ -30,6 +32,8 @@ public:
     
     /**
      * @brief Destructor for DeadState
+     * 
+     * Cleans up the dead state object.
      */
     ~DeadState();
     
@@ -50,6 +54,9 @@ public:
 
     /**
      * @brief Get the name of this state
+     * 
+     * Returns a string identifier for the dead state, used for
+     * display purposes and state identification throughout the system.
      * 
      * @return std::string Returns "Dead"
      */

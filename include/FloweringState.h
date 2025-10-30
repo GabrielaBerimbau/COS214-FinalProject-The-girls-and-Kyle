@@ -8,6 +8,8 @@ class Plant;
 /**
  * @class FloweringState
  * @brief Concrete state representing the flowering stage of a plant's lifecycle
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
  * This class implements the State pattern for plants in their flowering stage.
  * Flowering plants are at their premium quality, displaying blooms and requiring
@@ -31,6 +33,8 @@ public:
     
     /**
      * @brief Destructor for FloweringState
+     * 
+     * Cleans up the flowering state object.
      */
     ~FloweringState();
     
@@ -52,6 +56,9 @@ public:
 
     /**
      * @brief Get the name of this state
+     * 
+     * Returns a string identifier for the flowering state, used for
+     * display purposes and state identification throughout the system.
      * 
      * @return std::string Returns "Flowering"
      */
