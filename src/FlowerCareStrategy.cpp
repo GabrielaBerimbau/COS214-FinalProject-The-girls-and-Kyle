@@ -4,13 +4,16 @@
 
 
 /**
- * @brief Waters flowering plants with optimal moisture levels
- * 
- * Flowers require specific moisture levels to maintain healthy blooms.
- * This method increases the plant's water level by 25 units.
- * 
- * @param plant Pointer to the flower plant to be watered
+ * @author Rachel Clifford
+ * @date October 26, 2025
+ * @class FlowerCareStrategy
+ * @brief Care strategy for flowering plants
  */
+
+
+ /**
+ * @brief Waters flowering plants with optimal moisture levels
+ */ 
 void FlowerCareStrategy::water(Plant* plant) {
     // Flowers need specific moisture levels
     plant->setWaterLevel(plant->getWaterLevel() + 25);
@@ -19,13 +22,8 @@ void FlowerCareStrategy::water(Plant* plant) {
 }
 
 /**
- * @brief Fertilizes flowering plants with bloom-boosting nutrients
- * 
- * Applies balanced fertilizer specifically formulated to promote flower
- * production. Increases nutrient level by 20 units
- * 
- * @param plant Pointer to the flower plant to be fertilized
- */
+ *  @brief Fertilizes flowering plants with bloom-boosting nutrients
+ */ 
 void FlowerCareStrategy::fertilize(Plant* plant) {
     // Flowers need balanced fertilizer for blooms
     plant->setNutrientLevel(plant->getNutrientLevel() + 20);
@@ -34,12 +32,7 @@ void FlowerCareStrategy::fertilize(Plant* plant) {
 
 /**
  * @brief Adjusts sunlight exposure for optimal flowering
- * 
- * Sets sunlight exposure to 70% (moderate to high), which is ideal for
- * most flowering plants.
- * 
- * @param plant Pointer to the flower plant requiring sunlight adjustment
- */
+ */ 
 void FlowerCareStrategy::adjustSunlight(Plant* plant) {
     // Flowers need moderate to high sunlight
     plant->setSunlightExposure(70);
@@ -48,12 +41,7 @@ void FlowerCareStrategy::adjustSunlight(Plant* plant) {
 
 /**
  * @brief Prunes flowering plants by removing spent blooms
- * 
- * Performs deadheading - the removal of faded or dead flowers. This
- * practice encourages the plant to produce new blooms.
- * 
- * @param plant Pointer to the flower plant to be pruned
- */
+ */ 
 void FlowerCareStrategy::prune(Plant* plant) {
     std::cout << "Pruning flower - deadheading spent blooms" << std::endl;
     (void)plant;

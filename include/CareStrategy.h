@@ -4,6 +4,8 @@
 class Plant;
 
 /**
+ * @author Rachel Clifford
+ * @date October 26, 2025
  * @class CareStrategy
  * @brief Abstract base class for plant care strategies
  */
