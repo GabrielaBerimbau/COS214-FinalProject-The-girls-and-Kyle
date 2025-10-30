@@ -2,14 +2,16 @@
 #include "include/Plant.h"
 #include <iostream>
 
+
 /**
- * @brief Waters succulents with minimal moisture
- * 
- * Succulents store water in their leaves and stems, requiring infrequent
- * watering. This method adds only 15 units of water, preventing root rot
- * which is the most common cause of succulent death.
- * 
- * @param plant Pointer to the succulent plant to be watered
+ * @author Rachel Clifford
+ * @date October 26, 2025
+ * @class SucculentCareStrategy
+ * @brief Care strategy for succulent plants
+ */
+
+/**
+ * @brief Waters succulents with minimal moisture 
  */
 void SucculentCareStrategy::water(Plant* plant) {
     // Succulents need minimal watering
@@ -18,13 +20,8 @@ void SucculentCareStrategy::water(Plant* plant) {
     (void)plant;
 }
 
-/**
- * @brief Fertilizes succulents with light feeding
- * 
- * Succulents are adapted to nutrient-poor environments and require
- * minimal fertilization. Adds only 10 units of nutrients.
- * 
- * @param plant Pointer to the succulent plant to be fertilized
+ /**
+ * @brief Fertilizes succulents with light feeding 
  */
 void SucculentCareStrategy::fertilize(Plant* plant) {
     // Succulents need minimal fertilizer
@@ -33,12 +30,7 @@ void SucculentCareStrategy::fertilize(Plant* plant) {
 }
 
 /**
- * @brief Adjusts sunlight to high exposure levels
- * 
- * Sets sunlight exposure to 85% (high), reflecting succulents' natural
- * habitat in arid, sunny environments.
- * 
- * @param plant Pointer to the succulent plant requiring sunlight adjustment
+ * @brief Adjusts sunlight to high exposure levels 
  */
 void SucculentCareStrategy::adjustSunlight(Plant* plant) {
     // Succulents love lots of sunlight
@@ -47,12 +39,7 @@ void SucculentCareStrategy::adjustSunlight(Plant* plant) {
 }
 
 /**
- * @brief Prunes succulents by removing dead leaves
- * 
- * Removes dried, shriveled, or damaged leaves from the base of the
- * succulent.
- * 
- * @param plant Pointer to the succulent plant to be pruned
+ *  @brief Prunes succulents by removing dead leaves 
  */
 void SucculentCareStrategy::prune(Plant* plant) {
     std::cout << "Pruning succulent - removing dead leaves" << std::endl;
