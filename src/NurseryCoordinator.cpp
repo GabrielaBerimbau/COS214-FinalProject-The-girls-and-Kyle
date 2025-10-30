@@ -1,3 +1,14 @@
+/**
+ * @file NurseryCoordinator.cpp
+ * @brief Implementation of extended Mediator workflows
+ *
+ * Contains the concrete implementation of high-level coordination
+ * operations. See NurseryCoordinator.h for complete interface details.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
 #include "../include/NurseryCoordinator.h"
 #include "../include/SalesFloor.h"
 #include "../include/Greenhouse.h"

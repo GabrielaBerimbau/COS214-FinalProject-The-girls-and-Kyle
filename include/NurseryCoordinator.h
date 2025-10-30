@@ -1,4 +1,3 @@
-// include/NurseryCoordinator.h
 #ifndef NURSERYCOORDINATOR_H
 #define NURSERYCOORDINATOR_H
 
@@ -8,6 +7,27 @@
 class SalesFloor;
 class Greenhouse;
 class Person;
+
+/**
+ * @file NurseryCoordinator.h
+ * @brief Extended Mediator with high-level workflows (Mediator pattern)
+ *
+ * The NurseryCoordinator extends the base NurseryMediator to provide
+ * higher-level coordination of complex workflows:
+ * - Plant lifecycle management (greenhouse to sales floor)
+ * - Customer service coordination (staff assignment)
+ * - Purchase workflow orchestration
+ * - Inventory management between areas
+ *
+ * Design approach:
+ * - Maintains direct references to key areas (sales floor, greenhouse)
+ * - Implements complex multi-step operations
+ * - Coordinates staff-customer interactions
+ * - Handles complete purchase workflows
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
 
 /**
  * @class NurseryCoordinator

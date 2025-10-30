@@ -6,6 +6,25 @@
 #include "CareScheduler.h"
 #include <string>
 
+/**
+ * @file SalesAssistant.h
+ * @brief Sales assistant handler (entry-level in Chain of Responsibility)
+ *
+ * The SalesAssistant handles low-complexity customer requests (e.g. simple
+ * plant requests) and uses the `NurseryMediator` to locate and transfer
+ * plants to customers. If a request is beyond its responsibility it should
+ * escalate to the `nextHandler`.
+ *
+ * Implementations should call `mediator->staffAddPlantToCustomerCart(...)`
+ * to keep transfer logic centralised in the mediator.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
+/**
+ * @class SalesAssistant
+
 class SalesAssistant: public StaffMembers{
     private:
         CareScheduler* scheduler;
