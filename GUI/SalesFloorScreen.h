@@ -30,12 +30,14 @@ private:
     Rectangle addToCartButton;
     Rectangle viewGreenhouseButton;
     Rectangle viewCartButton;
+    Rectangle createOrderButton;
     Rectangle makeRequestButton;
     Rectangle backToStartButton;
-    
+
     bool addToCartHovered;
     bool viewGreenhouseHovered;
     bool viewCartHovered;
+    bool createOrderHovered;
     bool makeRequestHovered;
     bool backToStartHovered;
     
@@ -60,6 +62,7 @@ private:
     
     void HandlePlantSelection(int row, int col);
     void HandleAddToCart();
+    void HandleCreateOrder();
     void HandleMakeRequest();
     void HandleBackToStart();
     
