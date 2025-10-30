@@ -2,8 +2,9 @@
 #include "ScreenManager.h"
 #include "StartScreen.h"
 #include "SalesFloorScreen.h"
-#include "GreenhouseScreen.h"
+#include "CustomerGreenhouseScreen.h"
 #include "StaffGreenhouseScreen.h"
+#include "CartViewScreen.h"
 // Add other screen includes as you create them
 
 int main() {
@@ -23,6 +24,7 @@ int main() {
     SalesFloorScreen salesFloorScreen(&manager);
     CustomerGreenhouseScreen customerGreenhouseScreen(&manager);
     StaffGreenhouseScreen staffGreenhouseScreen(&manager);
+    CartViewScreen cartViewScreen(&manager);
     
     // Main game loop
     while (!WindowShouldClose()) {
@@ -52,6 +54,11 @@ int main() {
             case GameScreen::STAFF_GREENHOUSE:
                 staffGreenhouseScreen.Update();
                 staffGreenhouseScreen.Draw();
+                break;
+
+            case GameScreen::CART_VIEW:
+                cartViewScreen.Update();
+                cartViewScreen.Draw();
                 break;
                 
             // Add other screens as you implement them

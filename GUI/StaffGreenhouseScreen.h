@@ -36,8 +36,10 @@ private:
     Rectangle fertilizeButton;
     Rectangle adjustSunlightButton;
     Rectangle performFullCareButton;
-    Rectangle transferToSalesFloorButton;  // NEW
+    Rectangle transferToSalesFloorButton;
     Rectangle runSchedulerButton;
+    Rectangle advanceDayButton;
+    Rectangle removeDeadPlantButton;
     Rectangle backButton;
     
     // Button hover states
@@ -45,17 +47,35 @@ private:
     bool fertilizeHovered;
     bool sunlightHovered;
     bool fullCareHovered;
-    bool transferHovered;  // NEW
+    bool transferHovered;
     bool schedulerHovered;
+    bool advanceDayHovered;
+    bool removeDeadHovered;
     bool backHovered;
     
     // Care scheduler info
     int scheduledTasksCount;
     
+    // Scheduler overlay state
+    bool schedulerOverlayActive;
+    bool schedulerTasksExecuted;
+    Rectangle runAllButton;
+    Rectangle runOneButton;
+    Rectangle closeOverlayButton;
+    bool runAllHovered;
+    bool runOneHovered;
+    bool closeOverlayHovered;
+    
+    // FIXED: Track actual queue size for display
+    int displayedQueueSize;
+    
     void InitializeLayout();
     void InitializeButtons();
+    // FIXED: New method to initialize overlay buttons once
+    void InitializeOverlayButtons();
     void UpdateGrid();
     void UpdateButtons();
+    void UpdateSchedulerOverlay();
     
     void DrawLeftPanel();
     void DrawMiddlePanel();
@@ -64,6 +84,8 @@ private:
     void DrawPlantInCell(Plant* plant, int row, int col);
     void DrawButtons();
     void DrawSchedulerInfo();
+    void DrawDayCounter();
+    void DrawSchedulerOverlay();
     
     void HandlePlantSelection(int row, int col);
     void HandleWaterPlant();
@@ -72,6 +94,13 @@ private:
     void HandleFullCare();
     void HandleTransferToSalesFloor();
     void HandleRunScheduler();
+    void HandleAdvanceDay();
+    void HandleRunAllScheduled();
+    void HandleRunOneScheduled();
+    void HandleRemoveDeadPlant();
+    
+    int CountQueuedTasks();
+    bool IsPlantDead(Plant* plant) const;
     
 public:
     StaffGreenhouseScreen(ScreenManager* mgr);

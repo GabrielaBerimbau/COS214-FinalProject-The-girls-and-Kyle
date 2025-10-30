@@ -27,6 +27,7 @@
 #include "../include/RadishFactory.h"
 #include "../include/MonsteraFactory.h"
 #include "../include/VenusFlyTrapFactory.h"
+#include "../include/CarrotFactory.h"
 
 ScreenManager::ScreenManager() 
     : currentScreen(GameScreen::START),
@@ -113,11 +114,12 @@ void ScreenManager::PopulateInitialGreenhouse() {
     RadishFactory radishFactory;
     MonsteraFactory monsteraFactory;
     VenusFlyTrapFactory vftFactory;
+    CarrotFactory carrotFactory;
     
     std::vector<PlantFactory*> factories = {
         &roseFactory, &daisyFactory, &cactusFactory, 
         &aloeFactory, &potatoFactory, &strelitziaFactory,
-        &radishFactory, &monsteraFactory, &vftFactory
+        &radishFactory, &monsteraFactory, &vftFactory, &carrotFactory 
     };
     
     // Fill ~60% of greenhouse with plants
@@ -170,11 +172,12 @@ void ScreenManager::PopulateInitialSalesFloor() {
     RadishFactory radishFactory;
     MonsteraFactory monsteraFactory;
     VenusFlyTrapFactory vftFactory;
+     CarrotFactory carrotFactory;
     
     std::vector<PlantFactory*> factories = {
         &roseFactory, &daisyFactory, &cactusFactory, 
         &aloeFactory, &potatoFactory, &strelitziaFactory,
-        &radishFactory, &monsteraFactory, &vftFactory
+        &radishFactory, &monsteraFactory, &vftFactory, &carrotFactory
     };
     
     // Create 10-12 mature plants for the sales floor
@@ -246,13 +249,14 @@ void ScreenManager::LoadAssets() {
     // Load plant textures
     plantTextures["Rose"] = LoadTexture("assets/rose.png");
     plantTextures["Daisy"] = LoadTexture("assets/daisy.png");
-    plantTextures["Cactus"] = LoadTexture("assets/cactus2.png");
+    plantTextures["Cactus"] = LoadTexture("assets/cactus.png");
     plantTextures["Aloe"] = LoadTexture("assets/aloe.png");
     plantTextures["Potato"] = LoadTexture("assets/potato.png");
     plantTextures["Strelitzia"] = LoadTexture("assets/strelitzia.png");
     plantTextures["Radish"] = LoadTexture("assets/radish.png");
     plantTextures["Monstera"] = LoadTexture("assets/monstera.png");
     plantTextures["Venus Fly Trap"] = LoadTexture("assets/VenusFlyTrap.png");
+    plantTextures["Carrot"] = LoadTexture("assets/carrot.png");
     
     // Load pot textures
     std::vector<std::string> potColors = {
@@ -261,7 +265,7 @@ void ScreenManager::LoadAssets() {
     };
     
     for (const std::string& color : potColors) {
-        std::string path = "assets/pot_" + color + ".png";
+        std::string path = "assets/pots/pot_" + color + ".png";
         potTextures[color] = LoadTexture(path.c_str());
     }
     
@@ -375,31 +379,17 @@ void ScreenManager::Cleanup() {
         careScheduler = nullptr;
     }
     
-    // Delete sales floor (contains plants)
-    if (salesFloor != nullptr) {
-        // Get all plants before deleting sales floor
-        std::vector<Plant*> salesFloorPlants = salesFloor->getDisplayPlants();
-        delete salesFloor;
-        salesFloor = nullptr;
-        
-        // Delete plants from sales floor
-        for (Plant* plant : salesFloorPlants) {
-            delete plant;
-        }
-    }
-    
-    // Delete greenhouse (contains plants)
-    if (greenhouse != nullptr) {
-        // Get all plants before deleting greenhouse
-        std::vector<Plant*> greenhousePlants = greenhouse->getAllPlants();
-        delete greenhouse;
-        greenhouse = nullptr;
-        
-        // Delete plants from greenhouse
-        for (Plant* plant : greenhousePlants) {
-            delete plant;
-        }
-    }
+// Delete sales floor (contains plants) - DON'T delete plants separately
+if (salesFloor != nullptr) {
+    delete salesFloor;  // Destructor handles plant deletion
+    salesFloor = nullptr;
+}
+
+// Delete greenhouse (contains plants) - DON'T delete plants separately  
+if (greenhouse != nullptr) {
+    delete greenhouse;  // Destructor handles plant deletion
+    greenhouse = nullptr;
+}
     
     // Delete mediator
     if (mediator != nullptr) {

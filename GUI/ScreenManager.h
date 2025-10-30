@@ -72,7 +72,7 @@ private:
     void PopulateInitialSalesFloor();
     void LoadAssets();
     void UnloadAssets();
-    void PerformDailyUpdate();
+    
     
 public:
     // Constructor/Destructor
@@ -125,6 +125,8 @@ public:
     // Customer creation (for start screen)
     void CreateNewCustomer(double budget);
     void DeleteCustomer();
+
+    void PerformDailyUpdate();
 };
 
 #endif // SCREEN_MANAGER_H

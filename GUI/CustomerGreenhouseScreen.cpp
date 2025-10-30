@@ -1,4 +1,4 @@
-#include "GreenhouseScreen.h"
+#include "CustomerGreenhouseScreen.h"
 #include "ScreenManager.h"
 #include <iostream>
 #include <cstring>
@@ -146,8 +146,8 @@ void CustomerGreenhouseScreen::Draw() {
 }
 
 void CustomerGreenhouseScreen::DrawLeftPanel() {
-    // Draw panel background
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{50, 80, 120, 255});
+    // Draw panel background - matches staff greenhouse
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{40, 40, 50, 255});
     DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, BLACK);
     
     Customer* customer = manager->GetCustomer();
@@ -176,79 +176,74 @@ void CustomerGreenhouseScreen::DrawLeftPanel() {
     
     // Selected plant information
     if (selectedPlant != nullptr) {
-        DrawText("SELECTED PLANT", 20, yPos, 20, YELLOW);
-        yPos += 35;
+        DrawText("SELECTED PLANT", 20, yPos, 18, YELLOW);
+        yPos += 30;
         
         // Plant name
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 18, WHITE);
-        yPos += 30;
+        DrawText(plantNameText.c_str(), 20, yPos, 16, WHITE);
+        yPos += 25;
         
         // Plant ID
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 14, LIGHTGRAY);
+        DrawText(idText.c_str(), 20, yPos, 13, LIGHTGRAY);
         yPos += 25;
         
         // Plant state
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        DrawText(stateText.c_str(), 20, yPos, 14, LIGHTGRAY);
+        DrawText(stateText.c_str(), 20, yPos, 13, LIGHTGRAY);
         yPos += 25;
         
         // Plant age
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 14, LIGHTGRAY);
-        yPos += 25;
+        DrawText(ageStream.str().c_str(), 20, yPos, 13, LIGHTGRAY);
+        yPos += 35;
         
-        // Health level
-        std::ostringstream healthStream;
-        healthStream << "Health: " << selectedPlant->getHealthLevel() << "%";
-        Color healthColor = selectedPlant->getHealthLevel() > 70 ? GREEN : 
-                           selectedPlant->getHealthLevel() > 40 ? YELLOW : RED;
-        DrawText(healthStream.str().c_str(), 20, yPos, 14, healthColor);
-        yPos += 25;
+        DrawLine(20, yPos, leftPanelWidth - 20, yPos, DARKGRAY);
+        yPos += 20;
         
-        // Water level
-        std::ostringstream waterStream;
-        waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
-        DrawText(waterStream.str().c_str(), 20, yPos, 14, SKYBLUE);
-        yPos += 25;
-        
-        // Nutrient level
-        std::ostringstream nutrientStream;
-        nutrientStream << "Nutrients: " << selectedPlant->getNutrientLevel() << "%";
-        DrawText(nutrientStream.str().c_str(), 20, yPos, 14, Color{150, 255, 150, 255});
+        // Growth status
+        DrawText("GROWTH STATUS:", 20, yPos, 14, SKYBLUE);
         yPos += 30;
         
         // Ready for sale status
         std::string readyText = selectedPlant->isReadyForSale() ? "✓ Ready for Sale" : "✗ Still Growing";
         Color readyColor = selectedPlant->isReadyForSale() ? GREEN : ORANGE;
         DrawText(readyText.c_str(), 20, yPos, 16, readyColor);
+        yPos += 30;
+        
+        // Add a note about viewing more details
+        if (!selectedPlant->isReadyForSale()) {
+            DrawText("This plant is still", 20, yPos, 12, LIGHTGRAY);
+            yPos += 18;
+            DrawText("being cared for by", 20, yPos, 12, LIGHTGRAY);
+            yPos += 18;
+            DrawText("our staff.", 20, yPos, 12, LIGHTGRAY);
+        }
         
     } else {
         // No plant selected - show instructions
-        DrawText("GREENHOUSE VIEW", 20, yPos, 18, YELLOW);
+        DrawText("INSTRUCTIONS:", 20, yPos, 16, YELLOW);
         yPos += 30;
         
-        DrawText("Browse plants that are", 20, yPos, 14, WHITE);
-        yPos += 20;
-        DrawText("currently growing", 20, yPos, 14, WHITE);
-        yPos += 25;
-        DrawText("- Click to view details", 20, yPos, 14, LIGHTGRAY);
-        yPos += 20;
-        DrawText("- Check plant progress", 20, yPos, 14, LIGHTGRAY);
-        yPos += 20;
-        DrawText("- See growth stages", 20, yPos, 14, LIGHTGRAY);
+        DrawText("1. Click a plant to view", 20, yPos, 13, WHITE);
+        yPos += 22;
+        DrawText("2. Check plant details", 20, yPos, 13, WHITE);
+        yPos += 22;
+        DrawText("3. See growth stages", 20, yPos, 13, WHITE);
+        yPos += 22;
+        DrawText("4. Monitor plant health", 20, yPos, 13, WHITE);
     }
 }
 
 void CustomerGreenhouseScreen::DrawMiddlePanel() {
-    // Draw panel background
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{80, 120, 90, 255});
+    // Draw panel background - matches staff greenhouse
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{60, 80, 70, 255});
     DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, BLACK);
     
     // Draw header
-    const char* header = "GREENHOUSE - GROWING AREA";
+    const char* header = "CUSTOMER GREENHOUSE - GROWING AREA";
     int headerSize = 22;
     int headerWidth = MeasureText(header, headerSize);
     DrawText(header, 
@@ -257,27 +252,17 @@ void CustomerGreenhouseScreen::DrawMiddlePanel() {
              headerSize, 
              WHITE);
     
-    // Draw subtitle
-    const char* subtitle = "(Plants here are still growing)";
-    int subtitleSize = 14;
-    int subtitleWidth = MeasureText(subtitle, subtitleSize);
-    DrawText(subtitle,
-             leftPanelWidth + (middlePanelWidth - subtitleWidth) / 2,
-             50,
-             subtitleSize,
-             LIGHTGRAY);
-    
     // Draw grid
     DrawGrid();
 }
 
 void CustomerGreenhouseScreen::DrawRightPanel() {
-    // Draw panel background
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, DARKGREEN);
+    // Draw panel background - matches staff greenhouse
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{30, 50, 40, 255});
     
     // Draw header
     const char* header = "CART";
-    int headerSize = 20;
+    int headerSize = 18;
     int headerWidth = MeasureText(header, headerSize);
     DrawText(header, 
              screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2, 
@@ -332,15 +317,15 @@ void CustomerGreenhouseScreen::DrawGrid() {
             int x = gridStartX + col * cellSize;
             int y = gridStartY + row * cellSize;
             
-            // Determine cell color
-            Color cellColor = Color{60, 100, 70, 255};  // Greenhouse green
+            // Determine cell color - matches staff greenhouse
+            Color cellColor = Color{50, 70, 60, 255};
             if (row == selectedRow && col == selectedCol) {
-                cellColor = SKYBLUE; // Selected
+                cellColor = GOLD;
             }
             
             // Draw cell background
-            DrawRectangle(x + 2, y + 2, cellSize - 4, cellSize - 4, cellColor);
-            DrawRectangleLines(x + 2, y + 2, cellSize - 4, cellSize - 4, LIGHTGRAY);
+            DrawRectangle(x + 1, y + 1, cellSize - 2, cellSize - 2, cellColor);
+            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, Color{40, 60, 50, 255});
             
             // Draw plant if exists
             Plant* plant = greenhouse->getPlantAt(row, col);
@@ -360,7 +345,7 @@ void CustomerGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
     
     if (plantTexture.id != 0) {
         // Calculate scaling to fit in cell
-        int maxSize = cellSize - 30;
+        int maxSize = cellSize - 20;
         float scale = static_cast<float>(maxSize) / plantTexture.height;
         
         int scaledWidth = static_cast<int>(plantTexture.width * scale);
@@ -368,23 +353,22 @@ void CustomerGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         
         // Center texture in cell
         int texX = x + (cellSize - scaledWidth) / 2;
-        int texY = y + (cellSize - scaledHeight) / 2 - 10;
+        int texY = y + (cellSize - scaledHeight) / 2 - 5;
         
-        // Draw slightly faded to show it's not for sale yet
-        Color tint = plant->isReadyForSale() ? WHITE : Color{200, 200, 200, 200};
-        DrawTextureEx(plantTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)}, 0.0f, scale, tint);
+        // Draw with full color
+        DrawTextureEx(plantTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)}, 0.0f, scale, WHITE);
     } else {
         // Fallback: draw plant name
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 10);
-        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, WHITE);
+        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, DARKGREEN);
     }
     
-    // Draw growth stage indicator
+    // Draw growth stage indicator at bottom of cell (no health bar for customers)
     std::string stage = plant->getState()->getStateName();
-    int stageWidth = MeasureText(stage.c_str(), 12);
+    int stageWidth = MeasureText(stage.c_str(), 11);
     Color stageColor = plant->isReadyForSale() ? GREEN : ORANGE;
-    DrawText(stage.c_str(), x + (cellSize - stageWidth) / 2, y + cellSize - 20, 12, stageColor);
+    DrawText(stage.c_str(), x + (cellSize - stageWidth) / 2, y + cellSize - 18, 11, stageColor);
 }
 
 void CustomerGreenhouseScreen::DrawButtons() {
@@ -392,7 +376,7 @@ void CustomerGreenhouseScreen::DrawButtons() {
     bool hasCartItems = (customer != nullptr && customer->getCartSize() > 0);
     
     // Back to Sales Floor button
-    Color backColor = backButtonHovered ? Color{30, 50, 80, 255} : Color{50, 80, 120, 255};
+    Color backColor = backButtonHovered ? DARKGRAY : Color{100, 100, 100, 255};
     DrawRectangleRec(backToSalesFloorButton, backColor);
     DrawRectangleLinesEx(backToSalesFloorButton, 2, BLACK);
     const char* backText = "Back to Sales Floor";
@@ -405,7 +389,7 @@ void CustomerGreenhouseScreen::DrawButtons() {
     
     // View Cart button
     Color cartColor = hasCartItems ? 
-                      (viewCartHovered ? ORANGE : Color{200, 120, 50, 255}) : GRAY;
+                      (viewCartHovered ? Color{0, 120, 200, 255} : Color{50, 150, 220, 255}) : GRAY;
     DrawRectangleRec(viewCartButton, cartColor);
     DrawRectangleLinesEx(viewCartButton, 2, BLACK);
     const char* cartText = "View Cart";
