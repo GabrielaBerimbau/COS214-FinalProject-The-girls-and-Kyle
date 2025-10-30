@@ -9,18 +9,6 @@ CXXFLAGS = -std=c++17 -Wall -Wextra -I. -Iinclude
 TEST_FLAGS = -pthread
 
 # ============================================================================
-#for sanitizer workflow
-# ============================================================================
-
-ifeq ($(SANITIZE),asan_ubsan)
-  CXX := clang++
-  CXXFLAGS += -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
-  LDFLAGS  += -fsanitize=address,undefined
-endif
-
-
-
-# ============================================================================
 # RAYLIB SETUP (local installation in external/)
 # ============================================================================
 
