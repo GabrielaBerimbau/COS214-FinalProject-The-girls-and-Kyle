@@ -11,38 +11,34 @@ class SalesFloorScreen {
 private:
     ScreenManager* manager;
     
-    // Layout dimensions
     int leftPanelWidth;
     int middlePanelWidth;
     int rightPanelWidth;
     int screenWidth;
     int screenHeight;
     
-    // Grid dimensions
     int gridRows;
     int gridCols;
     int cellSize;
     int gridStartX;
     int gridStartY;
     
-    // Selection state
     int selectedRow;
     int selectedCol;
     Plant* selectedPlant;
     
-    // UI Buttons
     Rectangle addToCartButton;
     Rectangle viewGreenhouseButton;
     Rectangle viewCartButton;
     Rectangle makeRequestButton;
+    Rectangle backToStartButton;
     
-    // Button hover states
     bool addToCartHovered;
     bool viewGreenhouseHovered;
     bool viewCartHovered;
     bool makeRequestHovered;
+    bool backToStartHovered;
     
-    // Request overlay state
     bool requestOverlayActive;
     char requestText[256];
     int requestTextLength;
@@ -65,6 +61,7 @@ private:
     void HandlePlantSelection(int row, int col);
     void HandleAddToCart();
     void HandleMakeRequest();
+    void HandleBackToStart();
     
 public:
     SalesFloorScreen(ScreenManager* mgr);
@@ -74,4 +71,4 @@ public:
     void Draw();
 };
 
-#endif // SALES_FLOOR_SCREEN_H
+#endif

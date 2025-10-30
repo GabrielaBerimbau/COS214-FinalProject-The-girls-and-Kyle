@@ -62,6 +62,13 @@ class DecorativePotDecorator : public Decorator {
          */
         std::string description() const override;
 
+        /**
+         * @brief Returns the pot colour for decorating
+         * 
+         * @return String the pot colour
+         */
+        std::string getPotColor() const { return potColour; }
+
     private:
         /**
          * @brief Fixed cost for decorative pot service
