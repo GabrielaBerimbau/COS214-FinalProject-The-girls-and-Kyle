@@ -21,7 +21,7 @@
 
 /**
  * @class FloorManager
-
+*/
 class FloorManager: public StaffMembers{
     private:
         std::string name;
