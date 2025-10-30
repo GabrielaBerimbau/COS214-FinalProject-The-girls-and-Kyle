@@ -281,23 +281,31 @@ void ScreenManager::LoadAssets() {
 
 void ScreenManager::UnloadAssets() {
     std::cout << "[ScreenManager] Unloading assets..." << std::endl;
+
+    auto safeUnload = [](Texture2D &tx) {
+        if (tx.id != 0) {
+            UnloadTexture(tx);
+            tx.id = 0;
+            tx.width = tx.height = 0;
+        }
+    };
     
     // Unload plant textures
     for (auto& pair : plantTextures) {
-        UnloadTexture(pair.second);
+        safeUnload(pair.second);
     }
     plantTextures.clear();
     
     // Unload pot textures
     for (auto& pair : potTextures) {
-        UnloadTexture(pair.second);
+        safeUnload(pair.second);
     }
     potTextures.clear();
     
     // Unload other textures
-    UnloadTexture(ribbonTexture);
-    UnloadTexture(moneyIcon);
-    UnloadTexture(cartIcon);
+    safeUnload(ribbonTexture);
+    safeUnload(moneyIcon);
+    safeUnload(cartIcon);
 }
 
 void ScreenManager::Update() {
@@ -345,7 +353,20 @@ void ScreenManager::Draw() {
 }
 
 void ScreenManager::Cleanup() {
+    if (isCleanedUp) {
+        std::cout << "[ScreenManager] Cleanup already done, skipping...\n";
+        return;
+    }
+
     std::cout << "[ScreenManager] Cleaning up..." << std::endl;
+
+    auto safeUnload = [](Texture2D &tx) {
+        if (tx.id != 0) {
+            UnloadTexture(tx);
+            tx.id = 0;
+            tx.width = tx.height = 0;
+        }
+    };
     
     // Delete customer if exists
     if (customer != nullptr) {
@@ -401,6 +422,7 @@ if (greenhouse != nullptr) {
     UnloadAssets();
     
     std::cout << "[ScreenManager] Cleanup complete" << std::endl;
+    isCleanedUp = true;
 }
 
 void ScreenManager::SwitchScreen(GameScreen newScreen) {

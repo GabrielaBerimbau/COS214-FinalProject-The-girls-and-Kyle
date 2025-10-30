@@ -122,19 +122,28 @@ void DecorationScreen::LoadCurrentDecorations() {
     selectedPotColor = "";
     hasRibbon = false;
     hasPot = false;
-    
-    // Check for pot decorator
-    DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(currentPlant);
-    if (potDec != nullptr) {
-        selectedPotColor = potDec->getPotColor();
-        hasPot = true;
+
+
+    Plant* walker = currentPlant;
+    while (auto dec = dynamic_cast<Decorator*>(walker)) {
+        if (auto pot = dynamic_cast<DecorativePotDecorator*>(walker)) { hasPot = true; selectedPotColor = pot->getPotColor(); }
+        if (dynamic_cast<RibbonDecorator*>(walker)) { hasRibbon = true; }
+        walker = dec->getWrappedPlant();
     }
+
     
-    // Check for ribbon decorator
-    RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(currentPlant);
-    if (ribbonDec != nullptr) {
-        hasRibbon = true;
-    }
+    // // Check for pot decorator
+    // DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(currentPlant);
+    // if (potDec != nullptr) {
+    //     selectedPotColor = potDec->getPotColor();
+    //     hasPot = true;
+    // }
+    
+    // // Check for ribbon decorator
+    // RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(currentPlant);
+    // if (ribbonDec != nullptr) {
+    //     hasRibbon = true;
+    // }
     
     // Store original state
     originalPotColor = selectedPotColor;
@@ -235,28 +244,55 @@ void DecorationScreen::HandleConfirm() {
     if (needsUpdate) {
         // The cart index might have changed if decorators were added/removed
         // So we need to refresh the plant reference
-        int currentCartIndex = manager->GetCurrentCartIndex();
+        int idx = manager->GetCurrentCartIndex();
         
         // Remove old ribbon if needed
+        // if (originalHasRibbon && !hasRibbon) {
+        //     std::cout << "[DecorationScreen] Removing old ribbon decoration" << std::endl;
+        // }
+        
+        // // Remove old pot if needed
+        // if (originalHasPot && !hasPot) {
+        //     std::cout << "[DecorationScreen] Removing old pot decoration" << std::endl;
+        // }
+        
+        // // Add new ribbon if needed
+        // if (hasRibbon && !originalHasRibbon) {
+        //     customer->decorateCartItemWithRibbon(currentCartIndex);
+        //     std::cout << "[DecorationScreen] Added ribbon decoration" << std::endl;
+        // }
+        
+        // // Add new pot if needed (or replace)
+        // if (hasPot && (!originalHasPot || selectedPotColor != originalPotColor)) {
+        //     customer->decorateCartItemWithPot(currentCartIndex, selectedPotColor);
+        //     std::cout << "[DecorationScreen] Added " << selectedPotColor << " pot decoration" << std::endl;
+        // }
+
+
+
         if (originalHasRibbon && !hasRibbon) {
-            std::cout << "[DecorationScreen] Removing old ribbon decoration" << std::endl;
+            customer->removeRibbonFromCartItem(idx);
+            // refresh local view
+            currentPlant = customer->getPlantFromCart(idx);
         }
-        
-        // Remove old pot if needed
         if (originalHasPot && !hasPot) {
-            std::cout << "[DecorationScreen] Removing old pot decoration" << std::endl;
+            customer->removePotFromCartItem(idx);
+            currentPlant = customer->getPlantFromCart(idx);
         }
-        
-        // Add new ribbon if needed
+        if (hasPot && originalHasPot && (selectedPotColor != originalPotColor)) {
+            // replace pot: remove, then add with new color
+            customer->removePotFromCartItem(idx);
+            currentPlant = customer->getPlantFromCart(idx);
+        }
+
+        // Now add new/changed selections
         if (hasRibbon && !originalHasRibbon) {
-            customer->decorateCartItemWithRibbon(currentCartIndex);
-            std::cout << "[DecorationScreen] Added ribbon decoration" << std::endl;
+            customer->decorateCartItemWithRibbon(idx);
+            currentPlant = customer->getPlantFromCart(idx);
         }
-        
-        // Add new pot if needed (or replace)
         if (hasPot && (!originalHasPot || selectedPotColor != originalPotColor)) {
-            customer->decorateCartItemWithPot(currentCartIndex, selectedPotColor);
-            std::cout << "[DecorationScreen] Added " << selectedPotColor << " pot decoration" << std::endl;
+            customer->decorateCartItemWithPot(idx, selectedPotColor);
+            currentPlant = customer->getPlantFromCart(idx);
         }
     }
     
@@ -338,57 +374,99 @@ void DecorationScreen::DrawPlantPreview() {
     
     DrawRectangleRec(previewBox, Color{50, 70, 60, 255});
     DrawRectangleLinesEx(previewBox, 3, GOLD);
-    
-    // Get base plant name for texture
-    std::string plantName = currentPlant->getName();
-    Texture2D plantTexture = manager->GetPlantTexture(plantName);
-    
+
+
+    Plant* walker = currentPlant;
+    while (auto dec = dynamic_cast<Decorator*>(walker)) { walker = dec->getWrappedPlant(); }
+    Plant* basePlant = walker ? walker : currentPlant;
+
+    Texture2D plantTexture = manager->GetPlantTexture(basePlant->getName());
     if (plantTexture.id != 0) {
-        // Draw plant
         float scale = 200.0f / plantTexture.height;
-        int scaledWidth = static_cast<int>(plantTexture.width * scale);
-        int scaledHeight = static_cast<int>(plantTexture.height * scale);
-        
-        int plantX = previewBox.x + (previewBox.width - scaledWidth) / 2;
-        int plantY = previewBox.y + (previewBox.height - scaledHeight) / 2 - 10;
-        
-        DrawTextureEx(plantTexture, Vector2{static_cast<float>(plantX), static_cast<float>(plantY)}, 
-                     0.0f, scale, WHITE);
-        
-        // Draw pot decoration if selected
+        int sw = (int)(plantTexture.width * scale);
+        int sh = (int)(plantTexture.height * scale);
+        int px = (int)(previewBox.x + (previewBox.width - sw) / 2);
+        int py = (int)(previewBox.y + (previewBox.height - sh) / 2 - 10);
+
+        DrawTextureEx(plantTexture, Vector2{(float)px, (float)py}, 0.0f, scale, WHITE);
+
         if (hasPot && !selectedPotColor.empty()) {
             Texture2D potTexture = manager->GetPotTexture(selectedPotColor);
-            
             if (potTexture.id != 0) {
                 float potScale = 220.0f / potTexture.width;
-                int potWidth = static_cast<int>(potTexture.width * potScale);
-                int potHeight = static_cast<int>(potTexture.height * potScale);
-                
-                int potX = previewBox.x + (previewBox.width - potWidth) / 2;
-                int potY = plantY + scaledHeight - potHeight + 30;
-                
-                DrawTextureEx(potTexture, Vector2{static_cast<float>(potX), static_cast<float>(potY)},
-                            0.0f, potScale, WHITE);
+                int pw = (int)(potTexture.width * potScale);
+                int ph = (int)(potTexture.height * potScale);
+                int potX = (int)(previewBox.x + (previewBox.width - pw) / 2);
+                int potY = py + sh - ph + 30;
+                DrawTextureEx(potTexture, Vector2{(float)potX, (float)potY}, 0.0f, potScale, WHITE);
             }
         }
-        
-        // Draw ribbon decoration if selected
+
         if (hasRibbon) {
             Texture2D ribbonTexture = manager->GetRibbonTexture();
-            
             if (ribbonTexture.id != 0) {
-                float ribbonScale = 150.0f / ribbonTexture.width;
-                int ribbonWidth = static_cast<int>(ribbonTexture.width * ribbonScale);
-                int ribbonHeight = static_cast<int>(ribbonTexture.height * ribbonScale);
-                
-                int ribbonX = previewBox.x + (previewBox.width - ribbonWidth) / 2;
-                int ribbonY = plantY - 15;
-                
-                DrawTextureEx(ribbonTexture, Vector2{static_cast<float>(ribbonX), static_cast<float>(ribbonY)},
-                            0.0f, ribbonScale, WHITE);
+                float rs = 150.0f / ribbonTexture.width;
+                int rw = (int)(ribbonTexture.width * rs);
+                int rh = (int)(ribbonTexture.height * rs);
+                int rx = (int)(previewBox.x + (previewBox.width - rw) / 2);
+                int ry = py - 15;
+                DrawTextureEx(ribbonTexture, Vector2{(float)rx, (float)ry}, 0.0f, rs, WHITE);
             }
         }
     }
+
+
+    
+    // Get base plant name for texture
+    // std::string plantName = currentPlant->getName();
+    // Texture2D plantTexture = manager->GetPlantTexture(plantName);
+    
+    // if (plantTexture.id != 0) {
+    //     // Draw plant
+    //     float scale = 200.0f / plantTexture.height;
+    //     int scaledWidth = static_cast<int>(plantTexture.width * scale);
+    //     int scaledHeight = static_cast<int>(plantTexture.height * scale);
+        
+    //     int plantX = previewBox.x + (previewBox.width - scaledWidth) / 2;
+    //     int plantY = previewBox.y + (previewBox.height - scaledHeight) / 2 - 10;
+        
+    //     DrawTextureEx(plantTexture, Vector2{static_cast<float>(plantX), static_cast<float>(plantY)}, 
+    //                  0.0f, scale, WHITE);
+        
+    //     // Draw pot decoration if selected
+    //     if (hasPot && !selectedPotColor.empty()) {
+    //         Texture2D potTexture = manager->GetPotTexture(selectedPotColor);
+            
+    //         if (potTexture.id != 0) {
+    //             float potScale = 220.0f / potTexture.width;
+    //             int potWidth = static_cast<int>(potTexture.width * potScale);
+    //             int potHeight = static_cast<int>(potTexture.height * potScale);
+                
+    //             int potX = previewBox.x + (previewBox.width - potWidth) / 2;
+    //             int potY = plantY + scaledHeight - potHeight + 30;
+                
+    //             DrawTextureEx(potTexture, Vector2{static_cast<float>(potX), static_cast<float>(potY)},
+    //                         0.0f, potScale, WHITE);
+    //         }
+    //     }
+        
+    //     // Draw ribbon decoration if selected
+    //     if (hasRibbon) {
+    //         Texture2D ribbonTexture = manager->GetRibbonTexture();
+            
+    //         if (ribbonTexture.id != 0) {
+    //             float ribbonScale = 150.0f / ribbonTexture.width;
+    //             int ribbonWidth = static_cast<int>(ribbonTexture.width * ribbonScale);
+    //             int ribbonHeight = static_cast<int>(ribbonTexture.height * ribbonScale);
+                
+    //             int ribbonX = previewBox.x + (previewBox.width - ribbonWidth) / 2;
+    //             int ribbonY = plantY - 15;
+                
+    //             DrawTextureEx(ribbonTexture, Vector2{static_cast<float>(ribbonX), static_cast<float>(ribbonY)},
+    //                         0.0f, ribbonScale, WHITE);
+    //         }
+    //     }
+    // }
     
     // Draw remove buttons if decorations exist
     if (hasRibbon) {

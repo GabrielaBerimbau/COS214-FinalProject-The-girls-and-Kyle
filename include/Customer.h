@@ -60,6 +60,11 @@ public:
     double getBudget() const;
     void setBudget(double amount);
     bool deductFromBudget(double amount);
+
+    // ============ REMOVAL OPERATIONS ============
+    void removeRibbonFromCartItem(int index);
+    void removePotFromCartItem(int index);
+    void clearDecorationsForCartItem(int index);
     
     // ============ CHECKOUT ============
     virtual void checkOut() = 0;
