@@ -72,6 +72,8 @@ private:
     void PopulateInitialSalesFloor();
     void LoadAssets();
     void UnloadAssets();
+
+    bool isCleanedUp = false;
     
     
 public:

@@ -428,8 +428,9 @@ void SalesFloorScreen::DrawRightPanel() {
                 
                 if (removeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     std::cout << "[SalesFloorScreen] Removing item " << i << " from cart" << std::endl;
-                    customer->returnPlantToSalesFloor(i);
-                    break;
+                    customer->returnPlantToSalesFloor((int)i);
+                    //break;
+                    return;
                 }
                 
                 std::string itemText = plant->getName();

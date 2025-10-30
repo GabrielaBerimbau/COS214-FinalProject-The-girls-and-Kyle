@@ -9,6 +9,7 @@
 #include "../include/Plant.h"
 #include "../include/RibbonDecorator.h"
 #include "../include/DecorativePotDecorator.h"
+#include "../include/Decorator.h"
 
 CartViewScreen::CartViewScreen(ScreenManager* mgr)
     : manager(mgr),
@@ -217,19 +218,32 @@ void CartViewScreen::DrawPlantDisplay() {
     
     DrawRectangleRec(displayBox, Color{50, 60, 70, 255});
     DrawRectangleLinesEx(displayBox, 3, GOLD);
-    
-    // Get plant texture (base plant, not decorator)
-    // We need to find the innermost plant for the texture
-    Plant* basePlant = plant;
-    RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(plant);
-    DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(plant);
-    
-    if (ribbonDec != nullptr || potDec != nullptr) {
-        // Plant is decorated, need to get base plant name
-        // For now, we'll just use the plant's getName() which should work
+
+
+    bool hasRibbon = false, hasPot = false;
+    std::string potColor;
+
+    Plant* walker = plant;
+    while (auto dec = dynamic_cast<Decorator*>(walker)) {
+        if (auto pot = dynamic_cast<DecorativePotDecorator*>(walker)) { hasPot = true; potColor = pot->getPotColor(); }
+        if (dynamic_cast<RibbonDecorator*>(walker)) { hasRibbon = true; }
+        walker = dec->getWrappedPlant();
     }
+    Plant* basePlant = walker ? walker : plant;
+
     
-    Texture2D plantTexture = manager->GetPlantTexture(plant->getName());
+    // // Get plant texture (base plant, not decorator)
+    // // We need to find the innermost plant for the texture
+    // Plant* basePlant = plant;
+    // RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(plant);
+    // DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(plant);
+    
+    // if (ribbonDec != nullptr || potDec != nullptr) {
+    //     // Plant is decorated, need to get base plant name
+    //     // For now, we'll just use the plant's getName() which should work
+    // }
+    
+    Texture2D plantTexture = manager->GetPlantTexture(basePlant->getName());
     
     if (plantTexture.id != 0) {
         // Scale plant to fit in display
@@ -242,44 +256,73 @@ void CartViewScreen::DrawPlantDisplay() {
         
         DrawTextureEx(plantTexture, Vector2{static_cast<float>(plantX), static_cast<float>(plantY)}, 
                      0.0f, scale, WHITE);
+
+
+        
+        // Draw pot overlay if present
+        if (hasPot && !potColor.empty()) {
+            Texture2D potTexture = manager->GetPotTexture(potColor);
+            if (potTexture.id != 0) {
+                float potScale = 320.0f / potTexture.width;
+                int potWidth  = static_cast<int>(potTexture.width  * potScale);
+                int potHeight = static_cast<int>(potTexture.height * potScale);
+                int potX = displayBox.x + (displayBox.width - potWidth) / 2;
+                int potY = plantY + scaledHeight - potHeight + 40;
+                DrawTextureEx(potTexture, Vector2{static_cast<float>(potX), static_cast<float>(potY)}, 0.0f, potScale, WHITE);
+            }
+        }
+
+        // Draw ribbon overlay if present
+        if (hasRibbon) {
+            Texture2D ribbonTexture = manager->GetRibbonTexture();
+            if (ribbonTexture.id != 0) {
+                float ribbonScale = 200.0f / ribbonTexture.width;
+                int ribbonWidth  = static_cast<int>(ribbonTexture.width  * ribbonScale);
+                int ribbonHeight = static_cast<int>(ribbonTexture.height * ribbonScale);
+                int ribbonX = displayBox.x + (displayBox.width - ribbonWidth) / 2;
+                int ribbonY = plantY - 20;
+                DrawTextureEx(ribbonTexture, Vector2{static_cast<float>(ribbonX), static_cast<float>(ribbonY)}, 0.0f, ribbonScale, WHITE);
+            }
+        }
+                    
         
         // Draw decorations on top
         // Check for pot decoration
-        DecorativePotDecorator* currentPotDec = dynamic_cast<DecorativePotDecorator*>(plant);
-        if (currentPotDec != nullptr) {
-            std::string potColor = currentPotDec->getPotColor();
-            Texture2D potTexture = manager->GetPotTexture(potColor);
+        // DecorativePotDecorator* currentPotDec = dynamic_cast<DecorativePotDecorator*>(plant);
+        // if (currentPotDec != nullptr) {
+        //     std::string potColor = currentPotDec->getPotColor();
+        //     Texture2D potTexture = manager->GetPotTexture(potColor);
             
-            if (potTexture.id != 0) {
-                float potScale = 320.0f / potTexture.width;
-                int potWidth = static_cast<int>(potTexture.width * potScale);
-                int potHeight = static_cast<int>(potTexture.height * potScale);
+        //     if (potTexture.id != 0) {
+        //         float potScale = 320.0f / potTexture.width;
+        //         int potWidth = static_cast<int>(potTexture.width * potScale);
+        //         int potHeight = static_cast<int>(potTexture.height * potScale);
                 
-                int potX = displayBox.x + (displayBox.width - potWidth) / 2;
-                int potY = plantY + scaledHeight - potHeight + 40;
+        //         int potX = displayBox.x + (displayBox.width - potWidth) / 2;
+        //         int potY = plantY + scaledHeight - potHeight + 40;
                 
-                DrawTextureEx(potTexture, Vector2{static_cast<float>(potX), static_cast<float>(potY)},
-                            0.0f, potScale, WHITE);
-            }
-        }
+        //         DrawTextureEx(potTexture, Vector2{static_cast<float>(potX), static_cast<float>(potY)},
+        //                     0.0f, potScale, WHITE);
+        //     }
+        // }
         
-        // Check for ribbon decoration
-        RibbonDecorator* currentRibbonDec = dynamic_cast<RibbonDecorator*>(plant);
-        if (currentRibbonDec != nullptr) {
-            Texture2D ribbonTexture = manager->GetRibbonTexture();
+        // // Check for ribbon decoration
+        // RibbonDecorator* currentRibbonDec = dynamic_cast<RibbonDecorator*>(plant);
+        // if (currentRibbonDec != nullptr) {
+        //     Texture2D ribbonTexture = manager->GetRibbonTexture();
             
-            if (ribbonTexture.id != 0) {
-                float ribbonScale = 200.0f / ribbonTexture.width;
-                int ribbonWidth = static_cast<int>(ribbonTexture.width * ribbonScale);
-                int ribbonHeight = static_cast<int>(ribbonTexture.height * ribbonScale);
+        //     if (ribbonTexture.id != 0) {
+        //         float ribbonScale = 200.0f / ribbonTexture.width;
+        //         int ribbonWidth = static_cast<int>(ribbonTexture.width * ribbonScale);
+        //         int ribbonHeight = static_cast<int>(ribbonTexture.height * ribbonScale);
                 
-                int ribbonX = displayBox.x + (displayBox.width - ribbonWidth) / 2;
-                int ribbonY = plantY - 20;
+        //         int ribbonX = displayBox.x + (displayBox.width - ribbonWidth) / 2;
+        //         int ribbonY = plantY - 20;
                 
-                DrawTextureEx(ribbonTexture, Vector2{static_cast<float>(ribbonX), static_cast<float>(ribbonY)},
-                            0.0f, ribbonScale, WHITE);
-            }
-        }
+        //         DrawTextureEx(ribbonTexture, Vector2{static_cast<float>(ribbonX), static_cast<float>(ribbonY)},
+        //                     0.0f, ribbonScale, WHITE);
+        //     }
+        // }
     } else {
         // Fallback: draw plant name
         const char* name = plant->getName().c_str();
@@ -308,27 +351,56 @@ void CartViewScreen::DrawPlantInfo() {
     std::string idText = "ID: " + plant->getID();
     DrawText(idText.c_str(), infoX, infoY, 16, LIGHTGRAY);
     infoY += 25;
-    
-    // Check for decorations
-    RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(plant);
-    DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(plant);
-    
-    if (ribbonDec != nullptr || potDec != nullptr) {
+
+
+    // Discover decorations by walking the chain
+    bool hasRibbon = false, hasPot = false;
+    std::string potColor;
+
+    Plant* w = plant;
+    while (auto d = dynamic_cast<Decorator*>(w)) {
+        if (auto p = dynamic_cast<DecorativePotDecorator*>(w)) { hasPot = true; potColor = p->getPotColor(); }
+        if (dynamic_cast<RibbonDecorator*>(w)) { hasRibbon = true; }
+        w = d->getWrappedPlant();
+    }
+
+    if (hasRibbon || hasPot) {
         DrawText("Decorations:", infoX, infoY, 18, YELLOW);
         infoY += 25;
-        
-        if (ribbonDec != nullptr) {
+
+        if (hasRibbon) {
             DrawText("- Ribbon", infoX + 20, infoY, 16, PINK);
             infoY += 22;
         }
-        
-        if (potDec != nullptr) {
-            std::string potText = "- " + potDec->getPotColor() + " Pot";
+        if (hasPot) {
+            std::string potText = "- " + potColor + " Pot";
             DrawText(potText.c_str(), infoX + 20, infoY, 16, SKYBLUE);
             infoY += 22;
         }
         infoY += 10;
     }
+
+    
+    // Check for decorations
+    // RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(plant);
+    // DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(plant);
+    
+    // if (ribbonDec != nullptr || potDec != nullptr) {
+    //     DrawText("Decorations:", infoX, infoY, 18, YELLOW);
+    //     infoY += 25;
+        
+    //     if (ribbonDec != nullptr) {
+    //         DrawText("- Ribbon", infoX + 20, infoY, 16, PINK);
+    //         infoY += 22;
+    //     }
+        
+    //     if (potDec != nullptr) {
+    //         std::string potText = "- " + potDec->getPotColor() + " Pot";
+    //         DrawText(potText.c_str(), infoX + 20, infoY, 16, SKYBLUE);
+    //         infoY += 22;
+    //     }
+    //     infoY += 10;
+    // }
     
     // Price (large and highlighted)
     std::ostringstream priceStream;

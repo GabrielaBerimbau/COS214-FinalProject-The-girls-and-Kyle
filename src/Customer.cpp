@@ -209,6 +209,74 @@ void Customer::decorateCartItemWithPot(int index, std::string color) {
               << ". New price: R" << decorated->getPrice() << "\n";
 }
 
+void Customer::removeRibbonFromCartItem(int index) {
+    if (index < 0 || index >= (int)cart.size()) { std::cout << "[Customer] Invalid cart index.\n"; return; }
+    Plant* item = cart[index];
+    if (!item) return;
+
+    // Collect existing decorations
+    bool hadRibbon = false, hadGiftWrap = false, hadPot = false;
+    std::string potColor;
+
+    Plant* walker = item;
+    while (auto dec = dynamic_cast<Decorator*>(walker)) {
+        if (dynamic_cast<RibbonDecorator*>(walker)) { hadRibbon = true; }
+        else if (auto pot = dynamic_cast<DecorativePotDecorator*>(walker)) { hadPot = true; potColor = pot->getPotColor(); }
+        else if (dynamic_cast<GiftWrapDecorator*>(walker)) { hadGiftWrap = true; }
+        walker = dec->getWrappedPlant();
+    }
+
+    if (!hadRibbon) { std::cout << "[Customer] No ribbon to remove at index " << index << "\n"; return; }
+
+    // Strip all, then rebuild without ribbon
+    Plant* base = Decorator::stripDecorations(item);
+    // Rebuild: keep pot and giftwrap (omitting ribbon)
+    Plant* rebuilt = base;
+    if (hadGiftWrap) { rebuilt = new GiftWrapDecorator(rebuilt); }
+    if (hadPot)      { rebuilt = new DecorativePotDecorator(rebuilt, potColor); }
+    cart[index] = rebuilt;
+    std::cout << "[Customer] Removed ribbon for cart index " << index << "\n";
+}
+
+void Customer::removePotFromCartItem(int index) {
+    if (index < 0 || index >= (int)cart.size()) { std::cout << "[Customer] Invalid cart index.\n"; return; }
+    Plant* item = cart[index];
+    if (!item) return;
+
+    bool hadRibbon = false, hadGiftWrap = false, hadPot = false;
+    std::string potColor;
+
+    Plant* walker = item;
+    while (auto dec = dynamic_cast<Decorator*>(walker)) {
+        if (dynamic_cast<RibbonDecorator*>(walker)) { hadRibbon = true; }
+        else if (auto pot = dynamic_cast<DecorativePotDecorator*>(walker)) { hadPot = true; potColor = pot->getPotColor(); }
+        else if (dynamic_cast<GiftWrapDecorator*>(walker)) { hadGiftWrap = true; }
+        walker = dec->getWrappedPlant();
+    }
+
+    if (!hadPot) { std::cout << "[Customer] No pot to remove at index " << index << "\n"; return; }
+
+    Plant* base = Decorator::stripDecorations(item);
+    // Rebuild: keep ribbon + giftwrap (omit pot)
+    Plant* rebuilt = base;
+    if (hadGiftWrap) { rebuilt = new GiftWrapDecorator(rebuilt); }
+    if (hadRibbon)   { rebuilt = new RibbonDecorator(rebuilt); }
+    cart[index] = rebuilt;
+    std::cout << "[Customer] Removed pot for cart index " << index << "\n";
+}
+
+void Customer::clearDecorationsForCartItem(int index) {
+    if (index < 0 || index >= (int)cart.size()) { std::cout << "[Customer] Invalid cart index.\n"; return; }
+    Plant* item = cart[index];
+    if (!item) return;
+
+    if (!Decorator::isDecorated(item)) { std::cout << "[Customer] Item has no decorations.\n"; return; }
+
+    Plant* base = Decorator::stripDecorations(item);
+    cart[index] = base;
+    std::cout << "[Customer] Cleared all decorations for cart index " << index << "\n";
+}
+
 // ============ ORDER BUILDING (Composite Pattern) ============
 
 void Customer::startNewOrder(const std::string& orderName) {
