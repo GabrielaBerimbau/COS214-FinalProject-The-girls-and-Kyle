@@ -24,7 +24,7 @@
 
 /**
  * @class SalesAssistant
-
+*/
 class SalesAssistant: public StaffMembers{
     private:
         CareScheduler* scheduler;
