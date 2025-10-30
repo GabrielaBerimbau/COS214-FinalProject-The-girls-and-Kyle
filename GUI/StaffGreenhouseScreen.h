@@ -39,6 +39,7 @@ private:
     Rectangle transferToSalesFloorButton;
     Rectangle runSchedulerButton;
     Rectangle advanceDayButton;
+    Rectangle removeDeadPlantButton;
     Rectangle backButton;
     
     // Button hover states
@@ -49,6 +50,7 @@ private:
     bool transferHovered;
     bool schedulerHovered;
     bool advanceDayHovered;
+    bool removeDeadHovered;
     bool backHovered;
     
     // Care scheduler info
@@ -64,8 +66,13 @@ private:
     bool runOneHovered;
     bool closeOverlayHovered;
     
+    // FIXED: Track actual queue size for display
+    int displayedQueueSize;
+    
     void InitializeLayout();
     void InitializeButtons();
+    // FIXED: New method to initialize overlay buttons once
+    void InitializeOverlayButtons();
     void UpdateGrid();
     void UpdateButtons();
     void UpdateSchedulerOverlay();
@@ -90,6 +97,10 @@ private:
     void HandleAdvanceDay();
     void HandleRunAllScheduled();
     void HandleRunOneScheduled();
+    void HandleRemoveDeadPlant();
+    
+    int CountQueuedTasks();
+    bool IsPlantDead(Plant* plant) const;
     
 public:
     StaffGreenhouseScreen(ScreenManager* mgr);

@@ -24,19 +24,24 @@ StaffGreenhouseScreen::StaffGreenhouseScreen(ScreenManager* mgr)
       transferHovered(false),
       schedulerHovered(false),
       advanceDayHovered(false),
+      removeDeadHovered(false),
       backHovered(false),
       scheduledTasksCount(0),
       schedulerOverlayActive(false),
       schedulerTasksExecuted(false),
       runAllHovered(false),
       runOneHovered(false),
-      closeOverlayHovered(false) {
+      closeOverlayHovered(false),
+      displayedQueueSize(0) {
     
     gridRows = 6;
     gridCols = 8;
     
     InitializeLayout();
     InitializeButtons();
+    
+    // FIXED: Initialize button positions as fixed (not recalculated each frame)
+    InitializeOverlayButtons();
 }
 
 StaffGreenhouseScreen::~StaffGreenhouseScreen() {
@@ -107,6 +112,13 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonHeight + 10)
     };
     
+    removeDeadPlantButton = Rectangle{
+        static_cast<float>(buttonX),
+        static_cast<float>(startY + (buttonHeight + buttonSpacing) * 5 + 50),
+        static_cast<float>(buttonWidth),
+        static_cast<float>(buttonHeight + 10)
+    };
+    
     advanceDayButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(screenHeight - 200),
@@ -127,6 +139,42 @@ void StaffGreenhouseScreen::InitializeButtons() {
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
+}
+
+// FIXED: New method to initialize overlay buttons once
+void StaffGreenhouseScreen::InitializeOverlayButtons() {
+    int overlayWidth = 650;
+    int overlayHeight = 500;
+    int overlayX = (screenWidth - overlayWidth) / 2;
+    int overlayY = (screenHeight - overlayHeight) / 2;
+    
+    int buttonWidth = 240;
+    int buttonHeight = 50;
+    int buttonSpacing = 15;
+    int buttonX = overlayX + (overlayWidth - buttonWidth) / 2;
+    int yPos = overlayY + 350;  // Fixed Y position
+    
+    runAllButton.x = buttonX;
+    runAllButton.y = yPos;
+    runAllButton.width = buttonWidth;
+    runAllButton.height = buttonHeight;
+    
+    runOneButton.x = buttonX;
+    runOneButton.y = yPos + buttonHeight + buttonSpacing;
+    runOneButton.width = buttonWidth;
+    runOneButton.height = buttonHeight;
+    
+    closeOverlayButton.x = overlayX + overlayWidth / 2 - 60;
+    closeOverlayButton.y = overlayY + overlayHeight - 55;
+    closeOverlayButton.width = 120;
+    closeOverlayButton.height = 40;
+}
+
+bool StaffGreenhouseScreen::IsPlantDead(Plant* plant) const {
+    if (plant == nullptr || plant->getState() == nullptr) {
+        return false;
+    }
+    return plant->getState()->getStateName() == "Dead";
 }
 
 void StaffGreenhouseScreen::Update() {
@@ -166,21 +214,27 @@ void StaffGreenhouseScreen::UpdateButtons() {
     sunlightHovered = CheckCollisionPointRec(mousePos, adjustSunlightButton);
     fullCareHovered = CheckCollisionPointRec(mousePos, performFullCareButton);
     transferHovered = CheckCollisionPointRec(mousePos, transferToSalesFloorButton);
+    removeDeadHovered = CheckCollisionPointRec(mousePos, removeDeadPlantButton);
     advanceDayHovered = CheckCollisionPointRec(mousePos, advanceDayButton);
     schedulerHovered = CheckCollisionPointRec(mousePos, runSchedulerButton);
     backHovered = CheckCollisionPointRec(mousePos, backButton);
     
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if (waterHovered && selectedPlant != nullptr) {
+        // Don't allow care actions on dead plants
+        bool plantIsDead = IsPlantDead(selectedPlant);
+        
+        if (waterHovered && selectedPlant != nullptr && !plantIsDead) {
             HandleWaterPlant();
-        } else if (fertilizeHovered && selectedPlant != nullptr) {
+        } else if (fertilizeHovered && selectedPlant != nullptr && !plantIsDead) {
             HandleFertilizePlant();
-        } else if (sunlightHovered && selectedPlant != nullptr) {
+        } else if (sunlightHovered && selectedPlant != nullptr && !plantIsDead) {
             HandleAdjustSunlight();
-        } else if (fullCareHovered && selectedPlant != nullptr) {
+        } else if (fullCareHovered && selectedPlant != nullptr && !plantIsDead) {
             HandleFullCare();
-        } else if (transferHovered && selectedPlant != nullptr) {
+        } else if (transferHovered && selectedPlant != nullptr && !plantIsDead) {
             HandleTransferToSalesFloor();
+        } else if (removeDeadHovered && selectedPlant != nullptr && plantIsDead) {
+            HandleRemoveDeadPlant();
         } else if (advanceDayHovered) {
             HandleAdvanceDay();
         } else if (schedulerHovered) {
@@ -204,7 +258,6 @@ void StaffGreenhouseScreen::UpdateSchedulerOverlay() {
         } else if (runOneHovered) {
             HandleRunOneScheduled();
         } else if (closeOverlayHovered) {
-            // Close and advance day if we executed tasks
             if (schedulerTasksExecuted) {
                 std::cout << "[StaffGreenhouseScreen] Closing overlay and advancing day..." << std::endl;
                 manager->PerformDailyUpdate();
@@ -216,7 +269,6 @@ void StaffGreenhouseScreen::UpdateSchedulerOverlay() {
     }
     
     if (IsKeyPressed(KEY_ESCAPE)) {
-        // Close and advance day if we executed tasks
         if (schedulerTasksExecuted) {
             std::cout << "[StaffGreenhouseScreen] Closing overlay (ESC) and advancing day..." << std::endl;
             manager->PerformDailyUpdate();
@@ -238,7 +290,12 @@ void StaffGreenhouseScreen::HandlePlantSelection(int row, int col) {
         selectedCol = col;
         selectedPlant = plant;
         std::cout << "[StaffGreenhouseScreen] Selected plant: " << plant->getName() 
-                  << " at (" << row << "," << col << ")" << std::endl;
+                  << " at (" << row << "," << col << ")";
+        
+        if (IsPlantDead(plant)) {
+            std::cout << " - DEAD PLANT";
+        }
+        std::cout << std::endl;
     } else {
         selectedRow = -1;
         selectedCol = -1;
@@ -337,6 +394,34 @@ void StaffGreenhouseScreen::HandleTransferToSalesFloor() {
     }
 }
 
+void StaffGreenhouseScreen::HandleRemoveDeadPlant() {
+    if (selectedPlant == nullptr) return;
+    
+    if (!IsPlantDead(selectedPlant)) {
+        std::cout << "[StaffGreenhouseScreen] Plant is not dead, cannot remove!" << std::endl;
+        return;
+    }
+    
+    Greenhouse* greenhouse = manager->GetGreenhouse();
+    if (greenhouse == nullptr) return;
+    
+    std::cout << "[StaffGreenhouseScreen] Removing dead plant " << selectedPlant->getName() 
+              << " (ID: " << selectedPlant->getID() << ") from greenhouse" << std::endl;
+    
+    // Remove from greenhouse (greenhouse takes care of deletion)
+    Plant* deadPlant = greenhouse->removePlantAt(selectedRow, selectedCol);
+    
+    if (deadPlant != nullptr) {
+        delete deadPlant;  // Delete the dead plant
+        std::cout << "[StaffGreenhouseScreen] Dead plant removed and disposed of" << std::endl;
+    }
+    
+    // Clear selection
+    selectedPlant = nullptr;
+    selectedRow = -1;
+    selectedCol = -1;
+}
+
 void StaffGreenhouseScreen::HandleAdvanceDay() {
     std::cout << "[StaffGreenhouseScreen] Advancing day manually..." << std::endl;
     manager->PerformDailyUpdate();
@@ -348,10 +433,38 @@ void StaffGreenhouseScreen::HandleRunScheduler() {
     if (scheduler != nullptr && !scheduler->empty()) {
         schedulerOverlayActive = true;
         schedulerTasksExecuted = false;
-        std::cout << "[StaffGreenhouseScreen] Opening scheduler overlay..." << std::endl;
+        
+        // FIXED: Calculate initial queue size when opening overlay
+        displayedQueueSize = CountQueuedTasks();
+        
+        std::cout << "[StaffGreenhouseScreen] Opening scheduler overlay with " 
+                  << displayedQueueSize << " tasks..." << std::endl;
     } else {
         std::cout << "[StaffGreenhouseScreen] No tasks in scheduler" << std::endl;
     }
+}
+
+// FIXED: New method to count actual queued tasks
+int StaffGreenhouseScreen::CountQueuedTasks() {
+    CareScheduler* scheduler = manager->GetCareScheduler();
+    Greenhouse* greenhouse = manager->GetGreenhouse();
+    
+    if (scheduler == nullptr || greenhouse == nullptr || scheduler->empty()) {
+        return 0;
+    }
+    
+    int taskCount = 0;
+    std::vector<Plant*> allPlants = greenhouse->getAllPlants();
+    
+    for (Plant* plant : allPlants) {
+        if (plant != nullptr && !IsPlantDead(plant)) {  // Don't count tasks for dead plants
+            if (plant->getWaterLevel() < 30) taskCount++;
+            if (plant->getNutrientLevel() < 30) taskCount++;
+            if (plant->getSunlightExposure() < 40) taskCount++;
+        }
+    }
+    
+    return taskCount;
 }
 
 void StaffGreenhouseScreen::HandleRunAllScheduled() {
@@ -360,10 +473,13 @@ void StaffGreenhouseScreen::HandleRunAllScheduled() {
         std::cout << "[StaffGreenhouseScreen] Running all scheduled tasks..." << std::endl;
         scheduler->runAll();
         schedulerTasksExecuted = true;
+        
+        // FIXED: Update displayed queue size after running
+        displayedQueueSize = 0;
+        
         std::cout << "[StaffGreenhouseScreen] All tasks completed. Close overlay to advance day." << std::endl;
         schedulerOverlayActive = false;
         
-        // Advance day immediately after running all
         manager->PerformDailyUpdate();
         std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
         schedulerTasksExecuted = false;
@@ -377,11 +493,16 @@ void StaffGreenhouseScreen::HandleRunOneScheduled() {
         scheduler->runNext();
         schedulerTasksExecuted = true;
         
-        if (scheduler->empty()) {
+        // FIXED: Update displayed queue size after running one task
+        displayedQueueSize = CountQueuedTasks();
+        
+        std::cout << "[StaffGreenhouseScreen] Task executed. Remaining tasks: " 
+                  << displayedQueueSize << std::endl;
+        
+        if (scheduler->empty() || displayedQueueSize == 0) {
             std::cout << "[StaffGreenhouseScreen] All tasks completed" << std::endl;
             schedulerOverlayActive = false;
             
-            // Advance day after completing all tasks
             manager->PerformDailyUpdate();
             std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
             schedulerTasksExecuted = false;
@@ -420,7 +541,15 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
     yPos += 15;
     
     if (selectedPlant != nullptr) {
-        DrawText("SELECTED PLANT", 20, yPos, 18, YELLOW);
+        bool isDead = IsPlantDead(selectedPlant);
+        
+        // Draw warning if dead
+        if (isDead) {
+            DrawText("DEAD PLANT", 20, yPos, 18, RED);
+            yPos += 30;
+        }
+        
+        DrawText("SELECTED PLANT", 20, yPos, 18, isDead ? RED : YELLOW);
         yPos += 30;
         
         std::string plantNameText = selectedPlant->getName();
@@ -432,7 +561,8 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
         yPos += 25;
         
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        DrawText(stateText.c_str(), 20, yPos, 13, LIGHTGRAY);
+        Color stateColor = isDead ? RED : LIGHTGRAY;
+        DrawText(stateText.c_str(), 20, yPos, 13, stateColor);
         yPos += 25;
         
         std::ostringstream ageStream;
@@ -443,34 +573,44 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
         DrawLine(20, yPos, leftPanelWidth - 20, yPos, DARKGRAY);
         yPos += 15;
         
-        DrawText("PLANT STATUS:", 20, yPos, 14, SKYBLUE);
-        yPos += 25;
-        
-        std::ostringstream healthStream;
-        healthStream << "Health: " << selectedPlant->getHealthLevel() << "%";
-        Color healthColor = selectedPlant->getHealthLevel() > 70 ? GREEN : 
-                           selectedPlant->getHealthLevel() > 40 ? YELLOW : RED;
-        DrawText(healthStream.str().c_str(), 20, yPos, 14, healthColor);
-        yPos += 22;
-        
-        std::ostringstream waterStream;
-        waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
-        Color waterColor = selectedPlant->getWaterLevel() > 50 ? SKYBLUE : 
-                          selectedPlant->getWaterLevel() > 25 ? ORANGE : RED;
-        DrawText(waterStream.str().c_str(), 20, yPos, 14, waterColor);
-        yPos += 22;
-        
-        std::ostringstream nutrientStream;
-        nutrientStream << "Nutrients: " << selectedPlant->getNutrientLevel() << "%";
-        Color nutrientColor = selectedPlant->getNutrientLevel() > 50 ? Color{150, 255, 150, 255} : 
-                             selectedPlant->getNutrientLevel() > 25 ? ORANGE : RED;
-        DrawText(nutrientStream.str().c_str(), 20, yPos, 14, nutrientColor);
-        yPos += 22;
-        
-        std::ostringstream sunStream;
-        sunStream << "Sunlight: " << selectedPlant->getSunlightExposure() << "%";
-        DrawText(sunStream.str().c_str(), 20, yPos, 14, GOLD);
-        yPos += 30;
+        if (isDead) {
+            DrawText("This plant has died.", 20, yPos, 14, RED);
+            yPos += 22;
+            DrawText("Use 'Remove Dead'", 20, yPos, 14, ORANGE);
+            yPos += 18;
+            DrawText("button to dispose", 20, yPos, 14, ORANGE);
+            yPos += 18;
+            DrawText("of it.", 20, yPos, 14, ORANGE);
+        } else {
+            DrawText("PLANT STATUS:", 20, yPos, 14, SKYBLUE);
+            yPos += 25;
+            
+            std::ostringstream healthStream;
+            healthStream << "Health: " << selectedPlant->getHealthLevel() << "%";
+            Color healthColor = selectedPlant->getHealthLevel() > 70 ? GREEN : 
+                               selectedPlant->getHealthLevel() > 40 ? YELLOW : RED;
+            DrawText(healthStream.str().c_str(), 20, yPos, 14, healthColor);
+            yPos += 22;
+            
+            std::ostringstream waterStream;
+            waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
+            Color waterColor = selectedPlant->getWaterLevel() > 50 ? SKYBLUE : 
+                              selectedPlant->getWaterLevel() > 25 ? ORANGE : RED;
+            DrawText(waterStream.str().c_str(), 20, yPos, 14, waterColor);
+            yPos += 22;
+            
+            std::ostringstream nutrientStream;
+            nutrientStream << "Nutrients: " << selectedPlant->getNutrientLevel() << "%";
+            Color nutrientColor = selectedPlant->getNutrientLevel() > 50 ? Color{150, 255, 150, 255} : 
+                                 selectedPlant->getNutrientLevel() > 25 ? ORANGE : RED;
+            DrawText(nutrientStream.str().c_str(), 20, yPos, 14, nutrientColor);
+            yPos += 22;
+            
+            std::ostringstream sunStream;
+            sunStream << "Sunlight: " << selectedPlant->getSunlightExposure() << "%";
+            DrawText(sunStream.str().c_str(), 20, yPos, 14, GOLD);
+            yPos += 30;
+        }
         
     } else {
         DrawText("INSTRUCTIONS:", 20, yPos, 16, YELLOW);
@@ -485,6 +625,8 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
         DrawText("4. Transfer when ready", 20, yPos, 13, WHITE);
         yPos += 18;
         DrawText("   for sale", 20, yPos, 13, WHITE);
+        yPos += 22;
+        DrawText("5. Remove dead plants", 20, yPos, 13, WHITE);
     }
 }
 
@@ -529,17 +671,29 @@ void StaffGreenhouseScreen::DrawGrid() {
             int x = gridStartX + col * cellSize;
             int y = gridStartY + row * cellSize;
             
+            Plant* plant = greenhouse->getPlantAt(row, col);
+            bool isDead = IsPlantDead(plant);
+            
             Color cellColor = Color{50, 70, 60, 255};
             if (row == selectedRow && col == selectedCol) {
-                cellColor = GOLD;
+                cellColor = isDead ? Color{180, 50, 50, 255} : GOLD;
+            } else if (isDead) {
+                cellColor = Color{80, 30, 30, 255};  // Dark red for dead plants
             }
             
             DrawRectangle(x + 1, y + 1, cellSize - 2, cellSize - 2, cellColor);
-            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, Color{40, 60, 50, 255});
+            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, isDead ? RED : Color{40, 60, 50, 255});
             
-            Plant* plant = greenhouse->getPlantAt(row, col);
+            // Draw plant if exists
             if (plant != nullptr) {
                 DrawPlantInCell(plant, row, col);
+                
+                // Draw skull icon for dead plants
+                if (isDead) {
+                    const char* skullIcon = "X";
+                    int iconWidth = MeasureText(skullIcon, 30);
+                    DrawText(skullIcon, x + (cellSize - iconWidth) / 2, y + cellSize / 2 - 15, 30, RED);
+                }
             }
         }
     }
@@ -548,6 +702,8 @@ void StaffGreenhouseScreen::DrawGrid() {
 void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
     int x = gridStartX + col * cellSize;
     int y = gridStartY + row * cellSize;
+    
+    bool isDead = IsPlantDead(plant);
     
     Texture2D plantTexture = manager->GetPlantTexture(plant->getName());
     
@@ -561,29 +717,38 @@ void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         int texX = x + (cellSize - scaledWidth) / 2;
         int texY = y + (cellSize - scaledHeight) / 2 - 5;
         
-        DrawTextureEx(plantTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)}, 0.0f, scale, WHITE);
+        // Dim and desaturate texture if dead
+        Color tint = isDead ? Color{100, 100, 100, 255} : WHITE;
+        DrawTextureEx(plantTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)}, 0.0f, scale, tint);
     } else {
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 10);
-        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, DARKGREEN);
+        Color textColor = isDead ? Color{150, 50, 50, 255} : DARKGREEN;
+        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, textColor);
     }
     
-    int healthBarWidth = cellSize - 10;
-    int healthBarHeight = 4;
-    int healthBarX = x + 5;
-    int healthBarY = y + cellSize - 8;
-    
-    int health = plant->getHealthLevel();
-    Color healthColor = health > 70 ? GREEN : health > 40 ? YELLOW : RED;
-    
-    DrawRectangle(healthBarX, healthBarY, healthBarWidth, healthBarHeight, DARKGRAY);
-    DrawRectangle(healthBarX, healthBarY, (healthBarWidth * health) / 100, healthBarHeight, healthColor);
+    if (!isDead) {
+        // Draw health bar only for living plants
+        int healthBarWidth = cellSize - 10;
+        int healthBarHeight = 4;
+        int healthBarX = x + 5;
+        int healthBarY = y + cellSize - 8;
+        
+        int health = plant->getHealthLevel();
+        Color healthColor = health > 70 ? GREEN : health > 40 ? YELLOW : RED;
+        
+        DrawRectangle(healthBarX, healthBarY, healthBarWidth, healthBarHeight, DARKGRAY);
+        DrawRectangle(healthBarX, healthBarY, (healthBarWidth * health) / 100, healthBarHeight, healthColor);
+    }
 }
 
 void StaffGreenhouseScreen::DrawButtons() {
     bool hasSelection = selectedPlant != nullptr;
+    bool isDead = IsPlantDead(selectedPlant);
+    bool canCare = hasSelection && !isDead;
     
-    Color waterColor = hasSelection ? 
+    // Water button
+    Color waterColor = canCare ? 
                        (waterHovered ? Color{0, 150, 255, 255} : SKYBLUE) : GRAY;
     DrawRectangleRec(waterButton, waterColor);
     DrawRectangleLinesEx(waterButton, 2, BLACK);
@@ -593,9 +758,10 @@ void StaffGreenhouseScreen::DrawButtons() {
              waterButton.x + (waterButton.width - waterTextWidth) / 2,
              waterButton.y + (waterButton.height - 16) / 2,
              16,
-             hasSelection ? WHITE : DARKGRAY);
+             canCare ? WHITE : DARKGRAY);
     
-    Color fertColor = hasSelection ? 
+    // Fertilize button
+    Color fertColor = canCare ? 
                       (fertilizeHovered ? Color{100, 200, 100, 255} : Color{150, 255, 150, 255}) : GRAY;
     DrawRectangleRec(fertilizeButton, fertColor);
     DrawRectangleLinesEx(fertilizeButton, 2, BLACK);
@@ -605,9 +771,10 @@ void StaffGreenhouseScreen::DrawButtons() {
              fertilizeButton.x + (fertilizeButton.width - fertTextWidth) / 2,
              fertilizeButton.y + (fertilizeButton.height - 16) / 2,
              16,
-             hasSelection ? BLACK : DARKGRAY);
+             canCare ? BLACK : DARKGRAY);
     
-    Color sunColor = hasSelection ? 
+    // Sunlight button
+    Color sunColor = canCare ? 
                      (sunlightHovered ? Color{255, 180, 0, 255} : GOLD) : GRAY;
     DrawRectangleRec(adjustSunlightButton, sunColor);
     DrawRectangleLinesEx(adjustSunlightButton, 2, BLACK);
@@ -617,9 +784,10 @@ void StaffGreenhouseScreen::DrawButtons() {
              adjustSunlightButton.x + (adjustSunlightButton.width - sunTextWidth) / 2,
              adjustSunlightButton.y + (adjustSunlightButton.height - 16) / 2,
              16,
-             hasSelection ? BLACK : DARKGRAY);
+             canCare ? BLACK : DARKGRAY);
     
-    Color fullCareColor = hasSelection ? 
+    // Full care button
+    Color fullCareColor = canCare ? 
                           (fullCareHovered ? Color{100, 50, 150, 255} : Color{150, 100, 200, 255}) : GRAY;
     DrawRectangleRec(performFullCareButton, fullCareColor);
     DrawRectangleLinesEx(performFullCareButton, 3, BLACK);
@@ -631,7 +799,8 @@ void StaffGreenhouseScreen::DrawButtons() {
              18,
              WHITE);
     
-    bool canTransfer = hasSelection && selectedPlant->isReadyForSale();
+    // Transfer button
+    bool canTransfer = canCare && selectedPlant->isReadyForSale();
     Color transferColor = canTransfer ? 
                           (transferHovered ? Color{0, 120, 200, 255} : Color{50, 150, 220, 255}) : GRAY;
     DrawRectangleRec(transferToSalesFloorButton, transferColor);
@@ -644,6 +813,21 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              canTransfer ? WHITE : DARKGRAY);
     
+    // Remove dead plant button
+    bool canRemove = hasSelection && isDead;
+    Color removeColor = canRemove ? 
+                        (removeDeadHovered ? Color{200, 0, 0, 255} : Color{150, 30, 30, 255}) : GRAY;
+    DrawRectangleRec(removeDeadPlantButton, removeColor);
+    DrawRectangleLinesEx(removeDeadPlantButton, 3, BLACK);
+    const char* removeText = "Remove Dead";
+    int removeTextWidth = MeasureText(removeText, 15);
+    DrawText(removeText,
+             removeDeadPlantButton.x + (removeDeadPlantButton.width - removeTextWidth) / 2,
+             removeDeadPlantButton.y + (removeDeadPlantButton.height - 15) / 2,
+             15,
+             canRemove ? WHITE : DARKGRAY);
+    
+    // Advance day button
     Color advanceDayColor = advanceDayHovered ? Color{255, 200, 0, 255} : Color{255, 150, 0, 255};
     DrawRectangleRec(advanceDayButton, advanceDayColor);
     DrawRectangleLinesEx(advanceDayButton, 3, BLACK);
@@ -655,6 +839,7 @@ void StaffGreenhouseScreen::DrawButtons() {
              16,
              BLACK);
     
+    // Scheduler button
     Color schedulerColor = schedulerHovered ? Color{200, 150, 50, 255} : Color{150, 100, 50, 255};
     DrawRectangleRec(runSchedulerButton, schedulerColor);
     DrawRectangleLinesEx(runSchedulerButton, 2, BLACK);
@@ -666,6 +851,7 @@ void StaffGreenhouseScreen::DrawButtons() {
              15,
              WHITE);
     
+    // Back button
     Color backColor = backHovered ? DARKGRAY : Color{100, 100, 100, 255};
     DrawRectangleRec(backButton, backColor);
     DrawRectangleLinesEx(backButton, 2, BLACK);
@@ -723,21 +909,19 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
     
     int yPos = overlayY + 60;
     
-    CareScheduler* scheduler = manager->GetCareScheduler();
-    if (scheduler != nullptr && !scheduler->empty()) {
+    // FIXED: Use displayedQueueSize instead of recalculating
+    if (displayedQueueSize > 0) {
         DrawText("Next 3 Queued Tasks:", overlayX + 20, yPos, 18, YELLOW);
         yPos += 30;
         
-        // Get all plants and identify which need care
         Greenhouse* greenhouse = manager->GetGreenhouse();
         if (greenhouse != nullptr) {
             std::vector<Plant*> allPlants = greenhouse->getAllPlants();
             
             std::vector<std::string> taskList;
             
-            // Build list of tasks in order
             for (Plant* plant : allPlants) {
-                if (plant != nullptr) {
+                if (plant != nullptr && !IsPlantDead(plant)) {  // Skip dead plants
                     if (plant->getWaterLevel() < 30) {
                         std::ostringstream task;
                         task << "Water " << plant->getName() << " (ID: " << plant->getID() 
@@ -759,13 +943,11 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
                 }
             }
             
-            // Display next 3 tasks
             int tasksToShow = taskList.size() < 3 ? taskList.size() : 3;
             for (int i = 0; i < tasksToShow; i++) {
                 std::ostringstream taskNum;
                 taskNum << (i + 1) << ". " << taskList[i];
                 
-                // Color code by task type
                 Color taskColor = WHITE;
                 if (taskList[i].find("Water") != std::string::npos) {
                     taskColor = SKYBLUE;
@@ -781,7 +963,6 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
             
             yPos += 10;
             
-            // Show total remaining
             if (taskList.size() > 3) {
                 std::ostringstream remaining;
                 remaining << "...and " << (taskList.size() - 3) << " more tasks";
@@ -789,9 +970,9 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
                 yPos += 25;
             }
             
-            // Show total count
+            // FIXED: Show current count using displayedQueueSize
             std::ostringstream totalText;
-            totalText << "Total: " << taskList.size() << " tasks queued";
+            totalText << "Total: " << displayedQueueSize << " tasks queued";
             DrawText(totalText.str().c_str(), overlayX + 30, yPos, 16, YELLOW);
             yPos += 15;
         }
@@ -802,31 +983,13 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
         
         DrawText("Choose an action:", overlayX + 20, yPos, 16, WHITE);
         yPos += 35;
+    } else {
+        DrawText("No tasks in queue!", overlayX + 30, yPos, 18, ORANGE);
+        yPos += 40;
+        DrawText("All plants are well cared for.", overlayX + 30, yPos, 14, GREEN);
     }
     
-    // Draw buttons with proper spacing
-    int buttonWidth = 240;
-    int buttonHeight = 50;
-    int buttonSpacing = 15;
-    int buttonX = overlayX + (overlayWidth - buttonWidth) / 2;
-    
-    // Update button positions
-    runAllButton.x = buttonX;
-    runAllButton.y = yPos;
-    runAllButton.width = buttonWidth;
-    runAllButton.height = buttonHeight;
-    
-    runOneButton.x = buttonX;
-    runOneButton.y = yPos + buttonHeight + buttonSpacing;
-    runOneButton.width = buttonWidth;
-    runOneButton.height = buttonHeight;
-    
-    closeOverlayButton.x = overlayX + overlayWidth / 2 - 60;
-    closeOverlayButton.y = overlayY + overlayHeight - 55;
-    closeOverlayButton.width = 120;
-    closeOverlayButton.height = 40;
-    
-    // Draw Run All button
+    // Draw buttons (now fixed positions from InitializeOverlayButtons)
     Color runAllColor = runAllHovered ? DARKGREEN : GREEN;
     DrawRectangleRec(runAllButton, runAllColor);
     DrawRectangleLinesEx(runAllButton, 2, BLACK);
@@ -838,7 +1001,6 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
              16,
              WHITE);
     
-    // Draw Run One button
     Color runOneColor = runOneHovered ? ORANGE : Color{255, 150, 50, 255};
     DrawRectangleRec(runOneButton, runOneColor);
     DrawRectangleLinesEx(runOneButton, 2, BLACK);
@@ -850,7 +1012,6 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
              16,
              WHITE);
     
-    // Draw Close button
     Color closeColor = closeOverlayHovered ? DARKGRAY : GRAY;
     DrawRectangleRec(closeOverlayButton, closeColor);
     DrawRectangleLinesEx(closeOverlayButton, 2, BLACK);
