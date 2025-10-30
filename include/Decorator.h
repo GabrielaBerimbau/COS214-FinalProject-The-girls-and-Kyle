@@ -15,13 +15,10 @@
  * @see DecorativePotDecorator
  */
 
-//  ========== TESTING WORKFLOWS ===========
-
 #ifndef DECORATOR_H
 #define DECORATOR_H
 
 #include <sstream>
-
 #include "Plant.h"
 
 /**
@@ -88,6 +85,42 @@ class Decorator : public Plant {
          * @return String representation of the plant
          */
         std::string toString() const override;
+
+        /**
+         * @brief Strips all decorators and returns the base plant
+         * 
+         * Recursively unwraps the decorator chain to find and return the
+         * underlying base plant object. The decorators are NOT deleted,
+         * only the pointer to the base plant is returned.
+         * 
+         * @return Pointer to the base Plant (not a Decorator)
+         */
+        static Plant* stripDecorations(Plant* plant);
+
+        /**
+         * @brief Checks if a plant is decorated
+         * 
+         * @param plant Pointer to plant to check
+         * @return true if plant is wrapped in any decorator, false otherwise
+         */
+        static bool isDecorated(Plant* plant);
+
+        /**
+         * @brief Gets the base plant without deleting decorators
+         * 
+         * Traverses the decorator chain to find the base plant.
+         * Does NOT take ownership or delete anything.
+         * 
+         * @return Pointer to base plant
+         */
+        Plant* getBasePlant();
+
+        /**
+         * @brief Gets the wrapped plant (may be another decorator or base plant)
+         * 
+         * @return Pointer to the directly wrapped plant
+         */
+        Plant* getWrappedPlant() const;
 
     protected:
         /**
