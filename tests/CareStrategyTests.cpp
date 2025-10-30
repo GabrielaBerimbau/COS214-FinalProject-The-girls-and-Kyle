@@ -13,6 +13,30 @@
 #include "include/OtherPlantCareStrategy.h"
 #include "include/Plant.h"
 
+
+/**
+ * @brief Test fixture for initializing reusable plant and strategy objects.
+ * 
+ * This base fixture provides a common setup() method for tests that may need
+ * an initialized plant or preconfigured conditions.
+ */
+class CareStrategyTests : public ::testing::Test {
+protected:
+    Plant* plant;
+
+    void SetUp() override {
+        // Initialize a default plant for reuse in tests
+        plant = new Plant("TestPlant", "000", nullptr, nullptr);
+        plant->setWaterLevel(50);
+        plant->setNutrientLevel(50);
+        plant->setSunlightExposure(0);
+    }
+
+    void TearDown() override {
+        delete plant;
+    }
+};
+
 // ==================== FlowerCareStrategy Tests ====================
 
 TEST(FlowerCareStrategyTest, WaterAdds50Units) {
