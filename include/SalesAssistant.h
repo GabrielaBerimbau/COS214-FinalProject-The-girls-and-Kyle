@@ -28,8 +28,6 @@
 class SalesAssistant: public StaffMembers{
     private:
         CareScheduler* scheduler;
-        std::string name;
-        std::string id;
 
     public:
         /**
@@ -66,17 +64,6 @@ class SalesAssistant: public StaffMembers{
          */
         Plant* findRequestedPlant(std::string plantName);
         
-        /**
-         * @brief Get staff name
-         * @return Staff name
-         */
-        std::string getName() const;
-        
-        /**
-         * @brief Get staff ID
-         * @return Staff ID
-         */
-        std::string getId() const;
         
         /**
          * @brief Run all scheduled care tasks

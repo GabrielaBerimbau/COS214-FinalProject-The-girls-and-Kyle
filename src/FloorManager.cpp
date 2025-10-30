@@ -61,11 +61,3 @@ void FloorManager::handleRequest(Request* request){
 void FloorManager::handleRequest(){
     std::cout << "FloorManager " << getId() << ": Handling general request\n";
 }
-
-std::string FloorManager::getId() const{
-    return id;
-}
-
-std::string FloorManager::getName() const{
-    return name;
-}

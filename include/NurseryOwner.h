@@ -22,8 +22,6 @@
 
 class NurseryOwner: public StaffMembers{
     private:
-        std::string name;
-        std::string id;
 
     public:
         /**
@@ -47,17 +45,7 @@ class NurseryOwner: public StaffMembers{
          */
         void handleRequest() override;
         
-        /**
-         * @brief Get staff name
-         * @return Staff name
-         */
-        std::string getName() const;
-        
-        /**
-         * @brief Get staff ID
-         * @return Staff ID
-         */
-        std::string getId() const;
+
 };
 
 #endif

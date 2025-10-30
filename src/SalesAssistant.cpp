@@ -103,10 +103,3 @@ void SalesAssistant::runCareScheduler(){
     }
 }
 
-std::string SalesAssistant::getId() const{
-    return id;
-}
-
-std::string SalesAssistant::getName() const{
-    return name;
-}
