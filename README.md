@@ -8,15 +8,15 @@ A comprehensive C++ simulation of a plant nursery management system, demonstrati
 
 ## Table of Contents
 
-- [Overview](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#overview)
-- [Getting Started](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#getting-started)
-- [How to Use](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#how-to-use)
-- [System Architecture](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#system-architecture)
-- [Testing](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#testing)
-- [Project Structure](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#project-structure)
-- [Troubleshooting](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#troubleshooting)
-- [Contributors](https://claude.ai/chat/7c4ef6d6-cdaf-46ae-a0c9-bd23b034e881#contributors)
-
+- [Overview](#overview)
+- [Getting Started](#getting-started)
+- [How to Use](#how-to-use)
+- [System Architecture](#system-architecture)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Contributors](#contributors)
+- [Technical Details](#technical-details)
 ---
 
 ## Overview
@@ -123,7 +123,7 @@ The setup process typically takes 2-5 minutes depending on your internet connect
 
 ---
 
-## How to Use
+## How-to-Use
 
 ### Available Commands
 
@@ -193,7 +193,7 @@ The program outputs detailed logs of each operation, making it useful for unders
 
 ---
 
-## System Architecture
+## System-Architecture
 
 ### Design Patterns Implementation
 
@@ -396,7 +396,7 @@ All tests follow the Arrange-Act-Assert pattern and include both positive and ne
 
 ---
 
-## Project Structure
+## Project-Structure
 
 ### Directory Organization
 
@@ -582,7 +582,7 @@ This project was developed as part of the COS214 (Design Patterns) course to dem
 
 ---
 
-## Technical Details
+## Technical-Details
 
 **Language**: C++17  
 **Graphics Library**: Raylib 4.5  
