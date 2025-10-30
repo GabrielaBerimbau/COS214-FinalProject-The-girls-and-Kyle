@@ -89,15 +89,37 @@ bool Customer::returnPlantToSalesFloor(int cartIndex) {
     std::cout << "[Customer] " << getName() << " returning plant " 
               << plant->getID() << " to sales floor\n";
     
-    // Try to return via mediator FIRST
-    bool success = mediator->returnPlantToDisplay(plant);
+    // Check if plant is decorated and strip decorations
+    Plant* plantToReturn = plant;
+    if (Decorator::isDecorated(plant)) {
+        std::cout << "[Customer] Plant is decorated. Stripping decorations before return...\n";
+        plantToReturn = Decorator::stripDecorations(plant);
+        
+        if (plantToReturn == nullptr) {
+            std::cout << "[Customer] Error stripping decorations.\n";
+            return false;
+        }
+        
+        // Update cart pointer to null since we've handled the decorated plant
+        cart[cartIndex] = nullptr;
+        std::cout << "[Customer] Decorations removed. Returning base plant.\n";
+    }
+    
+    // Try to return via mediator
+    bool success = mediator->returnPlantToDisplay(plantToReturn);
     
     if (success) {
-        // Only remove from cart if mediator succeeded
+        // Remove from cart (either nullptr or the plant if it wasn't decorated)
         cart.erase(cart.begin() + cartIndex);
         std::cout << "[Customer] Successfully returned plant to sales floor.\n";
     } else {
         std::cout << "[Customer] Failed to return plant to sales floor.\n";
+        // If we stripped decorations but return failed, we have a problem
+        // The base plant exists but decorators are deleted
+        if (Decorator::isDecorated(plant)) {
+            // Restore the plant pointer if return failed
+            cart[cartIndex] = plantToReturn;
+        }
     }
     
     return success;
