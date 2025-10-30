@@ -1,0 +1,40 @@
+name: Sanitizers (ASan + UBSan)
+
+on:
+  pull_request:
+    branches: [ Dev, dev, main ]
+  push:
+    branches: [ Dev, dev ]
+  workflow_dispatch: {}
+
+jobs:
+  asan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+
+      - name: Install clang
+        run: |
+          sudo apt-get update -o Acquire::Retries=3
+          sudo apt-get install -y --no-install-recommends clang make g++
+
+      - name: Build with sanitizers
+        env:
+          CC: clang
+          CXX: clang++
+          CXXFLAGS: >-
+            -O1 -g -fno-omit-frame-pointer
+            -fsanitize=address,undefined
+            -fno-sanitize-recover=all
+          LDFLAGS: -fsanitize=address,undefined
+        run: |
+          make clean || true
+          make -j"$(nproc)" build-all
+
+      - name: Run tests (sanitized)
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1:strict_string_checks=1:check_initialization_order=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: |
+          make -j"$(nproc)" test
