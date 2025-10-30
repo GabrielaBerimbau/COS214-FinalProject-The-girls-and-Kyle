@@ -64,8 +64,13 @@ private:
     bool runOneHovered;
     bool closeOverlayHovered;
     
+    // FIXED: Track actual queue size for display
+    int displayedQueueSize;
+    
     void InitializeLayout();
     void InitializeButtons();
+    // FIXED: New method to initialize overlay buttons once
+    void InitializeOverlayButtons();
     void UpdateGrid();
     void UpdateButtons();
     void UpdateSchedulerOverlay();
@@ -90,6 +95,8 @@ private:
     void HandleAdvanceDay();
     void HandleRunAllScheduled();
     void HandleRunOneScheduled();
+    
+    int CountQueuedTasks();
     
 public:
     StaffGreenhouseScreen(ScreenManager* mgr);

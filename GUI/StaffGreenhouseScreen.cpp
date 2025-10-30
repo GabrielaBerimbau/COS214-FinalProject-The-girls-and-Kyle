@@ -30,13 +30,17 @@ StaffGreenhouseScreen::StaffGreenhouseScreen(ScreenManager* mgr)
       schedulerTasksExecuted(false),
       runAllHovered(false),
       runOneHovered(false),
-      closeOverlayHovered(false) {
+      closeOverlayHovered(false),
+      displayedQueueSize(0) {
     
     gridRows = 6;
     gridCols = 8;
     
     InitializeLayout();
     InitializeButtons();
+    
+    // FIXED: Initialize button positions as fixed (not recalculated each frame)
+    InitializeOverlayButtons();
 }
 
 StaffGreenhouseScreen::~StaffGreenhouseScreen() {
@@ -129,6 +133,35 @@ void StaffGreenhouseScreen::InitializeButtons() {
     };
 }
 
+// FIXED: New method to initialize overlay buttons once
+void StaffGreenhouseScreen::InitializeOverlayButtons() {
+    int overlayWidth = 650;
+    int overlayHeight = 500;
+    int overlayX = (screenWidth - overlayWidth) / 2;
+    int overlayY = (screenHeight - overlayHeight) / 2;
+    
+    int buttonWidth = 240;
+    int buttonHeight = 50;
+    int buttonSpacing = 15;
+    int buttonX = overlayX + (overlayWidth - buttonWidth) / 2;
+    int yPos = overlayY + 350;  // Fixed Y position
+    
+    runAllButton.x = buttonX;
+    runAllButton.y = yPos;
+    runAllButton.width = buttonWidth;
+    runAllButton.height = buttonHeight;
+    
+    runOneButton.x = buttonX;
+    runOneButton.y = yPos + buttonHeight + buttonSpacing;
+    runOneButton.width = buttonWidth;
+    runOneButton.height = buttonHeight;
+    
+    closeOverlayButton.x = overlayX + overlayWidth / 2 - 60;
+    closeOverlayButton.y = overlayY + overlayHeight - 55;
+    closeOverlayButton.width = 120;
+    closeOverlayButton.height = 40;
+}
+
 void StaffGreenhouseScreen::Update() {
     CareScheduler* scheduler = manager->GetCareScheduler();
     if (scheduler != nullptr) {
@@ -204,7 +237,6 @@ void StaffGreenhouseScreen::UpdateSchedulerOverlay() {
         } else if (runOneHovered) {
             HandleRunOneScheduled();
         } else if (closeOverlayHovered) {
-            // Close and advance day if we executed tasks
             if (schedulerTasksExecuted) {
                 std::cout << "[StaffGreenhouseScreen] Closing overlay and advancing day..." << std::endl;
                 manager->PerformDailyUpdate();
@@ -216,7 +248,6 @@ void StaffGreenhouseScreen::UpdateSchedulerOverlay() {
     }
     
     if (IsKeyPressed(KEY_ESCAPE)) {
-        // Close and advance day if we executed tasks
         if (schedulerTasksExecuted) {
             std::cout << "[StaffGreenhouseScreen] Closing overlay (ESC) and advancing day..." << std::endl;
             manager->PerformDailyUpdate();
@@ -348,10 +379,38 @@ void StaffGreenhouseScreen::HandleRunScheduler() {
     if (scheduler != nullptr && !scheduler->empty()) {
         schedulerOverlayActive = true;
         schedulerTasksExecuted = false;
-        std::cout << "[StaffGreenhouseScreen] Opening scheduler overlay..." << std::endl;
+        
+        // FIXED: Calculate initial queue size when opening overlay
+        displayedQueueSize = CountQueuedTasks();
+        
+        std::cout << "[StaffGreenhouseScreen] Opening scheduler overlay with " 
+                  << displayedQueueSize << " tasks..." << std::endl;
     } else {
         std::cout << "[StaffGreenhouseScreen] No tasks in scheduler" << std::endl;
     }
+}
+
+// FIXED: New method to count actual queued tasks
+int StaffGreenhouseScreen::CountQueuedTasks() {
+    CareScheduler* scheduler = manager->GetCareScheduler();
+    Greenhouse* greenhouse = manager->GetGreenhouse();
+    
+    if (scheduler == nullptr || greenhouse == nullptr || scheduler->empty()) {
+        return 0;
+    }
+    
+    int taskCount = 0;
+    std::vector<Plant*> allPlants = greenhouse->getAllPlants();
+    
+    for (Plant* plant : allPlants) {
+        if (plant != nullptr) {
+            if (plant->getWaterLevel() < 30) taskCount++;
+            if (plant->getNutrientLevel() < 30) taskCount++;
+            if (plant->getSunlightExposure() < 40) taskCount++;
+        }
+    }
+    
+    return taskCount;
 }
 
 void StaffGreenhouseScreen::HandleRunAllScheduled() {
@@ -360,10 +419,13 @@ void StaffGreenhouseScreen::HandleRunAllScheduled() {
         std::cout << "[StaffGreenhouseScreen] Running all scheduled tasks..." << std::endl;
         scheduler->runAll();
         schedulerTasksExecuted = true;
+        
+        // FIXED: Update displayed queue size after running
+        displayedQueueSize = 0;
+        
         std::cout << "[StaffGreenhouseScreen] All tasks completed. Close overlay to advance day." << std::endl;
         schedulerOverlayActive = false;
         
-        // Advance day immediately after running all
         manager->PerformDailyUpdate();
         std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
         schedulerTasksExecuted = false;
@@ -377,11 +439,16 @@ void StaffGreenhouseScreen::HandleRunOneScheduled() {
         scheduler->runNext();
         schedulerTasksExecuted = true;
         
-        if (scheduler->empty()) {
+        // FIXED: Update displayed queue size after running one task
+        displayedQueueSize = CountQueuedTasks();
+        
+        std::cout << "[StaffGreenhouseScreen] Task executed. Remaining tasks: " 
+                  << displayedQueueSize << std::endl;
+        
+        if (scheduler->empty() || displayedQueueSize == 0) {
             std::cout << "[StaffGreenhouseScreen] All tasks completed" << std::endl;
             schedulerOverlayActive = false;
             
-            // Advance day after completing all tasks
             manager->PerformDailyUpdate();
             std::cout << "[StaffGreenhouseScreen] Day advanced to: " << manager->GetDaysCounter() << std::endl;
             schedulerTasksExecuted = false;
@@ -723,19 +790,17 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
     
     int yPos = overlayY + 60;
     
-    CareScheduler* scheduler = manager->GetCareScheduler();
-    if (scheduler != nullptr && !scheduler->empty()) {
+    // FIXED: Use displayedQueueSize instead of recalculating
+    if (displayedQueueSize > 0) {
         DrawText("Next 3 Queued Tasks:", overlayX + 20, yPos, 18, YELLOW);
         yPos += 30;
         
-        // Get all plants and identify which need care
         Greenhouse* greenhouse = manager->GetGreenhouse();
         if (greenhouse != nullptr) {
             std::vector<Plant*> allPlants = greenhouse->getAllPlants();
             
             std::vector<std::string> taskList;
             
-            // Build list of tasks in order
             for (Plant* plant : allPlants) {
                 if (plant != nullptr) {
                     if (plant->getWaterLevel() < 30) {
@@ -759,13 +824,11 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
                 }
             }
             
-            // Display next 3 tasks
             int tasksToShow = taskList.size() < 3 ? taskList.size() : 3;
             for (int i = 0; i < tasksToShow; i++) {
                 std::ostringstream taskNum;
                 taskNum << (i + 1) << ". " << taskList[i];
                 
-                // Color code by task type
                 Color taskColor = WHITE;
                 if (taskList[i].find("Water") != std::string::npos) {
                     taskColor = SKYBLUE;
@@ -781,7 +844,6 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
             
             yPos += 10;
             
-            // Show total remaining
             if (taskList.size() > 3) {
                 std::ostringstream remaining;
                 remaining << "...and " << (taskList.size() - 3) << " more tasks";
@@ -789,9 +851,9 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
                 yPos += 25;
             }
             
-            // Show total count
+            // FIXED: Show current count using displayedQueueSize
             std::ostringstream totalText;
-            totalText << "Total: " << taskList.size() << " tasks queued";
+            totalText << "Total: " << displayedQueueSize << " tasks queued";
             DrawText(totalText.str().c_str(), overlayX + 30, yPos, 16, YELLOW);
             yPos += 15;
         }
@@ -802,31 +864,13 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
         
         DrawText("Choose an action:", overlayX + 20, yPos, 16, WHITE);
         yPos += 35;
+    } else {
+        DrawText("No tasks in queue!", overlayX + 30, yPos, 18, ORANGE);
+        yPos += 40;
+        DrawText("All plants are well cared for.", overlayX + 30, yPos, 14, GREEN);
     }
     
-    // Draw buttons with proper spacing
-    int buttonWidth = 240;
-    int buttonHeight = 50;
-    int buttonSpacing = 15;
-    int buttonX = overlayX + (overlayWidth - buttonWidth) / 2;
-    
-    // Update button positions
-    runAllButton.x = buttonX;
-    runAllButton.y = yPos;
-    runAllButton.width = buttonWidth;
-    runAllButton.height = buttonHeight;
-    
-    runOneButton.x = buttonX;
-    runOneButton.y = yPos + buttonHeight + buttonSpacing;
-    runOneButton.width = buttonWidth;
-    runOneButton.height = buttonHeight;
-    
-    closeOverlayButton.x = overlayX + overlayWidth / 2 - 60;
-    closeOverlayButton.y = overlayY + overlayHeight - 55;
-    closeOverlayButton.width = 120;
-    closeOverlayButton.height = 40;
-    
-    // Draw Run All button
+    // Draw buttons (now fixed positions from InitializeOverlayButtons)
     Color runAllColor = runAllHovered ? DARKGREEN : GREEN;
     DrawRectangleRec(runAllButton, runAllColor);
     DrawRectangleLinesEx(runAllButton, 2, BLACK);
@@ -838,7 +882,6 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
              16,
              WHITE);
     
-    // Draw Run One button
     Color runOneColor = runOneHovered ? ORANGE : Color{255, 150, 50, 255};
     DrawRectangleRec(runOneButton, runOneColor);
     DrawRectangleLinesEx(runOneButton, 2, BLACK);
@@ -850,7 +893,6 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
              16,
              WHITE);
     
-    // Draw Close button
     Color closeColor = closeOverlayHovered ? DARKGRAY : GRAY;
     DrawRectangleRec(closeOverlayButton, closeColor);
     DrawRectangleLinesEx(closeOverlayButton, 2, BLACK);
