@@ -5,10 +5,10 @@
 #include <iostream>
 
 /**
- * @brief Constructor for GrowingState
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
- * Initializes the growing state and outputs a message indicating
- * the plant has entered this active growth stage.
+ * @brief Constructor for GrowingState
  */
 GrowingState::GrowingState() {
     std::cout << "Plant entered Growing state." << std::endl;
@@ -16,28 +16,12 @@ GrowingState::GrowingState() {
 
 /**
  * @brief Destructor for GrowingState
- * 
- * Cleans up the growing state object. No special cleanup required.
  */
 GrowingState::~GrowingState() {
 }
 
 /**
  * @brief Handle growing-specific behavior and state transitions
- * 
- * Manages the plant's behavior during the active growth stage by:
- * 1. Checking if the plant has died due to poor health (health < 20%)
- *    - If so, transitions to DeadState
- * 2. Checking if the plant is ready to transition to mature stage
- *    - Requires: age ≥ 12 days AND health ≥ 50%
- *    - If conditions met, transitions to MatureState
- * 3. Monitoring water levels and alerting if low (< 30%)
- * 4. Monitoring nutrient levels and alerting if low (< 25%)
- * 
- * Growing plants require regular maintenance to ensure they develop
- * properly and reach maturity in good health.
- * 
- * @param plant Pointer to the plant whose state is being managed
  */
 void GrowingState::handleChange(Plant* plant) {
     
@@ -71,11 +55,6 @@ void GrowingState::handleChange(Plant* plant) {
 
 /**
  * @brief Get the name of this state
- * 
- * Returns a string identifier for the growing state, used for
- * display purposes and state identification throughout the system.
- * 
- * @return std::string Returns "Growing"
  */
 std::string GrowingState::getStateName() {
     return "Growing";

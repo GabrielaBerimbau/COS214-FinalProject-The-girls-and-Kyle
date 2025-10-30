@@ -5,10 +5,10 @@
 #include <iostream>
 
 /**
- * @brief Constructor for SeedlingState
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * 
- * Initializes the seedling state and outputs a message indicating
- * the plant has entered this stage of growth.
+ * @brief Constructor for SeedlingState
  */
 SeedlingState::SeedlingState() {
     std::cout << "Plant entered Seedling state." << std::endl;
@@ -17,26 +17,12 @@ SeedlingState::SeedlingState() {
 /**
  * @brief Destructor for SeedlingState
  * 
- * Cleans up the seedling state object. No special cleanup required.
  */
 SeedlingState::~SeedlingState() {
 }
 
 /**
  * @brief Handle seedling-specific behavior and state transitions
- * 
- * Manages the plant's behavior during the seedling stage by:
- * 1. Checking if the plant has died due to poor health (health < 20%)
- *    - If so, transitions to DeadState
- * 2. Checking if the seedling is ready to transition to growing stage
- *    - Requires: age ≥ 7 days AND health ≥ 50%
- *    - If conditions met, transitions to GrowingState
- * 3. Monitoring water levels and alerting if critically low (< 40%)
- * 
- * Seedlings are the most vulnerable stage and require frequent attention
- * to survive and progress to the next growth stage.
- * 
- * @param plant Pointer to the plant whose state is being managed
  */
 void SeedlingState::handleChange(Plant* plant) {
     int age = plant->getAge();
@@ -64,11 +50,6 @@ void SeedlingState::handleChange(Plant* plant) {
 
 /**
  * @brief Get the name of this state
- * 
- * Returns a string identifier for the seedling state, used for
- * display purposes and state identification throughout the system.
- * 
- * @return std::string Returns "Seedling"
  */
 std::string SeedlingState::getStateName() {
     return "Seedling";

@@ -5,10 +5,9 @@
 #include <iostream>
 
 /**
+ * @author Sofia Finlayson
+ * @date 2025-10-26
  * @brief Constructor for MatureState
- * 
- * Initializes the mature state and outputs a message indicating
- * the plant has reached full maturity and is ready for sale.
  */
 MatureState::MatureState() {
     std::cout << "Plant entered Mature state - ready for sale!" << std::endl;
@@ -16,28 +15,12 @@ MatureState::MatureState() {
 
 /**
  * @brief Destructor for MatureState
- * 
- * Cleans up the mature state object. No special cleanup required.
  */
 MatureState::~MatureState() {
 }
 
 /**
  * @brief Handle mature-specific behavior and state transitions
- * 
- * Manages the plant's behavior during the mature stage by:
- * 1. Checking if the plant has died due to poor health (health < 10%)
- *    - If so, transitions to DeadState
- * 2. Checking if the plant is ready to begin flowering (age ≥ 35 days, health ≥ 80%)
- *    - If conditions met, transitions to FloweringState
- * 3. Marking the plant as ready for sale
- * 4. Monitoring water levels and alerting if low (< 20%)
- * 
- * Mature plants represent the stable, sale-ready stage and should be
- * moved from the Greenhouse to the SalesFloor for customer purchase.
- * Plants with excellent health may transition to flowering.
- * 
- * @param plant Pointer to the plant whose state is being managed
  */
 void MatureState::handleChange(Plant* plant) {
    int age = plant->getAge();
@@ -70,11 +53,6 @@ void MatureState::handleChange(Plant* plant) {
 
 /**
  * @brief Get the name of this state
- * 
- * Returns a string identifier for the mature state, used for
- * display purposes and state identification throughout the system.
- * 
- * @return std::string Returns "Mature"
  */
 std::string MatureState::getStateName() {
     return "Mature";
