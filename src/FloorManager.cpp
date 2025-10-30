@@ -1,3 +1,14 @@
+/**
+ * @file FloorManager.cpp
+ * @brief Short implementation notes for FloorManager.
+ *
+ * Implementation details for the `FloorManager` request handling. See the
+ * header (`FloorManager.h`) for full responsibilities and usage examples.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-30
+ */
+
 #include "../include/FloorManager.h"
 #include <iostream>
 #include <cstdlib>
@@ -49,12 +60,4 @@ void FloorManager::handleRequest(Request* request){
 
 void FloorManager::handleRequest(){
     std::cout << "FloorManager " << getId() << ": Handling general request\n";
-}
-
-std::string FloorManager::getId() const{
-    return id;
-}
-
-std::string FloorManager::getName() const{
-    return name;
 }

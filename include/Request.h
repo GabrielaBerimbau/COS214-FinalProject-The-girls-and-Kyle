@@ -7,6 +7,31 @@
 class Customer;
 
 /**
+ * @file Request.h
+ * @brief Request object for Chain of Responsibility pattern
+ *
+ * Request encapsulates customer inquiries that flow through the staff
+ * chain of responsibility. Features include:
+ * - Automatic priority level determination
+ * - Natural language parsing
+ * - Tracking of request state
+ * - Customer association
+ *
+ * Request levels determine handler:
+ * - LOW: Basic inquiries (SalesAssistant)
+ * - MEDIUM: Special orders (FloorManager)
+ * - HIGH: Complaints/refunds (NurseryOwner)
+ *
+ * Design approach:
+ * - Keyword-based request classification
+ * - Internal state tracking
+ * - Customer context preservation
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
+/**
  * @enum RequestLevel
  * @brief Priority levels for requests in chain of responsibility
  */

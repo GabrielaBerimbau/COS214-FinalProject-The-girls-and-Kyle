@@ -9,8 +9,25 @@ class Plant;
 class Customer;
 
 /**
- * @class NurseryMediator
- * @brief Mediator that coordinates communication between different nursery components
+ * @file NurseryMediator.h
+ * @brief Mediator interface for coordinating nursery components (Mediator pattern)
+ *
+ * The NurseryMediator centralises interactions between colleagues such as
+ * the `SalesFloor`, `Greenhouse`, `Customer` and staff members. This reduces
+ * direct coupling between components and encapsulates cooperation logic:
+ * - locating plants on the sales floor or greenhouse
+ * - transferring plants between locations and customers
+ * - registering and notifying colleagues
+ *
+ * Responsibilities:
+ * - Provide lookup and transfer operations used by staff and customers.
+ * - Maintain the list of registered colleagues and route notifications.
+ *
+ * To extend: implement new high-level coordination methods in the header
+ * and keep implementation details in the corresponding .cpp file.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
  */
 class NurseryMediator{
     protected:

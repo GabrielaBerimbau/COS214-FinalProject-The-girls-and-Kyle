@@ -1,3 +1,14 @@
+/**
+ * @file NurseryOwner.cpp
+ * @brief Short implementation notes for NurseryOwner.
+ *
+ * Implementation of final request handler in staff chain. See
+ * `NurseryOwner.h` for complete description of responsibilities.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-30
+ */
+
 #include "../include/NurseryOwner.h"
 #include <iostream>
 #include <cstdlib>
@@ -38,12 +49,4 @@ void NurseryOwner::handleRequest(Request* request){
 
 void NurseryOwner::handleRequest(){
     std::cout << "NurseryOwner " << getId() << ": Handling general request\n";
-}
-
-std::string NurseryOwner::getId() const{
-    return id;
-}
-
-std::string NurseryOwner::getName() const{
-    return name;
 }

@@ -4,10 +4,26 @@
 #include "StaffMembers.h"
 #include <string>
 
+/**
+ * @file FloorManager.h
+ * @brief Mid-level handler in the staff chain (Chain of Responsibility)
+ *
+ * The FloorManager handles medium-complexity requests such as bulk orders or
+ * special arrangements. If the request is outside its scope it escalates
+ * to the next handler (e.g. NurseryOwner).
+ *
+ * Concrete implementations should focus on domain-specific logic and call
+ * `request->markHandled()` when a request has been satisfied.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
+/**
+ * @class FloorManager
+*/
 class FloorManager: public StaffMembers{
     private:
-        std::string name;
-        std::string id;
 
     public:
         /**
@@ -31,17 +47,7 @@ class FloorManager: public StaffMembers{
          */
         void handleRequest() override;
         
-        /**
-         * @brief Get staff name
-         * @return Staff name
-         */
-        std::string getName() const;
-        
-        /**
-         * @brief Get staff ID
-         * @return Staff ID
-         */
-        std::string getId() const;
+
 };
 
 #endif

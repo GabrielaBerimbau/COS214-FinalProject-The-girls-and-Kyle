@@ -1,3 +1,15 @@
+/**
+ * @file NurseryMediator.cpp
+ * @brief Short implementation notes for NurseryMediator.
+ *
+ * See `NurseryMediator.h` for the full design and responsibilities. This
+ * file contains the concrete implementations of the mediator coordination
+ * operations. Keep only short, implementation-level comments here.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-30
+ */
+
 #include "../include/NurseryMediator.h"
 #include "../include/Colleague.h"
 #include "../include/Plant.h"

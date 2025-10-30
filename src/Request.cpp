@@ -1,3 +1,14 @@
+/**
+ * @file Request.cpp
+ * @brief Implementation of Request class for Chain of Responsibility
+ *
+ * Contains the concrete implementation of request parsing and
+ * classification logic. See Request.h for complete interface details.
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
 #include "../include/Request.h"
 #include "../include/Customer.h"
 #include <algorithm>
