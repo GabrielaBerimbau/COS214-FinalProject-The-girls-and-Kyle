@@ -60,46 +60,51 @@ void OrderCreationScreen::InitializeLayout() {
 }
 
 void OrderCreationScreen::InitializeButtons() {
-    int buttonWidth = 200;
-    int buttonHeight = 50;
-    int buttonSpacing = 20;
-    int bottomY = screenHeight - 100;
+    int buttonWidth = 180;
+    int buttonHeight = 45;
+    int buttonSpacing = 15;
+    int bottomY = screenHeight - 110;
 
-    // Left side buttons
+    // Bottom row - centered horizontally, evenly spaced
+    int totalWidth = (buttonWidth * 4) + (buttonSpacing * 3);
+    int startX = (screenWidth - totalWidth) / 2;
+
+    // Row 1: Main action buttons (left to right)
     addToOrderButton = Rectangle{
-        leftPanel.x,
+        static_cast<float>(startX),
         static_cast<float>(bottomY),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
 
-    backButton = Rectangle{
-        leftPanel.x,
-        static_cast<float>(bottomY + buttonHeight + 10),
-        static_cast<float>(buttonWidth),
-        static_cast<float>(buttonHeight)
-    };
-
-    // Right side buttons
     createSuborderButton = Rectangle{
-        rightPanel.x,
+        static_cast<float>(startX + buttonWidth + buttonSpacing),
         static_cast<float>(bottomY),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
 
     restartButton = Rectangle{
-        rightPanel.x + buttonWidth + buttonSpacing,
+        static_cast<float>(startX + (buttonWidth + buttonSpacing) * 2),
         static_cast<float>(bottomY),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
 
-    proceedToCheckoutButton = Rectangle{
-        static_cast<float>(screenWidth / 2 - buttonWidth / 2),
-        static_cast<float>(bottomY + buttonHeight + 10),
+    backButton = Rectangle{
+        static_cast<float>(startX + (buttonWidth + buttonSpacing) * 3),
+        static_cast<float>(bottomY),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
+    };
+
+    // Row 2: Proceed to Checkout (centered, larger)
+    int checkoutWidth = 250;
+    proceedToCheckoutButton = Rectangle{
+        static_cast<float>(screenWidth / 2 - checkoutWidth / 2),
+        static_cast<float>(bottomY + buttonHeight + buttonSpacing),
+        static_cast<float>(checkoutWidth),
+        static_cast<float>(buttonHeight + 5)
     };
 
     // Suborder name input modal (centered)
@@ -427,8 +432,8 @@ void OrderCreationScreen::HandleProceedToCheckout() {
 }
 
 void OrderCreationScreen::HandleBack() {
-    std::cout << "[OrderCreationScreen] Returning to cart view" << std::endl;
-    manager->SwitchScreen(GameScreen::CART_VIEW);
+    std::cout << "[OrderCreationScreen] Returning to sales floor" << std::endl;
+    manager->SwitchScreen(GameScreen::SALES_FLOOR);
 }
 
 void OrderCreationScreen::HandleRestart() {
@@ -614,6 +619,8 @@ void OrderCreationScreen::DrawOrderNode(OrderNode* node, int& yPos) {
 }
 
 void OrderCreationScreen::DrawButtons() {
+    int fontSize = 18;
+
     // Add to Order button
     bool canAdd = selectedCartIndex >= 0 && selectedCartIndex < (int)cartTrackers.size()
                   && !cartTrackers[selectedCartIndex].isAddedToOrder
@@ -623,24 +630,12 @@ void OrderCreationScreen::DrawButtons() {
     DrawRectangleRec(addToOrderButton, addColor);
     DrawRectangleLinesEx(addToOrderButton, 2, BLACK);
     const char* addText = "ADD TO ORDER";
-    int addTextWidth = MeasureText(addText, 20);
+    int addTextWidth = MeasureText(addText, fontSize);
     DrawText(addText,
              addToOrderButton.x + (addToOrderButton.width - addTextWidth) / 2,
-             addToOrderButton.y + (addToOrderButton.height - 20) / 2,
-             20,
+             addToOrderButton.y + (addToOrderButton.height - fontSize) / 2,
+             fontSize,
              canAdd ? WHITE : DARKGRAY);
-
-    // Back button
-    Color backColor = backHovered ? DARKGRAY : GRAY;
-    DrawRectangleRec(backButton, backColor);
-    DrawRectangleLinesEx(backButton, 2, BLACK);
-    const char* backText = "BACK TO CART";
-    int backTextWidth = MeasureText(backText, 20);
-    DrawText(backText,
-             backButton.x + (backButton.width - backTextWidth) / 2,
-             backButton.y + (backButton.height - 20) / 2,
-             20,
-             WHITE);
 
     // Create Suborder button
     bool canCreateSub = selectedOrderNode != nullptr;
@@ -648,12 +643,12 @@ void OrderCreationScreen::DrawButtons() {
                                   : Color{60, 60, 60, 255};
     DrawRectangleRec(createSuborderButton, subColor);
     DrawRectangleLinesEx(createSuborderButton, 2, BLACK);
-    const char* subText = "CREATE SUBORDER";
-    int subTextWidth = MeasureText(subText, 18);
+    const char* subText = "SUBORDER";
+    int subTextWidth = MeasureText(subText, fontSize);
     DrawText(subText,
              createSuborderButton.x + (createSuborderButton.width - subTextWidth) / 2,
-             createSuborderButton.y + (createSuborderButton.height - 18) / 2,
-             18,
+             createSuborderButton.y + (createSuborderButton.height - fontSize) / 2,
+             fontSize,
              canCreateSub ? WHITE : DARKGRAY);
 
     // Restart button
@@ -661,25 +656,38 @@ void OrderCreationScreen::DrawButtons() {
     DrawRectangleRec(restartButton, restartColor);
     DrawRectangleLinesEx(restartButton, 2, BLACK);
     const char* restartText = "RESTART";
-    int restartTextWidth = MeasureText(restartText, 20);
+    int restartTextWidth = MeasureText(restartText, fontSize);
     DrawText(restartText,
              restartButton.x + (restartButton.width - restartTextWidth) / 2,
-             restartButton.y + (restartButton.height - 20) / 2,
-             20,
+             restartButton.y + (restartButton.height - fontSize) / 2,
+             fontSize,
              WHITE);
 
-    // Proceed to Checkout button
+    // Back button (returns to sales floor)
+    Color backColor = backHovered ? Color{120, 60, 60, 255} : Color{90, 45, 45, 255};
+    DrawRectangleRec(backButton, backColor);
+    DrawRectangleLinesEx(backButton, 2, BLACK);
+    const char* backText = "BACK";
+    int backTextWidth = MeasureText(backText, fontSize);
+    DrawText(backText,
+             backButton.x + (backButton.width - backTextWidth) / 2,
+             backButton.y + (backButton.height - fontSize) / 2,
+             fontSize,
+             WHITE);
+
+    // Proceed to Checkout button (larger, bottom row)
     bool allAdded = AllCartItemsAdded();
+    int checkoutFontSize = 20;
     Color checkoutColor = allAdded ? (proceedToCheckoutHovered ? Color{220, 180, 0, 255} : Color{180, 140, 0, 255})
                                    : Color{60, 60, 60, 255};
     DrawRectangleRec(proceedToCheckoutButton, checkoutColor);
     DrawRectangleLinesEx(proceedToCheckoutButton, 3, allAdded ? GOLD : DARKGRAY);
     const char* checkoutText = "PROCEED TO CHECKOUT";
-    int checkoutTextWidth = MeasureText(checkoutText, 20);
+    int checkoutTextWidth = MeasureText(checkoutText, checkoutFontSize);
     DrawText(checkoutText,
              proceedToCheckoutButton.x + (proceedToCheckoutButton.width - checkoutTextWidth) / 2,
-             proceedToCheckoutButton.y + (proceedToCheckoutButton.height - 20) / 2,
-             20,
+             proceedToCheckoutButton.y + (proceedToCheckoutButton.height - checkoutFontSize) / 2,
+             checkoutFontSize,
              allAdded ? WHITE : DARKGRAY);
 }
 

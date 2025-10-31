@@ -78,19 +78,19 @@ void DecorationScreen::InitializeButtons() {
         50
     };
 
-    // Remove decoration buttons (small, next to preview)
+    // Remove decoration buttons (positioned to the right of preview, well-spaced)
     removeRibbonButton = Rectangle{
-        static_cast<float>(screenWidth / 2 + 200),  // Moved right from 180 to 200
-        180,  // Moved up from 200
-        140,  // Increased width from 120 to 140
-        40    // Increased height from 35 to 40
+        static_cast<float>(screenWidth / 2 + 220),  // Further right to avoid overlap
+        140,  // Higher up
+        150,  // Wider
+        45    // Taller
     };
 
     removePotButton = Rectangle{
-        static_cast<float>(screenWidth / 2 + 200),  // Moved right from 180 to 200
-        230,  // Moved up from 245
-        140,  // Increased width from 120 to 140
-        40    // Increased height from 35 to 40
+        static_cast<float>(screenWidth / 2 + 220),  // Same x as ribbon button
+        195,  // Below ribbon button with spacing
+        150,  // Same width as ribbon button
+        45    // Same height as ribbon button
     };
     
     // Confirm and Back buttons
@@ -315,26 +315,23 @@ void DecorationScreen::HandleBack() {
 
 double DecorationScreen::CalculateCurrentPrice() {
     if (currentPlant == nullptr) return 0.0;
-    
-    // Get base price
+
+    // Get base plant price (unwrap all decorators)
     Plant* basePlant = currentPlant;
-    if (Decorator::isDecorated(currentPlant)) {
-        Decorator* decorator = dynamic_cast<Decorator*>(currentPlant);
-        if (decorator != nullptr) {
-            basePlant = decorator->getBasePlant();
-        }
+    while (auto dec = dynamic_cast<Decorator*>(basePlant)) {
+        basePlant = dec->getWrappedPlant();
     }
-    
+
     double price = basePlant ? basePlant->getPrice() : 0.0;
-    
-    // Add decoration costs
+
+    // Add decoration costs based on PREVIEW selections
     if (hasRibbon) {
-        price += 15.0; // RIBBON_PRICE
+        price += 15.0; // RIBBON_PRICE from RibbonDecorator.h
     }
     if (hasPot) {
-        price += 20.0; // POT_PRICE
+        price += 80.0; // POT_PRICE from DecorativePotDecorator.h (was incorrectly 20.0)
     }
-    
+
     return price;
 }
 

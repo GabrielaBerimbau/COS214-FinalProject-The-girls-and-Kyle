@@ -172,28 +172,45 @@ void ScreenManager::PopulateInitialSalesFloor() {
     RadishFactory radishFactory;
     MonsteraFactory monsteraFactory;
     VenusFlyTrapFactory vftFactory;
-     CarrotFactory carrotFactory;
-    
+    CarrotFactory carrotFactory;
+
     std::vector<PlantFactory*> factories = {
-        &roseFactory, &daisyFactory, &cactusFactory, 
+        &roseFactory, &daisyFactory, &cactusFactory,
         &aloeFactory, &potatoFactory, &strelitziaFactory,
         &radishFactory, &monsteraFactory, &vftFactory, &carrotFactory
     };
-    
+
     // Create 10-12 mature plants for the sales floor
     int plantsToCreate = 10 + (std::rand() % 3); // 10-12 plants
-    
-    for (int i = 0; i < plantsToCreate; i++) {
-        // Random factory
-        int factoryIndex = std::rand() % factories.size();
+
+    // Track which factories have been used to ensure variety
+    std::vector<bool> factoryUsed(factories.size(), false);
+    int plantsCreated = 0;
+
+    // PHASE 1: Ensure at least one of each type (up to the total we need)
+    std::vector<int> factoryOrder;
+    for (size_t i = 0; i < factories.size(); i++) {
+        factoryOrder.push_back(i);
+    }
+
+    // Shuffle the factory order for randomness
+    for (size_t i = factoryOrder.size() - 1; i > 0; i--) {
+        size_t j = std::rand() % (i + 1);
+        std::swap(factoryOrder[i], factoryOrder[j]);
+    }
+
+    // Create at least one of each type (or until we reach our limit)
+    for (size_t i = 0; i < factoryOrder.size() && plantsCreated < plantsToCreate; i++) {
+        int factoryIndex = factoryOrder[i];
         PlantFactory* factory = factories[factoryIndex];
-        
+        factoryUsed[factoryIndex] = true;
+
         // Create plant without scheduler for sales floor (they're ready to sell)
         Plant* plant = factory->buildPlant(nullptr);
-        
+
         // Age the plant to mature state (35+ days for mature, 50+ for flowering)
         int targetAge = 35 + (std::rand() % 20); // 35-54 days
-        
+
         for (int age = 0; age < targetAge; age++) {
             // Keep plant healthy while aging
             plant->setWaterLevel(80);
@@ -201,21 +218,21 @@ void ScreenManager::PopulateInitialSalesFloor() {
             plant->setSunlightExposure(70);
             plant->updateHealth();
             plant->incrementAge();
-            
+
             // Manually trigger state changes
             if (plant->getState() != nullptr) {
                 plant->getState()->handleChange(plant);
             }
         }
-        
+
         // Ensure plant is ready for sale
         plant->setReadyForSale(true);
-        
+
         // Set a reasonable price if not already set
         if (plant->getPrice() < 10.0) {
             plant->setPrice(15.0 + (std::rand() % 35)); // R15-R50
         }
-        
+
         // Find empty spot in sales floor
         bool placed = false;
         int attempts = 0;
@@ -225,22 +242,82 @@ void ScreenManager::PopulateInitialSalesFloor() {
             if (salesFloor->isPositionEmpty(row, col)) {
                 salesFloor->addPlantToDisplay(plant, row, col);
                 placed = true;
-                std::cout << "[ScreenManager] Placed " << plant->getName() 
-                          << " (ID: " << plant->getID() << ") on sales floor at (" 
-                          << row << "," << col << ") - State: " 
-                          << plant->getState()->getStateName() 
+                plantsCreated++;
+                std::cout << "[ScreenManager] Placed " << plant->getName()
+                          << " (ID: " << plant->getID() << ") on sales floor at ("
+                          << row << "," << col << ") - State: "
+                          << plant->getState()->getStateName()
                           << ", Price: R" << plant->getPrice() << std::endl;
             }
             attempts++;
         }
-        
+
         if (!placed) {
             std::cout << "[ScreenManager] Warning: Could not place plant on sales floor" << std::endl;
             delete plant;
         }
     }
-    
-    std::cout << "[ScreenManager] Created " << plantsToCreate << " mature plants for sales floor" << std::endl;
+
+    // PHASE 2: Fill remaining slots with random plants (including repeats)
+    while (plantsCreated < plantsToCreate) {
+        // Random factory (can be any, including ones already used)
+        int factoryIndex = std::rand() % factories.size();
+        PlantFactory* factory = factories[factoryIndex];
+
+        // Create plant without scheduler for sales floor (they're ready to sell)
+        Plant* plant = factory->buildPlant(nullptr);
+
+        // Age the plant to mature state (35+ days for mature, 50+ for flowering)
+        int targetAge = 35 + (std::rand() % 20); // 35-54 days
+
+        for (int age = 0; age < targetAge; age++) {
+            // Keep plant healthy while aging
+            plant->setWaterLevel(80);
+            plant->setNutrientLevel(80);
+            plant->setSunlightExposure(70);
+            plant->updateHealth();
+            plant->incrementAge();
+
+            // Manually trigger state changes
+            if (plant->getState() != nullptr) {
+                plant->getState()->handleChange(plant);
+            }
+        }
+
+        // Ensure plant is ready for sale
+        plant->setReadyForSale(true);
+
+        // Set a reasonable price if not already set
+        if (plant->getPrice() < 10.0) {
+            plant->setPrice(15.0 + (std::rand() % 35)); // R15-R50
+        }
+
+        // Find empty spot in sales floor
+        bool placed = false;
+        int attempts = 0;
+        while (!placed && attempts < 100) {
+            int row = std::rand() % 5;
+            int col = std::rand() % 5;
+            if (salesFloor->isPositionEmpty(row, col)) {
+                salesFloor->addPlantToDisplay(plant, row, col);
+                placed = true;
+                plantsCreated++;
+                std::cout << "[ScreenManager] Placed " << plant->getName()
+                          << " (ID: " << plant->getID() << ") on sales floor at ("
+                          << row << "," << col << ") - State: "
+                          << plant->getState()->getStateName()
+                          << ", Price: R" << plant->getPrice() << std::endl;
+            }
+            attempts++;
+        }
+
+        if (!placed) {
+            std::cout << "[ScreenManager] Warning: Could not place plant on sales floor" << std::endl;
+            delete plant;
+        }
+    }
+
+    std::cout << "[ScreenManager] Created " << plantsCreated << " mature plants for sales floor with variety" << std::endl;
 }
 
 void ScreenManager::LoadAssets() {
@@ -554,9 +631,26 @@ void ScreenManager::CreateNewCustomer(double budget) {
 
 void ScreenManager::DeleteCustomer() {
     if (customer != nullptr) {
+        std::cout << "[ScreenManager] Deleting customer, returning cart items to sales floor..." << std::endl;
+
+        // Return all cart items to sales floor before deleting customer
+        int cartSize = customer->getCartSize();
+        for (int i = cartSize - 1; i >= 0; i--) {
+            bool returned = customer->returnPlantToSalesFloor(i);
+            if (returned) {
+                std::cout << "[ScreenManager] Returned cart item " << i << " to sales floor" << std::endl;
+            } else {
+                std::cout << "[ScreenManager] Warning: Failed to return cart item " << i << std::endl;
+            }
+        }
+
+        // Clean up customer's current order if it exists (prevents memory leak)
+        // Note: The order will be deleted by the customer destructor, but we should
+        // clear it to avoid potential issues
+
         mediator->removeColleague(customer);
         delete customer;
         customer = nullptr;
-        std::cout << "[ScreenManager] Deleted customer" << std::endl;
+        std::cout << "[ScreenManager] Customer deleted successfully" << std::endl;
     }
 }
