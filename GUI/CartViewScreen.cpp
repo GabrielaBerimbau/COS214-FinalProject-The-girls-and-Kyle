@@ -17,7 +17,6 @@ CartViewScreen::CartViewScreen(ScreenManager* mgr)
       leftArrowHovered(false),
       rightArrowHovered(false),
       decorateHovered(false),
-      addToOrderHovered(false),
       backHovered(false) {
     
     InitializeLayout();
@@ -35,27 +34,17 @@ void CartViewScreen::InitializeLayout() {
 void CartViewScreen::InitializeButtons() {
     int buttonWidth = 250;
     int buttonHeight = 60;
-    int buttonSpacing = 20;
-    
-    // Center buttons at bottom of screen
-    int totalButtonsWidth = buttonWidth * 2 + buttonSpacing;
-    int startX = (screenWidth - totalButtonsWidth) / 2;
+
+    // Center decorate button at bottom of screen
     int buttonY = screenHeight - 150;
-    
+
     decorateButton = Rectangle{
-        static_cast<float>(startX),
+        static_cast<float>(screenWidth / 2 - buttonWidth / 2),
         static_cast<float>(buttonY),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
-    
-    addToOrderButton = Rectangle{
-        static_cast<float>(startX + buttonWidth + buttonSpacing),
-        static_cast<float>(buttonY),
-        static_cast<float>(buttonWidth),
-        static_cast<float>(buttonHeight)
-    };
-    
+
     backToSalesFloorButton = Rectangle{
         static_cast<float>(screenWidth / 2 - 120),
         static_cast<float>(screenHeight - 70),
@@ -110,9 +99,8 @@ void CartViewScreen::UpdateButtons() {
     leftArrowHovered = hasMultipleItems && CheckCollisionPointRec(mousePos, leftArrowButton);
     rightArrowHovered = hasMultipleItems && CheckCollisionPointRec(mousePos, rightArrowButton);
     decorateHovered = CheckCollisionPointRec(mousePos, decorateButton);
-    addToOrderHovered = CheckCollisionPointRec(mousePos, addToOrderButton);
     backHovered = CheckCollisionPointRec(mousePos, backToSalesFloorButton);
-    
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (leftArrowHovered) {
             HandleLeftArrow();
@@ -120,8 +108,6 @@ void CartViewScreen::UpdateButtons() {
             HandleRightArrow();
         } else if (decorateHovered) {
             HandleDecorate();
-        } else if (addToOrderHovered) {
-            HandleAddToOrder();
         } else if (backHovered) {
             HandleBack();
         }
@@ -159,11 +145,6 @@ void CartViewScreen::HandleDecorate() {
         std::cout << "[CartViewScreen] Opening decoration screen for cart item " << currentIndex << std::endl;
         manager->SwitchScreen(GameScreen::DECORATION);
     }
-}
-
-void CartViewScreen::HandleAddToOrder() {
-    // This will be implemented when order screen is done
-    std::cout << "[CartViewScreen] Add to order - TO BE IMPLEMENTED" << std::endl;
 }
 
 void CartViewScreen::HandleBack() {
@@ -453,19 +434,7 @@ void CartViewScreen::DrawButtons() {
              decorateButton.y + (decorateButton.height - 22) / 2,
              22,
              WHITE);
-    
-    // Add to Order button
-    Color orderColor = addToOrderHovered ? Color{0, 150, 200, 255} : Color{0, 100, 150, 255};
-    DrawRectangleRec(addToOrderButton, orderColor);
-    DrawRectangleLinesEx(addToOrderButton, 3, BLACK);
-    const char* orderText = "ADD TO ORDER";
-    int orderTextWidth = MeasureText(orderText, 22);
-    DrawText(orderText,
-             addToOrderButton.x + (addToOrderButton.width - orderTextWidth) / 2,
-             addToOrderButton.y + (addToOrderButton.height - 22) / 2,
-             22,
-             WHITE);
-    
+
     // Back button
     Color backColor = backHovered ? DARKGRAY : GRAY;
     DrawRectangleRec(backToSalesFloorButton, backColor);

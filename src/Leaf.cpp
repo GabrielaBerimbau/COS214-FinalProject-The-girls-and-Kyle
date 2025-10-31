@@ -13,7 +13,7 @@ Leaf::~Leaf()
     }
 }
 
-double Leaf::getPrice()
+double Leaf::getPrice() const
 {
     // Return the price of this single physical plant
     if (plant) {
@@ -51,4 +51,9 @@ std::string Leaf::getName() const {
 
 Iterator* Leaf::createIterator() {
     return new ConcreteIterator(this);
+}
+
+void Leaf::printStructure(int indent, const std::string& prefix) const {
+    std::string indentStr(indent * 2, ' ');
+    std::cout << indentStr << prefix << getName() << " - R" << getPrice() << "\n";
 }

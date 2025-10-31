@@ -1,6 +1,7 @@
 #include "include/ConcreteOrder.h"
 #include "include/Iterator.h"
 #include "include/ConcreteIterator.h"
+#include "include/Leaf.h"
 
 ConcreteOrder::ConcreteOrder(std::string orderN) : orderName(orderN) 
 {
@@ -15,16 +16,16 @@ ConcreteOrder::~ConcreteOrder()
     plantList.clear();
 }
 
-double ConcreteOrder::getPrice()
+double ConcreteOrder::getPrice() const
 {
     double total = 0.0;
-    
+
     for (Order* plant : plantList) {
         if (plant) {
             total += plant->getPrice();
         }
     }
-    
+
     return total;
 }
 
@@ -90,4 +91,25 @@ Iterator* ConcreteOrder::createIterator() {
 
 std::vector<Order*> ConcreteOrder::getChildren() const {
     return plantList;
+}
+
+void ConcreteOrder::printStructure(int indent, const std::string& prefix) const {
+    std::string indentStr(indent * 2, ' ');
+    std::cout << indentStr << prefix << "├─ [" << orderName << "] - R" << getPrice() << "\n";
+
+    for (size_t i = 0; i < plantList.size(); ++i) {
+        if (plantList[i]) {
+            bool isLast = (i == plantList.size() - 1);
+            std::string childPrefix = isLast ? "└─ " : "├─ ";
+
+            ConcreteOrder* composite = dynamic_cast<ConcreteOrder*>(plantList[i]);
+            Leaf* leaf = dynamic_cast<Leaf*>(plantList[i]);
+
+            if (composite) {
+                composite->printStructure(indent + 1, childPrefix);
+            } else if (leaf) {
+                leaf->printStructure(indent + 1, childPrefix);
+            }
+        }
+    }
 }

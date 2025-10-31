@@ -21,6 +21,7 @@ SalesFloorScreen::SalesFloorScreen(ScreenManager* mgr)
       addToCartHovered(false),
       viewGreenhouseHovered(false),
       viewCartHovered(false),
+      createOrderHovered(false),
       makeRequestHovered(false),
       backToStartHovered(false),
       requestOverlayActive(false),
@@ -67,7 +68,7 @@ void SalesFloorScreen::InitializeButtons() {
     int buttonHeight = 45;
     int buttonSpacing = 15;
     int buttonX = screenWidth - rightPanelWidth + 20;
-    int startY = screenHeight - 310;  // CHANGED: moved up to make room for back button
+    int startY = screenHeight - 400;  // CHANGED: moved up more to accommodate all buttons
     
     addToCartButton = Rectangle{
         static_cast<float>(buttonX),
@@ -89,18 +90,25 @@ void SalesFloorScreen::InitializeButtons() {
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
-    
-    makeRequestButton = Rectangle{
+
+    createOrderButton = Rectangle{
         static_cast<float>(buttonX),
         static_cast<float>(startY + (buttonHeight + buttonSpacing) * 3),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
-    
+
+    makeRequestButton = Rectangle{
+        static_cast<float>(buttonX),
+        static_cast<float>(startY + (buttonHeight + buttonSpacing) * 4),
+        static_cast<float>(buttonWidth),
+        static_cast<float>(buttonHeight)
+    };
+
     // NEW: Back to Start button
     backToStartButton = Rectangle{
         static_cast<float>(buttonX),
-        static_cast<float>(startY + (buttonHeight + buttonSpacing) * 4),
+        static_cast<float>(startY + (buttonHeight + buttonSpacing) * 5),
         static_cast<float>(buttonWidth),
         static_cast<float>(buttonHeight)
     };
@@ -144,13 +152,14 @@ void SalesFloorScreen::UpdateGrid() {
 
 void SalesFloorScreen::UpdateButtons() {
     Vector2 mousePos = GetMousePosition();
-    
+
     addToCartHovered = CheckCollisionPointRec(mousePos, addToCartButton);
     viewGreenhouseHovered = CheckCollisionPointRec(mousePos, viewGreenhouseButton);
     viewCartHovered = CheckCollisionPointRec(mousePos, viewCartButton);
+    createOrderHovered = CheckCollisionPointRec(mousePos, createOrderButton);
     makeRequestHovered = CheckCollisionPointRec(mousePos, makeRequestButton);
-    backToStartHovered = CheckCollisionPointRec(mousePos, backToStartButton);  // NEW
-    
+    backToStartHovered = CheckCollisionPointRec(mousePos, backToStartButton);
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (addToCartHovered && selectedPlant != nullptr) {
             HandleAddToCart();
@@ -161,12 +170,14 @@ void SalesFloorScreen::UpdateButtons() {
             if (customer != nullptr && customer->getCartSize() > 0) {
                 manager->SwitchScreen(GameScreen::CART_VIEW);
             }
+        } else if (createOrderHovered) {
+            HandleCreateOrder();
         } else if (makeRequestHovered) {
             requestOverlayActive = true;
             requestTextLength = 0;
             std::memset(requestText, 0, sizeof(requestText));
             responseText = "";
-        } else if (backToStartHovered) {  // NEW
+        } else if (backToStartHovered) {
             HandleBackToStart();
         }
     }
@@ -241,6 +252,22 @@ void SalesFloorScreen::HandleAddToCart() {
     } else {
         std::cout << "[SalesFloorScreen] Failed to add plant to cart" << std::endl;
     }
+}
+
+void SalesFloorScreen::HandleCreateOrder() {
+    Customer* customer = manager->GetCustomer();
+    if (customer == nullptr) {
+        std::cout << "[SalesFloorScreen] No customer available" << std::endl;
+        return;
+    }
+
+    if (customer->getCartSize() == 0) {
+        std::cout << "[SalesFloorScreen] Cart is empty, cannot create order" << std::endl;
+        return;
+    }
+
+    std::cout << "[SalesFloorScreen] Navigating to order creation screen" << std::endl;
+    manager->SwitchScreen(GameScreen::ORDER_CREATION);
 }
 
 void SalesFloorScreen::HandleMakeRequest() {
@@ -548,7 +575,7 @@ void SalesFloorScreen::DrawButtons() {
              WHITE);
     
     // View Cart button
-    Color cartColor = hasCartItems ? 
+    Color cartColor = hasCartItems ?
                       (viewCartHovered ? ORANGE : Color{200, 120, 50, 255}) : GRAY;
     DrawRectangleRec(viewCartButton, cartColor);
     DrawRectangleLinesEx(viewCartButton, 2, BLACK);
@@ -559,7 +586,20 @@ void SalesFloorScreen::DrawButtons() {
              viewCartButton.y + (viewCartButton.height - 18) / 2,
              18,
              WHITE);
-    
+
+    // Create Order button
+    Color orderColor = hasCartItems ?
+                       (createOrderHovered ? Color{0, 160, 200, 255} : Color{0, 120, 160, 255}) : GRAY;
+    DrawRectangleRec(createOrderButton, orderColor);
+    DrawRectangleLinesEx(createOrderButton, 2, BLACK);
+    const char* orderText = "Create Order";
+    int orderTextWidth = MeasureText(orderText, 18);
+    DrawText(orderText,
+             createOrderButton.x + (createOrderButton.width - orderTextWidth) / 2,
+             createOrderButton.y + (createOrderButton.height - 18) / 2,
+             18,
+             WHITE);
+
     // Make Request button
     Color requestColor = makeRequestHovered ? Color{150, 50, 150, 255} : Color{100, 50, 100, 255};
     DrawRectangleRec(makeRequestButton, requestColor);

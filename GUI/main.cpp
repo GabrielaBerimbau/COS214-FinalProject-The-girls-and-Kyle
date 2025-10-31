@@ -6,6 +6,7 @@
 #include "StaffGreenhouseScreen.h"
 #include "CartViewScreen.h"
 #include "DecorationScreen.h"
+#include "OrderCreationScreen.h"
 // Add other screen includes as you create them
 
 int main() {
@@ -27,17 +28,25 @@ int main() {
     StaffGreenhouseScreen staffGreenhouseScreen(&manager);
     CartViewScreen cartViewScreen(&manager);
     DecorationScreen decorationScreen(&manager);
-    
+    OrderCreationScreen orderCreationScreen(&manager);
+
+    // Track previous screen to detect transitions
+    GameScreen lastScreen = manager.GetCurrentScreen();
+
     // Main game loop
     while (!WindowShouldClose()) {
         // Update
         manager.Update();
         
+        // Detect screen transitions
+        GameScreen currentScreen = manager.GetCurrentScreen();
+        bool screenChanged = (currentScreen != lastScreen);
+
         // Draw based on current screen
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        
-        switch (manager.GetCurrentScreen()) {
+
+        switch (currentScreen) {
             case GameScreen::START:
                 startScreen.Update();
                 startScreen.Draw();
@@ -67,14 +76,26 @@ int main() {
                 decorationScreen.Update();
                 decorationScreen.Draw();
                 break;
-                
+
+            case GameScreen::ORDER_CREATION:
+                // Reset screen when first entering
+                if (screenChanged) {
+                    orderCreationScreen.Reset();
+                }
+                orderCreationScreen.Update();
+                orderCreationScreen.Draw();
+                break;
+
             // Add other screens as you implement them
             default:
                 DrawText("Screen not implemented yet", 10, 10, 20, RED);
                 break;
         }
-        
+
         EndDrawing();
+
+        // Update last screen for next frame
+        lastScreen = currentScreen;
     }
     
     // Cleanup

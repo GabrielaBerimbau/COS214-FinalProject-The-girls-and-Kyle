@@ -45,11 +45,11 @@ void DecorationScreen::InitializeLayout() {
 
 void DecorationScreen::InitializeButtons() {
     // Pot buttons - 2 rows of 5
-    int potBtnSize = 100;
-    int potBtnSpacing = 20;
+    int potBtnSize = 80;  // Reduced from 100 to 80
+    int potBtnSpacing = 15;  // Reduced from 20 to 15
     int totalPotWidth = (potBtnSize * 5) + (potBtnSpacing * 4);
     int potStartX = (screenWidth - totalPotWidth) / 2;
-    int potRow1Y = 420;
+    int potRow1Y = 380;  // Moved up from 420
     int potRow2Y = potRow1Y + potBtnSize + potBtnSpacing;
     
     for (int i = 0; i < 5; i++) {
@@ -73,24 +73,24 @@ void DecorationScreen::InitializeButtons() {
     // Ribbon toggle button
     ribbonToggleButton = Rectangle{
         static_cast<float>(screenWidth / 2 - 120),
-        static_cast<float>(potRow2Y + potBtnSize + 40),
+        static_cast<float>(potRow2Y + potBtnSize + 25),  // Reduced spacing from 40 to 25
         240,
         50
     };
-    
-    // Remove decoration buttons (small, next to preview)
+
+    // Remove decoration buttons (positioned to the right of preview, well-spaced)
     removeRibbonButton = Rectangle{
-        static_cast<float>(screenWidth / 2 + 180),
-        200,
-        120,
-        35
+        static_cast<float>(screenWidth / 2 + 220),  // Further right to avoid overlap
+        140,  // Higher up
+        150,  // Wider
+        45    // Taller
     };
-    
+
     removePotButton = Rectangle{
-        static_cast<float>(screenWidth / 2 + 180),
-        245,
-        120,
-        35
+        static_cast<float>(screenWidth / 2 + 220),  // Same x as ribbon button
+        195,  // Below ribbon button with spacing
+        150,  // Same width as ribbon button
+        45    // Same height as ribbon button
     };
     
     // Confirm and Back buttons
@@ -315,26 +315,23 @@ void DecorationScreen::HandleBack() {
 
 double DecorationScreen::CalculateCurrentPrice() {
     if (currentPlant == nullptr) return 0.0;
-    
-    // Get base price
+
+    // Get base plant price (unwrap all decorators)
     Plant* basePlant = currentPlant;
-    if (Decorator::isDecorated(currentPlant)) {
-        Decorator* decorator = dynamic_cast<Decorator*>(currentPlant);
-        if (decorator != nullptr) {
-            basePlant = decorator->getBasePlant();
-        }
+    while (auto dec = dynamic_cast<Decorator*>(basePlant)) {
+        basePlant = dec->getWrappedPlant();
     }
-    
+
     double price = basePlant ? basePlant->getPrice() : 0.0;
-    
-    // Add decoration costs
+
+    // Add decoration costs based on PREVIEW selections
     if (hasRibbon) {
-        price += 15.0; // RIBBON_PRICE
+        price += 15.0; // RIBBON_PRICE from RibbonDecorator.h
     }
     if (hasPot) {
-        price += 20.0; // POT_PRICE
+        price += 80.0; // POT_PRICE from DecorativePotDecorator.h (was incorrectly 20.0)
     }
-    
+
     return price;
 }
 
@@ -499,7 +496,7 @@ void DecorationScreen::DrawPlantPreview() {
 void DecorationScreen::DrawPotSelection() {
     const char* label = "Select Pot Color:";
     int labelWidth = MeasureText(label, 20);
-    DrawText(label, screenWidth / 2 - labelWidth / 2, 380, 20, WHITE);
+    DrawText(label, screenWidth / 2 - labelWidth / 2, 355, 20, WHITE);  // Moved up from 380 to 355
     
     // Draw pot buttons
     for (int i = 0; i < 10; i++) {
@@ -512,7 +509,7 @@ void DecorationScreen::DrawPotSelection() {
         // Draw pot texture preview
         Texture2D potTexture = manager->GetPotTexture(potColors[i]);
         if (potTexture.id != 0) {
-            float scale = 80.0f / potTexture.width;
+            float scale = 70.0f / potTexture.width;  // Adjusted from 80 to 70 to fit in smaller button
             int texWidth = static_cast<int>(potTexture.width * scale);
             int texHeight = static_cast<int>(potTexture.height * scale);
             

@@ -65,24 +65,30 @@ RequestLevel Request::determineLevel(const std::vector<std::string>& keywords)co
     }
     
     for(const std::string& keyword: keywords){
+        // Succulents
         if(keyword == "cactus" || keyword == "aloe" || keyword == "succulent"){
             return RequestLevel::LOW;
         }
 
-        if(keyword == "potato" || keyword == "radish" || keyword == "vegetable"){
+        // Vegetables
+        if(keyword == "potato" || keyword == "radish" || keyword == "carrot" ||
+           keyword == "vegetable"){
             return RequestLevel::LOW;
         }
-        
+
+        // Flowers
         if(keyword == "rose" || keyword == "daisy" || keyword == "flower" ||
            keyword == "strelitzia"){
             return RequestLevel::LOW;
         }
-        
+
+        // Other Plants
         if(keyword == "venus" || keyword == "flytrap" || keyword == "venusflytrap" ||
            keyword == "monstera"){
             return RequestLevel::LOW;
         }
-        
+
+        // Generic
         if(keyword == "plant" || keyword == "plants"){
             return RequestLevel::LOW;
         }
@@ -139,18 +145,23 @@ std::string Request::toString()const{
 
 std::string Request::extractPlantName()const{
     std::vector<std::string> keywords = extractKeywords(message);
-    
+
     std::vector<std::string> plantTypes = {
+        // Succulents
         "cactus", "aloe", "succulent",
-        "potato", "radish", "vegetable",
+        // Vegetables
+        "potato", "radish", "carrot", "vegetable",
+        // Flowers
         "rose", "daisy", "flower", "strelitzia",
+        // Other Plants
         "venusflytrap", "venus", "flytrap", "monstera",
+        // Generic
         "plant"
     };
-    
+
     for(const std::string& keyword: keywords){
         for(const std::string& plantType: plantTypes){
-            
+
             if(keyword == plantType){
                 // Capitalize first letter to match plant names
                 std::string result = plantType;
@@ -161,7 +172,7 @@ std::string Request::extractPlantName()const{
             }
         }
     }
-    
+
     return "";
 }
 

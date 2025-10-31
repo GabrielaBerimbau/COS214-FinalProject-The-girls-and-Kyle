@@ -58,13 +58,13 @@ class ConcreteOrder : public Order {
 
         /**
          * @brief Calculates total price of all children in this composite order
-         * 
+         *
          * Recursively sums the prices of all child orders (both Leaf items and
          * nested ConcreteOrders) to determine the total price of this composite.
-         * 
+         *
          * @return Total price as sum of all children's prices
          */
-        virtual double getPrice() override;
+        virtual double getPrice() const override;
 
         /**
          * @brief Generates description including all children's descriptions
@@ -121,13 +121,24 @@ class ConcreteOrder : public Order {
         
         /**
          * @brief Returns the collection of child orders in this composite
-         * 
+         *
          * Provides access to the internal vector of child Order objects for
          * iteration and traversal purposes.
-         * 
+         *
          * @return Vector containing pointers to all child Order objects
-         */        
+         */
         std::vector<Order*> getChildren() const;
+
+        /**
+         * @brief Prints the hierarchical structure of this composite order
+         *
+         * Recursively prints this order and all its children with proper
+         * indentation to show the hierarchical structure.
+         *
+         * @param indent Indentation level for nested structures
+         * @param prefix String prefix for tree-style formatting
+         */
+        virtual void printStructure(int indent = 0, const std::string& prefix = "") const override;
 
     private:
         /**

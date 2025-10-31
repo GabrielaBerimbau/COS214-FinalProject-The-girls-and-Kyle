@@ -22,14 +22,12 @@ private:
     Rectangle leftArrowButton;
     Rectangle rightArrowButton;
     Rectangle decorateButton;
-    Rectangle addToOrderButton;
     Rectangle backToSalesFloorButton;
-    
+
     // Button hover states
     bool leftArrowHovered;
     bool rightArrowHovered;
     bool decorateHovered;
-    bool addToOrderHovered;
     bool backHovered;
     
     void InitializeLayout();
@@ -44,7 +42,6 @@ private:
     void HandleLeftArrow();
     void HandleRightArrow();
     void HandleDecorate();
-    void HandleAddToOrder();
     void HandleBack();
     
 public:

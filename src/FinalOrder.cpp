@@ -100,11 +100,11 @@ std::string FinalOrder::getSummary() const {
 void FinalOrder::printInvoice() const {
     std::cout << "---------------------------------------\n";
     std::cout << "Invoice for: " << customerName << "\n";
-    
+
     for (auto* order : orderList) {
         if (order) {
             std::cout << order->getName() << ":\n";
-            
+
             Iterator* it = order->createIterator();
             it->first();
             while (!it->isDone()) {
@@ -117,7 +117,34 @@ void FinalOrder::printInvoice() const {
             delete it;
         }
     }
-    
+
     std::cout << "Total: R" << calculateTotalPrice() << "\n";
     std::cout << "---------------------------------------\n";
+}
+
+void FinalOrder::printOrderStructure() const {
+    std::cout << "╔════════════════════════════════════════════════════════════╗\n";
+    std::cout << "║  Final Order for: " << customerName;
+    for(size_t i = customerName.length(); i < 38; i++) std::cout << " ";
+    std::cout << "║\n";
+    std::cout << "╠════════════════════════════════════════════════════════════╣\n";
+
+    if (orderList.empty()) {
+        std::cout << "║  (No orders)";
+        for(int i = 0; i < 46; i++) std::cout << " ";
+        std::cout << "║\n";
+    } else {
+        for (auto* order : orderList) {
+            if (order) {
+                order->printStructure(0, "");
+            }
+        }
+    }
+
+    std::cout << "╠════════════════════════════════════════════════════════════╣\n";
+    std::cout << "║  TOTAL: R" << calculateTotalPrice();
+    std::string totalStr = std::to_string(calculateTotalPrice());
+    for(size_t i = totalStr.length(); i < 48; i++) std::cout << " ";
+    std::cout << "║\n";
+    std::cout << "╚════════════════════════════════════════════════════════════╝\n";
 }
