@@ -46,13 +46,13 @@ class Order { //composite pattern - Component
 
         /**
          * @brief Calculates the total price of this order component
-         * 
+         *
          * For Leaf: returns the price of the single plant (including decorations)
          * For ConcreteOrder: returns sum of all children's prices
-         * 
+         *
          * @return Total price of this order component
          */
-        virtual double getPrice() = 0;
+        virtual double getPrice() const = 0;
 
         /**
          * @brief Generates a description of this order component
@@ -107,10 +107,21 @@ class Order { //composite pattern - Component
 
         /**
          * @brief Creates an iterator for traversing this order structure
-         * 
+         *
          * @return Pointer to newly created Iterator for this order component
          */
         virtual Iterator* createIterator() = 0;
+
+        /**
+         * @brief Prints the hierarchical structure of this order component
+         *
+         * Recursively prints the order structure showing the hierarchy of
+         * composite orders and their leaf items with proper indentation.
+         *
+         * @param indent Indentation level for nested structures (default: 0)
+         * @param prefix String prefix for tree-style formatting
+         */
+        virtual void printStructure(int indent = 0, const std::string& prefix = "") const = 0;
 };
 
 #endif

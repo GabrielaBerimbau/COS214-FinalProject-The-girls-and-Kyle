@@ -88,11 +88,20 @@ public:
 
     /**
      * @brief Prints a structured invoice for this order to the console.
-     * 
+     *
      * Uses the Iterator pattern to list all items in nested orders,
      * along with their individual and total prices.
      */
     void printInvoice() const;
+
+    /**
+     * @brief Prints the complete hierarchical structure of this FinalOrder.
+     *
+     * Displays the entire order structure showing all nested orders and items
+     * with proper indentation and visual tree formatting. This provides a
+     * clear visualization of the composite order hierarchy.
+     */
+    void printOrderStructure() const;
 };
 
 #endif

@@ -60,10 +60,10 @@ class Leaf : public Order {
 
         /**
          * @brief Returns the price of the wrapped plant
-         * 
+         *
          * @return Price of the single plant (including any decorations)
          */
-        virtual double getPrice() override;
+        virtual double getPrice() const override;
 
         /**
          * @brief Returns the description of the wrapped plant
@@ -110,11 +110,20 @@ class Leaf : public Order {
         
         /**
          * @brief Creates an iterator for this leaf node
-         * 
+         *
          * @return Pointer to newly created Iterator for this leaf
          */
-
         virtual Iterator* createIterator() override;
+
+        /**
+         * @brief Prints the structure of this leaf node
+         *
+         * Prints this leaf item with proper indentation.
+         *
+         * @param indent Indentation level for nested structures
+         * @param prefix String prefix for tree-style formatting
+         */
+        virtual void printStructure(int indent = 0, const std::string& prefix = "") const override;
 
     private:
         /**
