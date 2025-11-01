@@ -1,13 +1,3 @@
-/**
- * @file SalesFloor.cpp
- * @brief Implementation of the SalesFloor retail space management
- *
- * Handles the concrete implementation of plant display grid and customer
- * tracking. See SalesFloor.h for complete interface documentation.
- *
- * @author Kahlan Hagerman
- * @date 2025-10-26
- */
 
 #include "../include/SalesFloor.h"
 #include "../include/Plant.h"

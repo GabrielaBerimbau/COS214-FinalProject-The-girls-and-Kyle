@@ -1,17 +1,9 @@
-/**
- * @file TestingPrototype.cpp
- * @brief Unit tests for the Prototype design pattern (FinalOrder cloning functionality).
- * @author Gabi
- */
 
 #include <gtest/gtest.h>
 #include "include/FinalOrder.h"
 #include "include/ConcreteOrder.h"
 
-/**
- * @class PrototypeTest
- * @brief Test suite for validating FinalOrder's Prototype pattern behavior.
- */
+
 class PrototypeTest : public ::testing::Test {
 protected:
     FinalOrder* original;
@@ -33,27 +25,21 @@ protected:
     }
 };
 
-/**
- * @test Ensures that cloning creates a new FinalOrder instance (not a shallow copy).
- */
+
 TEST_F(PrototypeTest, CloneCreatesIndependentObject) {
     FinalOrder* clone = original->clone();
     EXPECT_NE(clone, original); // different memory
     delete clone;
 }
 
-/**
- * @test Ensures that cloned order retains the same data structure (summary matches).
- */
+
 TEST_F(PrototypeTest, CloneHasIdenticalData) {
     FinalOrder* clone = original->clone();
     EXPECT_EQ(clone->getSummary(), original->getSummary());
     delete clone;
 }
 
-/**
- * @test Ensures that modifying the clone does not affect the original (independent structure).
- */
+
 TEST_F(PrototypeTest, CloneIsIndependent) {
     FinalOrder* clone = original->clone();
     ConcreteOrder* newOrder = new ConcreteOrder("Cactus Set");

@@ -1,12 +1,3 @@
-/**
- * @file FinalOrder.cpp
- * @author Gabi de Gouveia
- * @brief Implements the concrete Prototype class for customer orders.
- * 
- * This file defines all logic for creating, cloning, summarizing, and printing
- * final customer orders. It demonstrates collaboration between the **Prototype**
- * and **Iterator** design patterns.
- */
 
 #include "include/FinalOrder.h"
 #include "include/Iterator.h"

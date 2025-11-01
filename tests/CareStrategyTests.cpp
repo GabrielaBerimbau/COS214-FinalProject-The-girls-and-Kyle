@@ -1,9 +1,3 @@
-/**
- * @file CareStrategyTests.cpp
- * @author Rachel Clifford
- * @date October 30, 2025
- * @brief Google Test unit tests for CareStrategy classes only
- */
 
 #include <gtest/gtest.h>
 #include "include/CareStrategy.h"
@@ -14,12 +8,7 @@
 #include "include/Plant.h"
 
 
-/**
- * @brief Test fixture for initializing reusable plant and strategy objects.
- * 
- * This base fixture provides a common setup() method for tests that may need
- * an initialized plant or preconfigured conditions.
- */
+
 class CareStrategyTests : public ::testing::Test {
 protected:
     Plant* plant;

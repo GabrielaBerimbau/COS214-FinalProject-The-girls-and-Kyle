@@ -4,25 +4,15 @@
 #include "include/Plant.h"
 #include <iostream>
 
-/**
- * @author Sofia Finlayson
- * @date 2025-10-26
- * 
- * @brief Constructor for GrowingState
- */
+
 GrowingState::GrowingState() {
     std::cout << "Plant entered Growing state." << std::endl;
 }
 
-/**
- * @brief Destructor for GrowingState
- */
+
 GrowingState::~GrowingState() {
 }
 
-/**
- * @brief Handle growing-specific behavior and state transitions
- */
 void GrowingState::handleChange(Plant* plant) {
     
     int age = plant->getAge();
@@ -53,9 +43,7 @@ void GrowingState::handleChange(Plant* plant) {
     }
 }
 
-/**
- * @brief Get the name of this state
- */
+
 std::string GrowingState::getStateName() {
     return "Growing";
 }
