@@ -11,7 +11,10 @@
 #include "include/FinalOrder.h"
 #include "include/Iterator.h"
 #include "include/ConcreteIterator.h"
+#include "include/ConcreteOrder.h"
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 FinalOrder::FinalOrder(const std::string& name)
     : customerName(name), totalPrice(0.0) {}
@@ -147,4 +150,63 @@ void FinalOrder::printOrderStructure() const {
     for(size_t i = totalStr.length(); i < 48; i++) std::cout << " ";
     std::cout << "║\n";
     std::cout << "╚════════════════════════════════════════════════════════════╝\n";
+}
+
+std::string FinalOrder::getFormattedReceipt() const {
+    std::string receipt = "";
+
+    if (orderList.empty()) {
+        receipt += "(No orders)\n";
+        return receipt;
+    }
+
+    for (size_t i = 0; i < orderList.size(); i++) {
+        Order* order = orderList[i];
+        if (order) {
+            bool isLast = (i == orderList.size() - 1);
+            receipt += formatOrderRecursive(order, 0, isLast);
+        }
+    }
+
+    return receipt;
+}
+
+std::string FinalOrder::formatOrderRecursive(Order* order, int indent, bool isLast) const {
+    if (!order) return "";
+
+    std::string result = "";
+    std::string indentStr = "";
+
+    // Build indentation string
+    for (int i = 0; i < indent; i++) {
+        indentStr += "  ";
+    }
+
+    // Try to cast to ConcreteOrder to check if it's a composite
+    ConcreteOrder* composite = dynamic_cast<ConcreteOrder*>(order);
+
+    if (composite) {
+        // This is a composite order (suborder)
+        std::vector<Order*> children = composite->getChildren();
+
+        // Add the suborder name
+        result += indentStr + "[" + composite->getName() + "]\n";
+
+        // Recursively format children
+        for (size_t i = 0; i < children.size(); i++) {
+            Order* child = children[i];
+            if (child) {
+                bool childIsLast = (i == children.size() - 1);
+                result += formatOrderRecursive(child, indent + 1, childIsLast);
+            }
+        }
+    } else {
+        // This is a leaf item (individual plant)
+        std::ostringstream priceStream;
+        priceStream << std::fixed << std::setprecision(2) << order->getPrice();
+
+        result += indentStr + "- " + order->getName() + ": R" + priceStream.str() + "\n";
+    }
+
+    return result;
 }

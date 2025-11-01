@@ -49,7 +49,7 @@ FinalOrderScreen::~FinalOrderScreen() {
         delete paymentProcessor;
         paymentProcessor = nullptr;
     }
-    // Note: finalOrder is managed by ScreenManager, don't delete here
+
 }
 
 void FinalOrderScreen::Reset() {
@@ -97,11 +97,10 @@ void FinalOrderScreen::InitializeButtons() {
         static_cast<float>(buttonHeight)
     };
 
-    // Card Input fields
     int inputWidth = 400;
     int inputHeight = 50;
     int inputY = screenHeight / 2 - 100;
-    int inputSpacing = 85; // Increased spacing between inputs
+    int inputSpacing = 85; 
 
     cardNumberInput = Rectangle{
         static_cast<float>(screenWidth / 2 - inputWidth / 2),
@@ -212,55 +211,25 @@ void FinalOrderScreen::GenerateReceiptLines() {
     receiptLines.push_back("Invoice for: " + customerName);
     receiptLines.push_back("");
 
-    // Get order items using the same method as printInvoice
-    std::vector<Order*> orderList;
-    // Access via getSummary to get the data
-    std::string summary = finalOrder->getSummary();
-
-    // Parse orders manually by accessing through iterator
-    // Since we can't access private orderList, we'll use getSummary output
     receiptLines.push_back("ORDER ITEMS:");
     receiptLines.push_back("---------------------------------------");
 
-    // Split summary into lines for display and fix decimal formatting
-    std::istringstream summaryStream(summary);
-    std::string line;
-    bool skipFirst = true; // Skip "Order Summary for..." line
-    while (std::getline(summaryStream, line)) {
-        if (skipFirst) {
-            skipFirst = false;
-            continue;
-        }
-        if (!line.empty() && line.find("Total:") == std::string::npos) {
-            // Fix decimal places in the line
-            // Find "R" followed by a number and format it to 2 decimal places
-            size_t rPos = line.find(": R");
-            if (rPos != std::string::npos) {
-                size_t priceStart = rPos + 3; // After ": R"
-                std::string beforePrice = line.substr(0, priceStart);
-                std::string priceStr = line.substr(priceStart);
+    std::string formattedReceipt = finalOrder->getFormattedReceipt();
 
-                try {
-                    double price = std::stod(priceStr);
-                    std::ostringstream priceStream;
-                    priceStream << std::fixed << std::setprecision(2) << price;
-                    line = beforePrice + priceStream.str();
-                } catch (...) {
-                    // If parsing fails, keep original line
-                }
-            }
+    std::istringstream receiptStream(formattedReceipt);
+    std::string line;
+    while (std::getline(receiptStream, line)) {
+        if (!line.empty()) {
             receiptLines.push_back(line);
         }
     }
 
     receiptLines.push_back("---------------------------------------");
 
-    // Format total price
     std::ostringstream totalStream;
     totalStream << std::fixed << std::setprecision(2) << orderTotal;
     receiptLines.push_back("TOTAL: R" + totalStream.str());
 
-    // Payment method
     std::string paymentMethod = (paymentProcessor) ? "Card" : "Cash";
     if (dynamic_cast<CashPayment*>(paymentProcessor)) {
         paymentMethod = "Cash";
@@ -269,7 +238,6 @@ void FinalOrderScreen::GenerateReceiptLines() {
     }
     receiptLines.push_back("Payment Method: " + paymentMethod);
 
-    // Remaining balance
     std::ostringstream balanceStream;
     balanceStream << std::fixed << std::setprecision(2) << customerBalance;
     receiptLines.push_back("Remaining Balance: R" + balanceStream.str());
@@ -342,10 +310,8 @@ void FinalOrderScreen::UpdatePaymentSelection() {
 }
 
 void FinalOrderScreen::DrawPaymentSelection() {
-    // Title
     DrawTextCentered("CHECKOUT", 80, 50, WHITE);
 
-    // Display order summary box
     int boxWidth = 500;
     int boxHeight = 200;
     int boxX = screenWidth / 2 - boxWidth / 2;
@@ -354,7 +320,6 @@ void FinalOrderScreen::DrawPaymentSelection() {
     DrawRectangle(boxX, boxY, boxWidth, boxHeight, Color{50, 60, 70, 255});
     DrawRectangleLinesEx(Rectangle{(float)boxX, (float)boxY, (float)boxWidth, (float)boxHeight}, 3, SKYBLUE);
 
-    // Order details
     int textY = boxY + 30;
     int fontSize = 24;
 
@@ -376,10 +341,8 @@ void FinalOrderScreen::DrawPaymentSelection() {
     Color remainingColor = (customerBalance >= orderTotal) ? LIGHTGRAY : RED;
     DrawTextCentered(remainingText.c_str(), textY, fontSize, remainingColor);
 
-    // Payment method selection prompt
     DrawTextCentered("Select Payment Method:", screenHeight / 2 - 20, 28, WHITE);
 
-    // Cash button
     Color cashColor = cashHovered ? DARKGREEN : Color{40, 100, 60, 255};
     DrawRectangleRec(cashButton, cashColor);
     DrawRectangleLinesEx(cashButton, 3, WHITE);
@@ -391,7 +354,6 @@ void FinalOrderScreen::DrawPaymentSelection() {
              30,
              WHITE);
 
-    // Card button
     Color cardColor = cardHovered ? DARKBLUE : Color{40, 60, 100, 255};
     DrawRectangleRec(cardButton, cardColor);
     DrawRectangleLinesEx(cardButton, 3, WHITE);
@@ -403,7 +365,6 @@ void FinalOrderScreen::DrawPaymentSelection() {
              30,
              WHITE);
 
-    // Warning if insufficient funds
     if (customerBalance < orderTotal) {
         DrawTextCentered("WARNING: Insufficient funds!", screenHeight - 80, 22, RED);
     }
@@ -414,7 +375,7 @@ void FinalOrderScreen::HandleCashPayment() {
     currentState = CheckoutState::PROCESSING;
     processingTimer = 0.0f;
 
-    // Process payment immediately for cash
+    //Process payment immediately for cash
     bool success = ProcessPayment(true);
 }
 
@@ -431,7 +392,6 @@ void FinalOrderScreen::UpdateCardInput() {
     confirmCardHovered = CheckCollisionPointRec(mousePos, confirmCardButton);
     cancelCardHovered = CheckCollisionPointRec(mousePos, cancelCardButton);
 
-    // Check which input field is clicked
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (CheckCollisionPointRec(mousePos, cardNumberInput)) {
             activeInputField = 1;
@@ -444,7 +404,6 @@ void FinalOrderScreen::UpdateCardInput() {
         }
     }
 
-    // Handle text input
     int key = GetCharPressed();
     while (key > 0) {
         if (activeInputField == 1 && cardNumber.length() < maxCardNumberLength) {
@@ -463,7 +422,6 @@ void FinalOrderScreen::UpdateCardInput() {
         key = GetCharPressed();
     }
 
-    // Handle backspace
     if (IsKeyPressed(KEY_BACKSPACE)) {
         if (activeInputField == 1 && !cardNumber.empty()) {
             cardNumber.pop_back();
@@ -474,12 +432,10 @@ void FinalOrderScreen::UpdateCardInput() {
         }
     }
 
-    // Handle 'A' key for autocomplete
     if (IsKeyPressed(KEY_A)) {
         HandleAutocomplete();
     }
 
-    // Handle button clicks
     if (confirmCardHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         HandleConfirmCard();
     }
@@ -492,32 +448,26 @@ void FinalOrderScreen::UpdateCardInput() {
 void FinalOrderScreen::DrawCardInput() {
     DrawTextCentered("Enter Card Details", 60, 40, WHITE);
 
-    // Draw input fields with labels above them
-    // Card Number
     DrawText("Card Number:", cardNumberInput.x, cardNumberInput.y - 25, 18, LIGHTGRAY);
     Color numberBorder = (activeInputField == 1) ? YELLOW : LIGHTGRAY;
     DrawRectangleRec(cardNumberInput, Color{60, 70, 80, 255});
     DrawRectangleLinesEx(cardNumberInput, 2, numberBorder);
     DrawText(cardNumber.c_str(), cardNumberInput.x + 10, cardNumberInput.y + 15, 20, WHITE);
 
-    // Expiry
     DrawText("Expiry (MM/YY):", cardExpiryInput.x, cardExpiryInput.y - 25, 18, LIGHTGRAY);
     Color expiryBorder = (activeInputField == 2) ? YELLOW : LIGHTGRAY;
     DrawRectangleRec(cardExpiryInput, Color{60, 70, 80, 255});
     DrawRectangleLinesEx(cardExpiryInput, 2, expiryBorder);
     DrawText(cardExpiry.c_str(), cardExpiryInput.x + 10, cardExpiryInput.y + 15, 20, WHITE);
 
-    // CVV
     DrawText("CVV:", cardCVVInput.x, cardCVVInput.y - 25, 18, LIGHTGRAY);
     Color cvvBorder = (activeInputField == 3) ? YELLOW : LIGHTGRAY;
     DrawRectangleRec(cardCVVInput, Color{60, 70, 80, 255});
     DrawRectangleLinesEx(cardCVVInput, 2, cvvBorder);
 
-    // Mask CVV with asterisks
     std::string maskedCVV(cardCVV.length(), '*');
     DrawText(maskedCVV.c_str(), cardCVVInput.x + 10, cardCVVInput.y + 15, 20, WHITE);
 
-    // Autocomplete hint (discrete text at bottom right of card section)
     const char* hintText = "Press 'A' to autocomplete (demo)";
     DrawText(hintText, screenWidth - 280, screenHeight - 100, 16, Color{150, 150, 150, 255});
 
@@ -784,9 +734,6 @@ void FinalOrderScreen::DrawReceipt() {
 
 void FinalOrderScreen::HandleExitProgram() {
     std::cout << "[FinalOrderScreen] Exiting program" << std::endl;
-    // Don't call CloseWindow() here - let the main loop handle it via WindowShouldClose()
-    // Instead, we'll clean up and let the user close via the X button,
-    // or we can switch back to the start screen
     manager->SwitchScreen(GameScreen::START);
 }
 
@@ -846,17 +793,8 @@ void FinalOrderScreen::CleanupAfterPayment() {
 
     std::cout << "[FinalOrderScreen] Cleaning up after successful payment" << std::endl;
 
-    // NOTE: We don't clear the cart here because the FinalOrder contains Leaf objects
-    // that reference plants in the cart. Clearing the cart would delete those plants
-    // and cause a crash when FinalOrder is deleted later.
-    // The cart will be cleaned up naturally when the customer is deleted or when
-    // a new customer session starts.
-
-    // Note: We don't delete finalOrder here as it's still needed for receipt
-    // It will be cleaned up when the screen is destroyed or reset
 }
 
-// ==================== UTILITY METHODS ====================
 
 void FinalOrderScreen::DrawTextCentered(const char* text, int y, int fontSize, Color color) {
     int textWidth = MeasureText(text, fontSize);

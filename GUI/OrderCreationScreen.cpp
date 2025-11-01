@@ -14,7 +14,6 @@
 
 OrderCreationScreen::OrderCreationScreen(ScreenManager* mgr)
     : manager(mgr),
-      selectedCartIndex(-1),
       rootOrderNode(nullptr),
       selectedOrderNode(nullptr),
       isCreatingSuborder(false),
@@ -165,7 +164,7 @@ void OrderCreationScreen::Reset() {
     CleanupOrderHierarchy();
 
     // Reset state
-    selectedCartIndex = -1;
+    selectedCartIndices.clear();
     isCreatingSuborder = false;
     suborderNameInput.clear();
     cartScrollOffset = 0.0f;
@@ -226,8 +225,14 @@ void OrderCreationScreen::UpdateCartSelection() {
             };
 
             if (CheckCollisionPointRec(mousePos, itemRect)) {
-                selectedCartIndex = i;
-                std::cout << "[OrderCreationScreen] Selected cart item " << i << std::endl;
+                // Toggle selection
+                if (selectedCartIndices.count(i) > 0) {
+                    selectedCartIndices.erase(i);
+                    std::cout << "[OrderCreationScreen] Deselected cart item " << i << std::endl;
+                } else {
+                    selectedCartIndices.insert(i);
+                    std::cout << "[OrderCreationScreen] Selected cart item " << i << std::endl;
+                }
                 break;
             }
         }
@@ -323,8 +328,8 @@ void OrderCreationScreen::UpdateButtons() {
 }
 
 void OrderCreationScreen::HandleAddToOrder() {
-    if (selectedCartIndex < 0 || selectedCartIndex >= (int)cartTrackers.size()) {
-        std::cout << "[OrderCreationScreen] No cart item selected" << std::endl;
+    if (selectedCartIndices.empty()) {
+        std::cout << "[OrderCreationScreen] No cart items selected" << std::endl;
         return;
     }
 
@@ -333,30 +338,49 @@ void OrderCreationScreen::HandleAddToOrder() {
         return;
     }
 
-    if (cartTrackers[selectedCartIndex].isAddedToOrder) {
-        std::cout << "[OrderCreationScreen] Cart item already added to an order" << std::endl;
-        return;
-    }
-
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
 
-    Plant* plant = customer->getPlantFromCart(selectedCartIndex);
-    if (plant == nullptr) return;
+    int addedCount = 0;
+    std::vector<int> indicesToDeselect;
 
-    // Create a Leaf with ownsPlant=false (cart still owns the plant)
-    Leaf* leaf = new Leaf(plant, false);
+    // Add all selected items that haven't been added yet
+    for (int index : selectedCartIndices) {
+        if (index < 0 || index >= (int)cartTrackers.size()) {
+            continue;
+        }
 
-    // Add to the selected order
-    selectedOrderNode->order->add(leaf);
-    selectedOrderNode->leafCartIndices.push_back(selectedCartIndex);
+        if (cartTrackers[index].isAddedToOrder) {
+            std::cout << "[OrderCreationScreen] Cart item " << index << " already added, skipping" << std::endl;
+            continue;
+        }
 
-    // Mark as added
-    cartTrackers[selectedCartIndex].isAddedToOrder = true;
+        Plant* plant = customer->getPlantFromCart(index);
+        if (plant == nullptr) continue;
 
-    std::cout << "[OrderCreationScreen] Added cart item " << selectedCartIndex
-              << " (" << plant->getName() << ") to order \""
-              << selectedOrderNode->order->getName() << "\"" << std::endl;
+        // Create a Leaf with ownsPlant=false (cart still owns the plant)
+        Leaf* leaf = new Leaf(plant, false);
+
+        // Add to the selected order
+        selectedOrderNode->order->add(leaf);
+        selectedOrderNode->leafCartIndices.push_back(index);
+
+        // Mark as added
+        cartTrackers[index].isAddedToOrder = true;
+        indicesToDeselect.push_back(index);
+        addedCount++;
+
+        std::cout << "[OrderCreationScreen] Added cart item " << index
+                  << " (" << plant->getName() << ") to order \""
+                  << selectedOrderNode->order->getName() << "\"" << std::endl;
+    }
+
+    // Deselect items that were added
+    for (int index : indicesToDeselect) {
+        selectedCartIndices.erase(index);
+    }
+
+    std::cout << "[OrderCreationScreen] Added " << addedCount << " items to order" << std::endl;
 }
 
 void OrderCreationScreen::HandleCreateSuborder() {
@@ -451,9 +475,9 @@ void OrderCreationScreen::Draw() {
     DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, WHITE);
 
     // Draw instructions
-    const char* instruction = "Select items from cart and add them to orders";
-    int instrWidth = MeasureText(instruction, 18);
-    DrawText(instruction, screenWidth / 2 - instrWidth / 2, 75, 18, LIGHTGRAY);
+    const char* instruction = "Click items to select/deselect (multi-select enabled) - Add all selected to order";
+    int instrWidth = MeasureText(instruction, 16);
+    DrawText(instruction, screenWidth / 2 - instrWidth / 2, 75, 16, LIGHTGRAY);
 
     if (isCreatingSuborder) {
         // Draw modal overlay
@@ -504,16 +528,20 @@ void OrderCreationScreen::DrawCartList() {
 
         // Determine color based on state
         Color bgColor;
+        Color borderColor;
         if (cartTrackers[i].isAddedToOrder) {
             bgColor = Color{20, 80, 20, 255}; // Green - added
-        } else if (selectedCartIndex == (int)i) {
-            bgColor = Color{80, 90, 120, 255}; // Highlighted
+            borderColor = GREEN;
+        } else if (selectedCartIndices.count(i) > 0) {
+            bgColor = Color{80, 90, 120, 255}; // Highlighted - selected
+            borderColor = SKYBLUE;
         } else {
             bgColor = Color{50, 60, 70, 255}; // Normal
+            borderColor = DARKGRAY;
         }
 
         DrawRectangleRec(itemRect, bgColor);
-        DrawRectangleLinesEx(itemRect, 2, cartTrackers[i].isAddedToOrder ? GREEN : DARKGRAY);
+        DrawRectangleLinesEx(itemRect, 2, borderColor);
 
         // Draw plant name
         std::string displayName = plant->getName();
@@ -622,16 +650,28 @@ void OrderCreationScreen::DrawButtons() {
     int fontSize = 18;
 
     // Add to Order button
-    bool canAdd = selectedCartIndex >= 0 && selectedCartIndex < (int)cartTrackers.size()
-                  && !cartTrackers[selectedCartIndex].isAddedToOrder
-                  && selectedOrderNode != nullptr;
+    // Can add if we have at least one selected item that hasn't been added yet
+    bool canAdd = false;
+    if (selectedOrderNode != nullptr && !selectedCartIndices.empty()) {
+        for (int index : selectedCartIndices) {
+            if (index >= 0 && index < (int)cartTrackers.size() && !cartTrackers[index].isAddedToOrder) {
+                canAdd = true;
+                break;
+            }
+        }
+    }
     Color addColor = canAdd ? (addToOrderHovered ? Color{0, 160, 80, 255} : Color{0, 120, 60, 255})
                             : Color{60, 60, 60, 255};
     DrawRectangleRec(addToOrderButton, addColor);
     DrawRectangleLinesEx(addToOrderButton, 2, BLACK);
-    const char* addText = "ADD TO ORDER";
-    int addTextWidth = MeasureText(addText, fontSize);
-    DrawText(addText,
+
+    // Show count of selected items in button text
+    std::string addText = "ADD TO ORDER";
+    if (!selectedCartIndices.empty()) {
+        addText += " (" + std::to_string(selectedCartIndices.size()) + ")";
+    }
+    int addTextWidth = MeasureText(addText.c_str(), fontSize);
+    DrawText(addText.c_str(),
              addToOrderButton.x + (addToOrderButton.width - addTextWidth) / 2,
              addToOrderButton.y + (addToOrderButton.height - fontSize) / 2,
              fontSize,
