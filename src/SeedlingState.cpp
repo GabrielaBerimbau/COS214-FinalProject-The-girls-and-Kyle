@@ -4,26 +4,15 @@
 #include "include/Plant.h"
 #include <iostream>
 
-/**
- * @author Sofia Finlayson
- * @date 2025-10-26
- * 
- * @brief Constructor for SeedlingState
- */
 SeedlingState::SeedlingState() {
     std::cout << "Plant entered Seedling state." << std::endl;
 }
 
-/**
- * @brief Destructor for SeedlingState
- * 
- */
+
 SeedlingState::~SeedlingState() {
 }
 
-/**
- * @brief Handle seedling-specific behavior and state transitions
- */
+
 void SeedlingState::handleChange(Plant* plant) {
     int age = plant->getAge();
     int health = plant->getHealthLevel();
@@ -48,9 +37,6 @@ void SeedlingState::handleChange(Plant* plant) {
     }
 }
 
-/**
- * @brief Get the name of this state
- */
 std::string SeedlingState::getStateName() {
     return "Seedling";
 }

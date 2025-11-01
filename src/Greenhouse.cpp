@@ -1,13 +1,3 @@
-/**
- * @file Greenhouse.cpp
- * @brief Implementation of Greenhouse plant management
- *
- * Contains the concrete implementation of plant storage and growth
- * tracking. See Greenhouse.h for complete interface documentation.
- *
- * @author Kahlan Hagerman
- * @date 2025-10-26
- */
 
 #include "../include/Greenhouse.h"
 #include "../include/Plant.h"

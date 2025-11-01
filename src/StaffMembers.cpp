@@ -1,14 +1,4 @@
-/**
- * @file StaffMembers.cpp
- * @brief Implementation for staff chain base class.
- *
- * See `StaffMembers.h` for the full design and usage details of the
- * Chain of Responsibility used by staff. This source file contains
- * the simple, implementation-level functions shared by all handlers.
- *
- * @author Kahlan Hagerman
- * @date 2025-10-30
- */
+
 
 #include "../include/StaffMembers.h"
 #include <iostream>

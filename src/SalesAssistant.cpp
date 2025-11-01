@@ -1,15 +1,3 @@
-/**
- * @file SalesAssistant.cpp
- * @brief Short implementation notes for SalesAssistant.
- *
- * See `SalesAssistant.h` for the class responsibilities and usage notes.
- * This file contains the concrete request-handling logic used by the
- * sales assistant role. Keep only short descriptions here; detailed
- * behavioural documentation belongs in the header.
- *
- * @author Kahlan Hagerman
- * @date 2025-10-30
- */
 
 #include "../include/SalesAssistant.h"
 #include "../include/Customer.h"

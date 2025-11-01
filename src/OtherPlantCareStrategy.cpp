@@ -4,13 +4,6 @@
 
 
 
- /**
- * @author Rachel Clifford
- * @date October 26, 2025
- * @class OtherPlantCareStrategy
- * @brief General care strategy for miscellaneous plants
- */
-
 void OtherPlantCareStrategy::water(Plant* plant) {
     // Standard watering for other plant types
     plant->setWaterLevel(plant->getWaterLevel() + 20);
