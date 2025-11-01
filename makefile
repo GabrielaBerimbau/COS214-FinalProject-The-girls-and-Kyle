@@ -305,14 +305,23 @@ help:
 	@echo "  make rebuild      - Clean and rebuild all"
 	@echo "  make rebuild-all  - Clean everything and rebuild"
 	@echo ""
+	@echo "Documentation:"
+	@echo "  make docs         - Generate Doxygen documentation and open in browser"
+	@echo "  make clean-docs   - Remove generated documentation"
+	@echo ""
 	@echo "Utilities:"
 	@echo "  make show-sources - Show detected source files"
 	@echo "  make help         - Show this help message"
 
 
 # ============================================================================
-# Doxygen clean generated folders
+# Doxygen documentation
 # ============================================================================
+docs:
+	@echo "Generating Doxygen documentation..."
+	@doxygen Doxyfile
+	@echo "✓ Documentation generated successfully!"
+
 clean-docs:
 	rm -rf docs/html docs/latex
 
