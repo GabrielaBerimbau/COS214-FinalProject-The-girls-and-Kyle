@@ -65,7 +65,7 @@ private:
 
     // Cart tracking
     std::vector<CartItemTracker> cartTrackers;
-    int selectedCartIndex;
+    std::set<int> selectedCartIndices;  // Changed to support multi-select
 
     // Order hierarchy tracking
     OrderNode* rootOrderNode;

@@ -102,6 +102,31 @@ public:
      * clear visualization of the composite order hierarchy.
      */
     void printOrderStructure() const;
+
+    /**
+     * @brief Generates a formatted hierarchical receipt string.
+     *
+     * Creates a detailed receipt showing the order structure with all
+     * suborders and their items properly formatted and indented. This
+     * is specifically designed for GUI display in the receipt screen.
+     *
+     * @return A formatted string containing the complete order hierarchy
+     */
+    std::string getFormattedReceipt() const;
+
+private:
+    /**
+     * @brief Helper function to recursively build order hierarchy strings.
+     *
+     * Recursively traverses the order structure and builds a formatted
+     * string representation with proper indentation.
+     *
+     * @param order The order to format
+     * @param indent The current indentation level
+     * @param isLast Whether this is the last item in the current level
+     * @return A formatted string for this order and its children
+     */
+    std::string formatOrderRecursive(Order* order, int indent, bool isLast) const;
 };
 
 #endif

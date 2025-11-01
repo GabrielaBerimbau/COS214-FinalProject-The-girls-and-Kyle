@@ -7,17 +7,15 @@
 #include "CartViewScreen.h"
 #include "DecorationScreen.h"
 #include "OrderCreationScreen.h"
-// Add other screen includes as you create them
+#include "FinalOrderScreen.h"
+
 
 int main() {
-    // Initialize window
     const int screenWidth = 1400;
     const int screenHeight = 900;
     
     InitWindow(screenWidth, screenHeight, "Plant Nursery Shop");
-    SetTargetFPS(60);
-    
-    // Create screen manager
+
     ScreenManager manager;
     manager.Initialize();
     
@@ -29,20 +27,17 @@ int main() {
     CartViewScreen cartViewScreen(&manager);
     DecorationScreen decorationScreen(&manager);
     OrderCreationScreen orderCreationScreen(&manager);
+    FinalOrderScreen finalOrderScreen(&manager);
 
-    // Track previous screen to detect transitions
     GameScreen lastScreen = manager.GetCurrentScreen();
 
-    // Main game loop
     while (!WindowShouldClose()) {
-        // Update
+
         manager.Update();
-        
-        // Detect screen transitions
+
         GameScreen currentScreen = manager.GetCurrentScreen();
         bool screenChanged = (currentScreen != lastScreen);
 
-        // Draw based on current screen
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -78,7 +73,6 @@ int main() {
                 break;
 
             case GameScreen::ORDER_CREATION:
-                // Reset screen when first entering
                 if (screenChanged) {
                     orderCreationScreen.Reset();
                 }
@@ -86,19 +80,27 @@ int main() {
                 orderCreationScreen.Draw();
                 break;
 
-            // Add other screens as you implement them
+            case GameScreen::CHECKOUT:
+                if (screenChanged) {
+                    finalOrderScreen.Reset();
+                }
+                finalOrderScreen.Update();
+                finalOrderScreen.Draw();
+                break;
+
             default:
                 DrawText("Screen not implemented yet", 10, 10, 20, RED);
                 break;
         }
 
+        int fps = GetFPS();
+        DrawText(TextFormat("FPS: %d", fps), screenWidth - 100, 10, 20, DARKGRAY);
+
         EndDrawing();
 
-        // Update last screen for next frame
         lastScreen = currentScreen;
     }
-    
-    // Cleanup
+
     manager.Cleanup();
     CloseWindow();
     
