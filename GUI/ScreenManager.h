@@ -57,7 +57,11 @@ private:
     Plant* currentPlantBeingDecorated;
     int currentCartIndex;
     FinalOrder* finalOrder;
-    
+
+    // Prototype pattern demonstration
+    FinalOrder* previousOrder;
+    bool hasShownReorderNotification;
+
     // Time tracking for real-time updates
     float lastUpdateTime;
     int daysCounter;
@@ -75,6 +79,7 @@ private:
     // Helper methods
     void PopulateInitialGreenhouse();
     void PopulateInitialSalesFloor();
+    void CreateSamplePreviousOrder();
     void LoadAssets();
     void UnloadAssets();
 
@@ -118,7 +123,12 @@ public:
     
     void SetFinalOrder(FinalOrder* order);
     FinalOrder* GetFinalOrder() const;
-    
+
+    // Previous order management (Prototype pattern)
+    FinalOrder* GetPreviousOrder() const;
+    bool HasShownReorderNotification() const;
+    void SetHasShownReorderNotification(bool shown);
+
     // Days counter
     int GetDaysCounter() const;
     

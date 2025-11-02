@@ -11,7 +11,8 @@
 #include "../include/Plant.h"
 #include "../include/Request.h"
 #include "../include/SalesAssistant.h"
-#include "../include/NurseryCoordinator.h" 
+#include "../include/NurseryCoordinator.h"
+#include "../include/FinalOrder.h"
 
 SalesFloorScreen::SalesFloorScreen(ScreenManager* mgr)
     : manager(mgr),
@@ -26,14 +27,25 @@ SalesFloorScreen::SalesFloorScreen(ScreenManager* mgr)
       backToStartHovered(false),
       requestOverlayActive(false),
       requestTextLength(0),
-      responseText("") {
-    
+      responseText(""),
+      showReorderNotification(false),
+      reorderYesHovered(false),
+      reorderNoHovered(false) {
+
     gridRows = 5;
     gridCols = 5;
-    
+
     InitializeLayout();
     InitializeButtons();
-    
+    InitializeReorderNotification();
+
+    // Check if we should show the reorder notification
+    if (!manager->HasShownReorderNotification() && manager->GetPreviousOrder() != nullptr) {
+        std::cout << "[SalesFloorScreen] Showing reorder notification (Prototype pattern demonstration)\n";
+        showReorderNotification = true;
+        manager->SetHasShownReorderNotification(true);
+    }
+
     std::memset(requestText, 0, sizeof(requestText));
 }
 
@@ -114,9 +126,45 @@ void SalesFloorScreen::InitializeButtons() {
     };
 }
 
+void SalesFloorScreen::InitializeReorderNotification() {
+    // Position in the left panel
+    const int notificationWidth = leftPanelWidth - 40;
+    const int notificationHeight = 240;
+    const int notificationX = 20;
+    const int notificationY = screenHeight / 2 - notificationHeight / 2;
+
+    reorderNotificationBox = Rectangle{
+        static_cast<float>(notificationX),
+        static_cast<float>(notificationY),
+        static_cast<float>(notificationWidth),
+        static_cast<float>(notificationHeight)
+    };
+
+    const int notifButtonWidth = (notificationWidth - 30) / 2;
+    const int notifButtonHeight = 40;
+    const int notifButtonSpacing = 10;
+    const int notifButtonY = notificationY + notificationHeight - notifButtonHeight - 15;
+
+    reorderYesButton = Rectangle{
+        static_cast<float>(notificationX + 10),
+        static_cast<float>(notifButtonY),
+        static_cast<float>(notifButtonWidth),
+        static_cast<float>(notifButtonHeight)
+    };
+
+    reorderNoButton = Rectangle{
+        reorderYesButton.x + notifButtonWidth + notifButtonSpacing,
+        static_cast<float>(notifButtonY),
+        static_cast<float>(notifButtonWidth),
+        static_cast<float>(notifButtonHeight)
+    };
+}
+
 void SalesFloorScreen::Update() {
     if (requestOverlayActive) {
         UpdateRequestOverlay();
+    } else if (showReorderNotification) {
+        UpdateReorderNotification();
     } else {
         if (selectedPlant != nullptr) {
             SalesFloor* salesFloor = manager->GetSalesFloor();
@@ -193,18 +241,69 @@ void SalesFloorScreen::UpdateRequestOverlay() {
         }
         key = GetCharPressed();
     }
-    
+
     if (IsKeyPressed(KEY_BACKSPACE) && requestTextLength > 0) {
         requestTextLength--;
         requestText[requestTextLength] = '\0';
     }
-    
+
     if (IsKeyPressed(KEY_ENTER) && requestTextLength > 0) {
         HandleMakeRequest();
     }
-    
+
     if (IsKeyPressed(KEY_ESCAPE)) {
         requestOverlayActive = false;
+    }
+}
+
+void SalesFloorScreen::UpdateReorderNotification() {
+    if (!showReorderNotification) {
+        return;
+    }
+
+    Vector2 mousePos = GetMousePosition();
+
+    // Check hover states
+    reorderYesHovered = CheckCollisionPointRec(mousePos, reorderYesButton);
+    reorderNoHovered = CheckCollisionPointRec(mousePos, reorderNoButton);
+
+    // Handle Yes button click - Clone the previous order (PROTOTYPE PATTERN!)
+    if (reorderYesHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        std::cout << "[Prototype Pattern] YES clicked - Cloning previous order!\n";
+        showReorderNotification = false;
+
+        // Clone the previous order using the Prototype pattern
+        FinalOrder* previousOrder = manager->GetPreviousOrder();
+        if (previousOrder != nullptr) {
+            FinalOrder* clonedOrder = previousOrder->clone();
+            std::cout << "[Prototype Pattern] Order cloned successfully!\n";
+            std::cout << "[Prototype Pattern] Cloned order summary:\n";
+            clonedOrder->printInvoice();
+
+            // Set as the current final order
+            manager->SetFinalOrder(clonedOrder);
+
+            // Create customer with enough budget
+            double orderTotal = clonedOrder->calculateTotalPrice();
+            double budget = orderTotal + 100.0; // Extra budget
+
+            // Update the existing customer's budget
+            Customer* customer = manager->GetCustomer();
+            if (customer != nullptr) {
+                customer->setBudget(budget);
+                std::cout << "[SalesFloorScreen] Updated customer budget to R" << budget << " for reorder\n";
+            }
+
+            // Go directly to checkout
+            std::cout << "[SalesFloorScreen] Navigating directly to checkout with cloned order\n";
+            manager->SwitchScreen(GameScreen::CHECKOUT);
+        }
+    }
+
+    // Handle No button click - Dismiss notification
+    if (reorderNoHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        std::cout << "[SalesFloorScreen] NO clicked - Dismissing reorder notification\n";
+        showReorderNotification = false;
     }
 }
 
@@ -433,6 +532,130 @@ void SalesFloorScreen::DrawLeftPanel() {
         yPos += 25;
         DrawText("- Use buttons to navigate", 20, yPos, 16, textColor);
     }
+
+    // Draw reorder notification if showing
+    if (showReorderNotification) {
+        DrawReorderNotification();
+    }
+}
+
+void SalesFloorScreen::DrawReorderNotification() {
+    // Notification box colors
+    Color boxBg = manager->IsAlternativeColors()
+        ? Color{50, 60, 65, 255}     // Dark blue-grey
+        : Color{250, 245, 250, 255}; // Very light lavender
+    Color boxBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint green
+        : Color{120, 90, 140, 255};  // Purple accent
+    Color textColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 70, 95, 255};    // Dark purple text
+
+    // Draw notification box
+    DrawRectangleRec(reorderNotificationBox, boxBg);
+    DrawRectangleLinesEx(reorderNotificationBox, 3, boxBorder);
+
+    // Title
+    const char* title = "Reorder?";
+    const int titleSize = 20;
+    int titleWidth = MeasureText(title, titleSize);
+    DrawText(title,
+             reorderNotificationBox.x + (reorderNotificationBox.width - titleWidth) / 2,
+             reorderNotificationBox.y + 15,
+             titleSize,
+             textColor);
+
+    // Message
+    const char* message1 = "Would you like to";
+    const char* message2 = "reorder your";
+    const char* message3 = "previous order?";
+    const char* message4 = "";
+    const char* message5 = "(Uses Prototype";
+    const char* message6 = "pattern to clone)";
+    const int messageSize = 16;
+
+    Color messageColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey text
+        : Color{100, 90, 110, 255};  // Medium purple-grey
+
+    int msg1Width = MeasureText(message1, messageSize);
+    int msg2Width = MeasureText(message2, messageSize);
+    int msg3Width = MeasureText(message3, messageSize);
+    int msg5Width = MeasureText(message5, 14);
+    int msg6Width = MeasureText(message6, 14);
+
+    float messageY = reorderNotificationBox.y + 50;
+    DrawText(message1,
+             reorderNotificationBox.x + (reorderNotificationBox.width - msg1Width) / 2,
+             messageY,
+             messageSize,
+             messageColor);
+    DrawText(message2,
+             reorderNotificationBox.x + (reorderNotificationBox.width - msg2Width) / 2,
+             messageY + 22,
+             messageSize,
+             messageColor);
+    DrawText(message3,
+             reorderNotificationBox.x + (reorderNotificationBox.width - msg3Width) / 2,
+             messageY + 44,
+             messageSize,
+             messageColor);
+
+    Color italicColor = manager->IsAlternativeColors()
+        ? Color{150, 150, 150, 255}  // Dimmer grey
+        : Color{120, 110, 130, 255}; // Light purple-grey
+
+    DrawText(message5,
+             reorderNotificationBox.x + (reorderNotificationBox.width - msg5Width) / 2,
+             messageY + 75,
+             14,
+             italicColor);
+    DrawText(message6,
+             reorderNotificationBox.x + (reorderNotificationBox.width - msg6Width) / 2,
+             messageY + 92,
+             14,
+             italicColor);
+
+    // Buttons
+    Color yesButtonIdle = manager->IsAlternativeColors()
+        ? Color{50, 120, 80, 255}    // Dark green
+        : Color{120, 180, 140, 255}; // Light green
+    Color yesButtonHover = manager->IsAlternativeColors()
+        ? Color{60, 140, 95, 255}    // Lighter green
+        : Color{100, 160, 120, 255}; // Darker green
+    Color yesButtonColor = reorderYesHovered ? yesButtonHover : yesButtonIdle;
+
+    Color noButtonIdle = manager->IsAlternativeColors()
+        ? Color{100, 50, 50, 255}    // Dark red
+        : Color{200, 150, 150, 255}; // Light red
+    Color noButtonHover = manager->IsAlternativeColors()
+        ? Color{120, 60, 60, 255}    // Lighter red
+        : Color{180, 130, 130, 255}; // Darker red
+    Color noButtonColor = reorderNoHovered ? noButtonHover : noButtonIdle;
+
+    // Draw Yes button
+    DrawRectangleRec(reorderYesButton, yesButtonColor);
+    DrawRectangleLinesEx(reorderYesButton, 2, boxBorder);
+    const char* yesText = "YES";
+    int yesTextSize = 18;
+    int yesTextWidth = MeasureText(yesText, yesTextSize);
+    DrawText(yesText,
+             reorderYesButton.x + (reorderYesButton.width - yesTextWidth) / 2,
+             reorderYesButton.y + (reorderYesButton.height - yesTextSize) / 2,
+             yesTextSize,
+             WHITE);
+
+    // Draw No button
+    DrawRectangleRec(reorderNoButton, noButtonColor);
+    DrawRectangleLinesEx(reorderNoButton, 2, boxBorder);
+    const char* noText = "NO";
+    int noTextSize = 18;
+    int noTextWidth = MeasureText(noText, noTextSize);
+    DrawText(noText,
+             reorderNoButton.x + (reorderNoButton.width - noTextWidth) / 2,
+             reorderNoButton.y + (reorderNoButton.height - noTextSize) / 2,
+             noTextSize,
+             WHITE);
 }
 
 void SalesFloorScreen::DrawMiddlePanel() {

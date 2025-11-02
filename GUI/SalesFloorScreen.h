@@ -45,14 +45,25 @@ private:
     char requestText[256];
     int requestTextLength;
     std::string responseText;
-    
+
+    // Reorder notification (Prototype pattern demonstration)
+    bool showReorderNotification;
+    Rectangle reorderNotificationBox;
+    Rectangle reorderYesButton;
+    Rectangle reorderNoButton;
+    bool reorderYesHovered;
+    bool reorderNoHovered;
+
     void InitializeLayout();
     void InitializeButtons();
+    void InitializeReorderNotification();
     void UpdateGrid();
     void UpdateButtons();
     void UpdateRequestOverlay();
-    
+    void UpdateReorderNotification();
+
     void DrawLeftPanel();
+    void DrawReorderNotification();
     void DrawMiddlePanel();
     void DrawRightPanel();
     void DrawGrid();
