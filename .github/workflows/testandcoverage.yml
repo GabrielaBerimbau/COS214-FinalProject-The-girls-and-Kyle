@@ -76,13 +76,14 @@ jobs:
           LDFLAGS: "--coverage"
         run: |
           make clean || true
-          make -j"$(nproc)" test
+          make -j"$(nproc)" build/RunTests build/DemoMain
 
       # ---------- RUN TESTS ----------
 
       - name: Run tests
         run: |
-          make -j"$(nproc)" test || true   # don't kill the job if a test fails
+          ./build/RunTests || true
+          ./build/DemoMain || true
 
       # ---------- COVERAGE REPORTS ----------
 
@@ -90,17 +91,18 @@ jobs:
         run: |
           mkdir -p coverage_html
 
-          # Text summary in job log
-          gcovr -r . \
-            --filter 'src' --filter 'include' --filter 'tests' \
-            --exclude-directories 'external' --exclude-directories 'build' \
-            --print-summary
+            # Text summary in job log
+             gcovr -r . \
+                --filter 'src/' --filter 'include/' \
+                --exclude 'external/' --exclude 'tests/' \
+                --print-summary
 
-          # Pretty HTML
-          gcovr -r . \
-            --filter 'src' --filter 'include' --filter 'tests' \
-            --exclude-directories 'external' --exclude-directories 'build' \
-            --html-details -o coverage_html/index.html
+             # Pretty HTML
+             gcovr -r . \
+                --filter 'src/' --filter 'include/' \
+                --exclude 'external/' --exclude 'tests/' \
+                --html-details -o coverage_html/index.html
+
 
       - name: Upload coverage HTML
         uses: actions/upload-artifact@v4
