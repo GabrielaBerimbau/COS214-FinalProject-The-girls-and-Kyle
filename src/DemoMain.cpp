@@ -1265,14 +1265,14 @@ int main() {
 
     // Check if running in CI environment
     if (getenv("CI") != nullptr) {
-        cout << CYAN << "🤖 CI Environment Detected - Running Automated Demo\n" << RESET;
+        cout << CYAN << " CI Environment Detected - Running Automated Demo\n" << RESET;
 
         try {
             systemSetUp();
             runAutomatedDemo();
             cleanupSystem();
         } catch (const exception& e) {
-            cout << RED << "\n❌ Error: " << e.what() << RESET << endl;
+            cout << RED << "\n Error: " << e.what() << RESET << endl;
             return 1;
         }
 

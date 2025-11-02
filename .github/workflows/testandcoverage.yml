@@ -97,11 +97,13 @@ jobs:
                 --exclude 'external/' --exclude 'tests/' \
                 --print-summary
 
-             # Pretty HTML
+             # Pretty HTML with custom thresholds
              gcovr -r . \
                 --filter 'src/' --filter 'include/' \
                 --exclude 'external/' --exclude 'tests/' \
-                --html-details -o coverage_html/index.html
+                --html-details -o coverage_html/index.html \
+                --html-medium-threshold 25 \
+                --html-high-threshold 70
 
 
       - name: Upload coverage HTML
