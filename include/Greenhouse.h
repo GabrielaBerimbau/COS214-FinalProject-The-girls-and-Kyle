@@ -8,6 +8,27 @@
 class Plant;
 
 /**
+ * @file Greenhouse.h
+ * @brief Plant storage and growth Colleague in Mediator pattern
+ *
+ * The Greenhouse serves as the backend inventory and growing facility,
+ * communicating with other components through the mediator:
+ * - Responds to plant availability queries
+ * - Manages plant growth and readiness
+ * - Coordinates with SalesFloor for restocking
+ * - Notifies when plants are ready for sale
+ *
+ * Implementation approach:
+ * - Grid-based storage system for plants
+ * - Plant lookup by name or position
+ * - Capacity management
+ * - Growth stage tracking
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
+/**
  * @class Greenhouse
  * @brief Manages the plant inventory and plant growing areas
  */
@@ -137,6 +158,9 @@ class Greenhouse: public Colleague{
          * @return true if empty or out of bounds
          */
         bool isPositionEmpty(int row, int col) const;
+        
+
+        std::string toString() const;
 };
 
 #endif

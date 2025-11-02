@@ -8,6 +8,26 @@ class Plant;
 class Customer;
 
 /**
+ * @file SalesFloor.h
+ * @brief Display and transaction area Colleague in Mediator pattern
+ *
+ * The SalesFloor manages the public retail space where customers can browse
+ * and purchase plants. As a Colleague, it communicates through the mediator:
+ * - Notifies when plants are added/removed from display
+ * - Tracks customer presence and plant positions
+ * - Coordinates with Greenhouse for restocking
+ *
+ * Implementation details:
+ * - Uses a 2D grid system for plant display
+ * - Maintains list of current customers
+ * - Tracks capacity and occupancy
+ * - Handles plant transfer requests through mediator
+ *
+ * @author Kahlan Hagerman
+ * @date 2025-10-26
+ */
+
+/**
  * @class SalesFloor
  * @brief Represents the sales area where customers browse and purchase plants
  */
@@ -141,6 +161,8 @@ class SalesFloor: public Colleague{
          * @return true if empty
          */
         bool isPositionEmpty(int row, int col)const;
+
+        std::string toString() const;
 };
 
 #endif

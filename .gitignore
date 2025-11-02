@@ -12,7 +12,23 @@ RunTests
 .vscode/
 *.Zoneidentifier
 makefile.backup
+valgrind*
 
 #raylib stuff just incase
 external/raylib/src/*.o
 external/raylib/src/libraylib.a
+
+
+# ===== DOXYGEN OUTPUT =====
+docs/
+html/
+latex/
+*.tag
+*.map
+*.dot
+*.aux
+*.log
+*.toc
+*.out
+*.tmp
+*.bak

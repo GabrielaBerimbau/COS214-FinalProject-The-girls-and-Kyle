@@ -1,17 +1,39 @@
 #ifndef CARESTRATEGY_H
 #define CARESTRATEGY_H
 
+class Plant;
+
+/**
+ * @author Rachel Clifford
+ * @date October 26, 2025
+ * @class CareStrategy
+ * @brief Abstract base class for plant care strategies
+ */
 class CareStrategy {
     public:
+
+        /** @brief Virtual destructor */
         virtual ~CareStrategy(){}
 
-        virtual void water() = 0;
+        /** @brief Virtual destructor */
+        virtual void water(Plant* plant) = 0;
 
-        virtual void fertilize() =0;
+        /** @brief Fertilizes the plant */
+        virtual void fertilize(Plant* plant) =0;
 
-        virtual void adjustSunlight() =0;
+        /** @brief Adjusts sunlight exposure */
+        virtual void adjustSunlight(Plant* plant) =0;
 
-        virtual void prune() =0;
+        /** @brief Prunes the plant */
+        virtual void prune(Plant* plant) =0;
+
+        /** @brief Performs complete care routine */
+        virtual void performCare(Plant* plant) {
+            water(plant);
+            fertilize(plant);
+            adjustSunlight(plant);
+            prune(plant);
+        }
 
 };
 
