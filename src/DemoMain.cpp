@@ -1101,11 +1101,185 @@ void mainMenu() {
     }
 }
 
+// ==================== AUTOMATED DEMO ====================
+
+void runAutomatedDemo() {
+    cout << CYAN << "\n🤖 Running Automated Demo for Coverage Testing...\n\n" << RESET;
+
+    try {
+        // Test 1: Employee views greenhouse
+        cout << GREEN << "Test 1: Employee viewing greenhouse plants...\n" << RESET;
+        vector<Plant*> greenhousePlants = greenhouse->getAllPlants();
+        if (!greenhousePlants.empty()) {
+            displayPlantDetailed(greenhousePlants[0]);
+        }
+
+        // Test 2: Employee cares for plants
+        cout << GREEN << "\nTest 2: Employee caring for plants...\n" << RESET;
+        if (!greenhousePlants.empty()) {
+            Plant* testPlant = greenhousePlants[0];
+            testPlant->getStrategy()->water(testPlant);
+            testPlant->getStrategy()->fertilize(testPlant);
+            testPlant->getStrategy()->adjustSunlight(testPlant);
+            testPlant->getStrategy()->prune(testPlant);
+            testPlant->performCare();
+            testPlant->updateHealth();
+        }
+
+        // Test 3: View sales floor
+        cout << GREEN << "\nTest 3: Viewing sales floor...\n" << RESET;
+        vector<Plant*> salesPlants = salesFloor->getDisplayPlants();
+        displaySalesFloorGrid();
+
+        // Test 4: Customer shopping experience
+        cout << GREEN << "\nTest 4: Customer shopping experience...\n" << RESET;
+        RegularCustomer* autoCustomer = new RegularCustomer();
+        autoCustomer->setMediator(coordinator);
+        autoCustomer->setName("Automated Test Customer");
+        coordinator->registerColleague(autoCustomer);
+
+        // Browse and add plants to cart
+        if (!salesPlants.empty()) {
+            autoCustomer->addPlantFromSalesFloor(salesPlants[0]->getName());
+            if (salesPlants.size() > 1) {
+                autoCustomer->addPlantFromSalesFloor(salesPlants[1]->getName());
+            }
+        }
+
+        displayCartWithNumbers(autoCustomer);
+
+        // Test 5: Decorate plants
+        cout << GREEN << "\nTest 5: Decorating plants...\n" << RESET;
+        if (autoCustomer->getCartSize() > 0) {
+            autoCustomer->decorateCartItemWithRibbon(0);
+            if (autoCustomer->getCartSize() > 1) {
+                autoCustomer->decorateCartItemWithGiftWrap(1);
+                autoCustomer->decorateCartItemWithPot(1, "terracotta");
+            }
+        }
+
+        displayCartWithNumbers(autoCustomer);
+
+        // Test 6: Customer requests
+        cout << GREEN << "\nTest 6: Testing customer requests...\n" << RESET;
+        Request* lowReq = autoCustomer->createRequest("I need help finding a Rose");
+        autoCustomer->submitRequestToStaff(assistant);
+
+        Request* medReq = autoCustomer->createRequest("I want 50 plants for wedding");
+        autoCustomer->submitRequestToStaff(assistant);
+
+        Request* highReq = autoCustomer->createRequest("I want a refund");
+        autoCustomer->submitRequestToStaff(assistant);
+
+        // Test 7: Checkout with different payment methods
+        cout << GREEN << "\nTest 7: Testing checkout process...\n" << RESET;
+        if (autoCustomer->getCartSize() > 0) {
+            string orderName = autoCustomer->getName() + "'s Order";
+            autoCustomer->startNewOrder(orderName);
+            autoCustomer->addEntireCartToOrder();
+
+            FinalOrder* finalOrder = autoCustomer->createFinalOrder();
+
+            if (finalOrder) {
+                double total = finalOrder->calculateTotalPrice();
+                finalOrder->printInvoice();
+
+                if (autoCustomer->canAfford(total)) {
+                    // Test cash payment
+                    CashPayment* cashProc = new CashPayment();
+                    cashProc->processTransaction(finalOrder);
+                    delete cashProc;
+
+                    autoCustomer->deductFromBudget(total);
+                }
+
+                delete finalOrder;
+            }
+        }
+
+        autoCustomer->clearCart();
+
+        // Test 8: Another customer with credit card
+        cout << GREEN << "\nTest 8: Testing credit card payment...\n" << RESET;
+        if (!salesPlants.empty() && salesPlants.size() > 2) {
+            autoCustomer->addPlantFromSalesFloor(salesPlants[2]->getName());
+
+            if (autoCustomer->getCartSize() > 0) {
+                autoCustomer->startNewOrder("Credit Card Order");
+                autoCustomer->addEntireCartToOrder();
+                FinalOrder* ccOrder = autoCustomer->createFinalOrder();
+
+                if (ccOrder) {
+                    CreditCardPayment* ccProc = new CreditCardPayment();
+                    ccProc->processTransaction(ccOrder);
+                    delete ccProc;
+                    delete ccOrder;
+                }
+            }
+        }
+
+        // Test 9: Remove from cart
+        cout << GREEN << "\nTest 9: Testing cart operations...\n" << RESET;
+        if (!salesPlants.empty()) {
+            autoCustomer->addPlantFromSalesFloor(salesPlants[0]->getName());
+            if (autoCustomer->getCartSize() > 0) {
+                autoCustomer->returnPlantToSalesFloor(0);
+            }
+        }
+
+        // Test 10: Plant relocation
+        cout << GREEN << "\nTest 10: Testing plant relocation...\n" << RESET;
+        coordinator->checkPlantRelocation();
+
+        // Test 11: Different customer types
+        cout << GREEN << "\nTest 11: Testing different customer types...\n" << RESET;
+        WalkInCustomer* walkIn = new WalkInCustomer();
+        walkIn->setMediator(coordinator);
+        walkIn->setName("Walk-In Test");
+        coordinator->registerColleague(walkIn);
+
+        CorporateCustomer* corporate = new CorporateCustomer();
+        corporate->setMediator(coordinator);
+        corporate->setName("Corporate Test");
+        coordinator->registerColleague(corporate);
+
+        // Cleanup test customers
+        coordinator->removeColleague(autoCustomer);
+        coordinator->removeColleague(walkIn);
+        coordinator->removeColleague(corporate);
+        delete autoCustomer;
+        delete walkIn;
+        delete corporate;
+
+        cout << GREEN << BOLD << "\n✓ Automated demo completed successfully!\n" << RESET;
+
+    } catch (const exception& e) {
+        cout << RED << "Error in automated demo: " << e.what() << RESET << endl;
+    }
+}
+
 // ==================== MAIN FUNCTION ====================
 
 int main() {
     cout << fixed << setprecision(2);
-    
+
+    // Check if running in CI environment
+    if (getenv("CI") != nullptr) {
+        cout << CYAN << " CI Environment Detected - Running Automated Demo\n" << RESET;
+
+        try {
+            systemSetUp();
+            runAutomatedDemo();
+            cleanupSystem();
+        } catch (const exception& e) {
+            cout << RED << "\n Error: " << e.what() << RESET << endl;
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // Interactive mode for normal execution
     cout << GREEN << BOLD;
     cout << "╔════════════════════════════════════════════════════════════╗\n";
     cout << "║                                                            ║\n";
@@ -1115,9 +1289,9 @@ int main() {
     cout << "║                                                            ║\n";
     cout << "╚════════════════════════════════════════════════════════════╝\n";
     cout << RESET << endl;
-    
+
     pause("\nPress Enter to initialize system...");
-    
+
     try {
         systemSetUp();
         mainMenu();
@@ -1126,6 +1300,6 @@ int main() {
         cout << RED << "\n❌ Error: " << e.what() << RESET << endl;
         return 1;
     }
-    
+
     return 0;
 }

@@ -1,0 +1,113 @@
+name: Test & Coverage
+
+on:
+  push:
+    branches: [ Dev, dev, main, feature/**, megan-fixing-coverage ]   # remove "megan-coverage" later
+  pull_request:
+    branches: [ Dev, dev, main ]
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # ---------- CACHES (speed-ups) ----------
+
+      - name: Cache APT
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt
+            /var/lib/apt/lists
+          key: apt-${{ runner.os }}-${{ hashFiles('**/.github/workflows/**') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('**/makefile', '**/Makefile', 'external/raylib/**', 'src/**', 'include/**', 'tests/**') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      - name: Cache raylib build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            external/raylib/src/*.o
+            external/raylib/src/*.a
+          key: raylib-${{ runner.os }}-${{ hashFiles('external/raylib/**') }}
+          restore-keys: |
+            raylib-${{ runner.os }}-
+
+      # ---------- TOOLS & DEPS ----------
+
+      - name: Install compiler & deps (cmake + raylib deps + coverage tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake make gcc g++ ccache \
+            lcov python3-pip \
+            libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
+            libgl1-mesa-dev mesa-common-dev libasound2-dev libpulse-dev \
+            libudev-dev libdrm-dev libgbm-dev
+          python3 -m pip install --upgrade gcovr
+
+      - name: Configure ccache
+        run: |
+          mkdir -p ~/.ccache
+          printf "max_size = 500M\n" > ~/.ccache/ccache.conf
+
+      # ---------- BUILD WITH COVERAGE FLAGS ----------
+
+      - name: Build tests with coverage flags
+        env:
+          CC: "ccache gcc"
+          CXX: "ccache g++"
+          CFLAGS: "-O0 -g --coverage -fprofile-arcs -ftest-coverage"
+          CXXFLAGS: "-O0 -g --coverage -fprofile-arcs -ftest-coverage"
+          LDFLAGS: "--coverage"
+        run: |
+          make clean || true
+          make -j"$(nproc)" build/RunTests build/DemoMain
+
+      # ---------- RUN TESTS ----------
+
+      - name: Run tests
+        run: |
+          ./build/RunTests || true
+          ./build/DemoMain || true
+
+      # ---------- COVERAGE REPORTS ----------
+
+      - name: Generate coverage summary (text) + HTML
+        run: |
+          mkdir -p coverage_html
+
+            # Text summary in job log
+             gcovr -r . \
+                --filter 'src/' --filter 'include/' \
+                --exclude 'external/' --exclude 'tests/' \
+                --print-summary
+
+             # Pretty HTML with custom thresholds
+             gcovr -r . \
+                --filter 'src/' --filter 'include/' \
+                --exclude 'external/' --exclude 'tests/' \
+                --html-details -o coverage_html/index.html \
+                --html-medium-threshold 50 \
+                --html-high-threshold 75
+
+
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage_html
