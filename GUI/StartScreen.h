@@ -23,7 +23,7 @@ private:
 
     Rectangle exitButton;
     bool exitHovered;
-    
+
     void InitializeUI();
     void UpdateButtons();
     void DrawBackground();
