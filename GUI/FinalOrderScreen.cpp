@@ -270,7 +270,7 @@ void FinalOrderScreen::Update() {
 }
 
 void FinalOrderScreen::Draw() {
-    ClearBackground(Color{35, 45, 55, 255});
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
 
     switch (currentState) {
         case CheckoutState::PAYMENT_SELECTION:
@@ -310,15 +310,15 @@ void FinalOrderScreen::UpdatePaymentSelection() {
 }
 
 void FinalOrderScreen::DrawPaymentSelection() {
-    DrawTextCentered("CHECKOUT", 80, 50, WHITE);
+    DrawTextCentered("CHECKOUT", 80, 50, Color{85, 107, 95, 255}); // Dark forest green
 
     int boxWidth = 500;
     int boxHeight = 200;
     int boxX = screenWidth / 2 - boxWidth / 2;
     int boxY = 180;
 
-    DrawRectangle(boxX, boxY, boxWidth, boxHeight, Color{50, 60, 70, 255});
-    DrawRectangleLinesEx(Rectangle{(float)boxX, (float)boxY, (float)boxWidth, (float)boxHeight}, 3, SKYBLUE);
+    DrawRectangle(boxX, boxY, boxWidth, boxHeight, Color{210, 210, 210, 255}); // Light grey
+    DrawRectangleLinesEx(Rectangle{(float)boxX, (float)boxY, (float)boxWidth, (float)boxHeight}, 3, Color{120, 120, 120, 255}); // Dark grey
 
     int textY = boxY + 30;
     int fontSize = 24;
@@ -326,24 +326,24 @@ void FinalOrderScreen::DrawPaymentSelection() {
     std::ostringstream totalStream;
     totalStream << std::fixed << std::setprecision(2) << orderTotal;
     std::string totalText = "Order Total: R" + totalStream.str();
-    DrawTextCentered(totalText.c_str(), textY, fontSize, YELLOW);
+    DrawTextCentered(totalText.c_str(), textY, fontSize, Color{180, 130, 50, 255}); // Dark gold/amber
 
     textY += 50;
     std::ostringstream balanceStream;
     balanceStream << std::fixed << std::setprecision(2) << customerBalance;
     std::string balanceText = "Your Balance: R" + balanceStream.str();
-    DrawTextCentered(balanceText.c_str(), textY, fontSize, LIME);
+    DrawTextCentered(balanceText.c_str(), textY, fontSize, Color{40, 120, 60, 255}); // Dark green
 
     textY += 50;
     std::ostringstream remainingStream;
     remainingStream << std::fixed << std::setprecision(2) << (customerBalance - orderTotal);
     std::string remainingText = "After Purchase: R" + remainingStream.str();
-    Color remainingColor = (customerBalance >= orderTotal) ? LIGHTGRAY : RED;
+    Color remainingColor = (customerBalance >= orderTotal) ? Color{85, 107, 95, 255} : Color{180, 40, 40, 255}; // Dark forest green : Dark red
     DrawTextCentered(remainingText.c_str(), textY, fontSize, remainingColor);
 
-    DrawTextCentered("Select Payment Method:", screenHeight / 2 - 20, 28, WHITE);
+    DrawTextCentered("Select Payment Method:", screenHeight / 2 - 20, 28, Color{85, 107, 95, 255}); // Dark forest green
 
-    Color cashColor = cashHovered ? DARKGREEN : Color{40, 100, 60, 255};
+    Color cashColor = cashHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
     DrawRectangleRec(cashButton, cashColor);
     DrawRectangleLinesEx(cashButton, 3, WHITE);
     const char* cashText = "CASH";
@@ -354,7 +354,7 @@ void FinalOrderScreen::DrawPaymentSelection() {
              30,
              WHITE);
 
-    Color cardColor = cardHovered ? DARKBLUE : Color{40, 60, 100, 255};
+    Color cardColor = cardHovered ? Color{60, 90, 140, 255} : Color{70, 100, 150, 255}; // Lighter blue shades
     DrawRectangleRec(cardButton, cardColor);
     DrawRectangleLinesEx(cardButton, 3, WHITE);
     const char* cardText = "CREDIT CARD";
@@ -448,31 +448,31 @@ void FinalOrderScreen::UpdateCardInput() {
 void FinalOrderScreen::DrawCardInput() {
     DrawTextCentered("Enter Card Details", 60, 40, WHITE);
 
-    DrawText("Card Number:", cardNumberInput.x, cardNumberInput.y - 25, 18, LIGHTGRAY);
-    Color numberBorder = (activeInputField == 1) ? YELLOW : LIGHTGRAY;
-    DrawRectangleRec(cardNumberInput, Color{60, 70, 80, 255});
+    DrawText("Card Number:", cardNumberInput.x, cardNumberInput.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
+    Color numberBorder = (activeInputField == 1) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}; // Warm terracotta : Light sage
+    DrawRectangleRec(cardNumberInput, Color{245, 250, 247, 255}); // Very light sage
     DrawRectangleLinesEx(cardNumberInput, 2, numberBorder);
-    DrawText(cardNumber.c_str(), cardNumberInput.x + 10, cardNumberInput.y + 15, 20, WHITE);
+    DrawText(cardNumber.c_str(), cardNumberInput.x + 10, cardNumberInput.y + 15, 20, Color{85, 107, 95, 255}); // Dark forest green
 
-    DrawText("Expiry (MM/YY):", cardExpiryInput.x, cardExpiryInput.y - 25, 18, LIGHTGRAY);
-    Color expiryBorder = (activeInputField == 2) ? YELLOW : LIGHTGRAY;
-    DrawRectangleRec(cardExpiryInput, Color{60, 70, 80, 255});
+    DrawText("Expiry (MM/YY):", cardExpiryInput.x, cardExpiryInput.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
+    Color expiryBorder = (activeInputField == 2) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}; // Warm terracotta : Light sage
+    DrawRectangleRec(cardExpiryInput, Color{245, 250, 247, 255}); // Very light sage
     DrawRectangleLinesEx(cardExpiryInput, 2, expiryBorder);
-    DrawText(cardExpiry.c_str(), cardExpiryInput.x + 10, cardExpiryInput.y + 15, 20, WHITE);
+    DrawText(cardExpiry.c_str(), cardExpiryInput.x + 10, cardExpiryInput.y + 15, 20, Color{85, 107, 95, 255}); // Dark forest green
 
-    DrawText("CVV:", cardCVVInput.x, cardCVVInput.y - 25, 18, LIGHTGRAY);
-    Color cvvBorder = (activeInputField == 3) ? YELLOW : LIGHTGRAY;
-    DrawRectangleRec(cardCVVInput, Color{60, 70, 80, 255});
+    DrawText("CVV:", cardCVVInput.x, cardCVVInput.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
+    Color cvvBorder = (activeInputField == 3) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}; // Warm terracotta : Light sage
+    DrawRectangleRec(cardCVVInput, Color{245, 250, 247, 255}); // Very light sage
     DrawRectangleLinesEx(cardCVVInput, 2, cvvBorder);
 
     std::string maskedCVV(cardCVV.length(), '*');
-    DrawText(maskedCVV.c_str(), cardCVVInput.x + 10, cardCVVInput.y + 15, 20, WHITE);
+    DrawText(maskedCVV.c_str(), cardCVVInput.x + 10, cardCVVInput.y + 15, 20, Color{85, 107, 95, 255}); // Dark forest green
 
     const char* hintText = "Press 'A' to autocomplete (demo)";
     DrawText(hintText, screenWidth - 280, screenHeight - 100, 16, Color{150, 150, 150, 255});
 
     // Confirm button
-    Color confirmColor = confirmCardHovered ? DARKGREEN : Color{40, 100, 60, 255};
+    Color confirmColor = confirmCardHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
     DrawRectangleRec(confirmCardButton, confirmColor);
     DrawRectangleLinesEx(confirmCardButton, 2, WHITE);
     const char* confirmText = "Confirm Payment";
@@ -603,7 +603,7 @@ void FinalOrderScreen::DrawSuccessFailure() {
         DrawTextCentered("Thank you for your purchase!", screenHeight / 2 - 5, 24, WHITE);
 
         // Continue button
-        Color continueColor = continueHovered ? DARKGREEN : Color{40, 100, 60, 255};
+        Color continueColor = continueHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
         DrawRectangleRec(continueButton, continueColor);
         DrawRectangleLinesEx(continueButton, 3, WHITE);
         const char* continueText = "View Receipt";
@@ -623,7 +623,7 @@ void FinalOrderScreen::DrawSuccessFailure() {
         DrawTextCentered("Would you like to try again?", screenHeight / 2 + 10, 22, LIGHTGRAY);
 
         // Retry button
-        Color retryColor = retryHovered ? DARKGREEN : Color{40, 100, 60, 255};
+        Color retryColor = retryHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
         DrawRectangleRec(retryButton, retryColor);
         DrawRectangleLinesEx(retryButton, 3, WHITE);
         const char* retryText = "Try Again";
@@ -803,9 +803,9 @@ void FinalOrderScreen::DrawTextCentered(const char* text, int y, int fontSize, C
 
 void FinalOrderScreen::DrawInfoBox(const char* label, const char* value, int x, int y, int width) {
     int height = 50;
-    DrawRectangle(x, y, width, height, Color{60, 70, 80, 255});
-    DrawRectangleLinesEx(Rectangle{(float)x, (float)y, (float)width, (float)height}, 2, LIGHTGRAY);
+    DrawRectangle(x, y, width, height, Color{245, 250, 247, 255}); // Very light sage
+    DrawRectangleLinesEx(Rectangle{(float)x, (float)y, (float)width, (float)height}, 2, Color{200, 210, 205, 255}); // Light sage
 
-    DrawText(label, x + 10, y + 10, 18, LIGHTGRAY);
-    DrawText(value, x + 10, y + 28, 20, WHITE);
+    DrawText(label, x + 10, y + 10, 18, Color{120, 140, 125, 255}); // Medium sage
+    DrawText(value, x + 10, y + 28, 20, Color{85, 107, 95, 255}); // Dark forest green
 }

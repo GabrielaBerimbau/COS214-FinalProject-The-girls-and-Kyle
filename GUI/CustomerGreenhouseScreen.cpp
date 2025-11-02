@@ -138,170 +138,170 @@ void CustomerGreenhouseScreen::HandlePlantSelection(int row, int col) {
 }
 
 void CustomerGreenhouseScreen::Draw() {
-    ClearBackground(GRAY);
-    
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+
     DrawLeftPanel();
     DrawMiddlePanel();
     DrawRightPanel();
 }
 
 void CustomerGreenhouseScreen::DrawLeftPanel() {
-    // Draw panel background - matches staff greenhouse
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{40, 40, 50, 255});
-    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, BLACK);
-    
+    // Draw panel background - pastel lavender
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{230, 224, 237, 255}); // Soft lavender
+    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
+
     int yPos = 20;
-    
+
     // Draw customer info
-    DrawText("CUSTOMER INFO", 20, yPos, 20, WHITE);
+    DrawText("CUSTOMER INFO", 20, yPos, 20, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 35;
-    
+
     // Customer name
     std::string nameText = "Name: " + customer->getName();
-    DrawText(nameText.c_str(), 20, yPos, 16, LIGHTGRAY);
+    DrawText(nameText.c_str(), 20, yPos, 16, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 25;
-    
+
     // Budget
     std::ostringstream budgetStream;
     budgetStream << "Budget: R" << std::fixed << std::setprecision(2) << customer->getBudget();
-    DrawText(budgetStream.str().c_str(), 20, yPos, 18, GREEN);
+    DrawText(budgetStream.str().c_str(), 20, yPos, 18, Color{120, 165, 120, 255}); // Soft green
     yPos += 45;
-    
+
     // Draw separator line
-    DrawLine(20, yPos, leftPanelWidth - 20, yPos, WHITE);
+    DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 15;
-    
+
     // Selected plant information
     if (selectedPlant != nullptr) {
-        DrawText("SELECTED PLANT", 20, yPos, 18, YELLOW);
+        DrawText("SELECTED PLANT", 20, yPos, 18, Color{235, 186, 170, 255}); // Warm terracotta
         yPos += 30;
-        
+
         // Plant name
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 16, WHITE);
+        DrawText(plantNameText.c_str(), 20, yPos, 16, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 25;
-        
+
         // Plant ID
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(idText.c_str(), 20, yPos, 13, Color{120, 140, 125, 255}); // Medium sage
         yPos += 25;
-        
+
         // Plant state
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        DrawText(stateText.c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(stateText.c_str(), 20, yPos, 13, Color{120, 140, 125, 255}); // Medium sage
         yPos += 25;
-        
+
         // Plant age
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(ageStream.str().c_str(), 20, yPos, 13, Color{120, 140, 125, 255}); // Medium sage
         yPos += 35;
-        
-        DrawLine(20, yPos, leftPanelWidth - 20, yPos, DARKGRAY);
+
+        DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{200, 210, 205, 255}); // Light sage
         yPos += 20;
-        
+
         // Growth status
-        DrawText("GROWTH STATUS:", 20, yPos, 14, SKYBLUE);
+        DrawText("GROWTH STATUS:", 20, yPos, 14, Color{85, 107, 95, 255}); // Dark forest green for visibility
         yPos += 30;
-        
+
         // Ready for sale status
         std::string readyText = selectedPlant->isReadyForSale() ? "✓ Ready for Sale" : "✗ Still Growing";
-        Color readyColor = selectedPlant->isReadyForSale() ? GREEN : ORANGE;
+        Color readyColor = selectedPlant->isReadyForSale() ? Color{120, 165, 120, 255} : Color{235, 186, 170, 255}; // Soft green / Terracotta
         DrawText(readyText.c_str(), 20, yPos, 16, readyColor);
         yPos += 30;
-        
+
         // Add a note about viewing more details
         if (!selectedPlant->isReadyForSale()) {
-            DrawText("This plant is still", 20, yPos, 12, LIGHTGRAY);
+            DrawText("This plant is still", 20, yPos, 12, Color{120, 140, 125, 255}); // Medium sage
             yPos += 18;
-            DrawText("being cared for by", 20, yPos, 12, LIGHTGRAY);
+            DrawText("being cared for by", 20, yPos, 12, Color{120, 140, 125, 255}); // Medium sage
             yPos += 18;
-            DrawText("our staff.", 20, yPos, 12, LIGHTGRAY);
+            DrawText("our staff.", 20, yPos, 12, Color{120, 140, 125, 255}); // Medium sage
         }
-        
+
     } else {
         // No plant selected - show instructions
-        DrawText("INSTRUCTIONS:", 20, yPos, 16, YELLOW);
+        DrawText("INSTRUCTIONS:", 20, yPos, 16, Color{235, 186, 170, 255}); // Warm terracotta
         yPos += 30;
-        
-        DrawText("1. Click a plant to view", 20, yPos, 13, WHITE);
+
+        DrawText("1. Click a plant to view", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("2. Check plant details", 20, yPos, 13, WHITE);
+        DrawText("2. Check plant details", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("3. See growth stages", 20, yPos, 13, WHITE);
+        DrawText("3. See growth stages", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("4. Monitor plant health", 20, yPos, 13, WHITE);
+        DrawText("4. Monitor plant health", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
     }
 }
 
 void CustomerGreenhouseScreen::DrawMiddlePanel() {
-    // Draw panel background - matches staff greenhouse
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{60, 80, 70, 255});
-    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, BLACK);
-    
+    // Draw panel background - soft mint
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{206, 237, 223, 255}); // Soft mint
+    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+
     // Draw header
     const char* header = "CUSTOMER GREENHOUSE - GROWING AREA";
     int headerSize = 22;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             leftPanelWidth + (middlePanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
+    DrawText(header,
+             leftPanelWidth + (middlePanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             Color{85, 107, 95, 255}); // Dark forest green
     
     // Draw grid
     DrawGrid();
 }
 
 void CustomerGreenhouseScreen::DrawRightPanel() {
-    // Draw panel background - matches staff greenhouse
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{30, 50, 40, 255});
-    
+    // Draw panel background - peachy cream
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{255, 236, 214, 255}); // Peachy cream
+
     // Draw header
     const char* header = "CART";
     int headerSize = 18;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
-    
+    DrawText(header,
+             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             Color{85, 107, 95, 255}); // Dark forest green
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
+
     // Draw cart items
     std::vector<Plant*> cart = customer->getCart();
     int yPos = 60;
-    
+
     if (cart.empty()) {
-        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, LIGHTGRAY);
+        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, Color{120, 140, 125, 255}); // Medium sage
     } else {
         for (size_t i = 0; i < cart.size(); i++) {
             Plant* plant = cart[i];
             if (plant != nullptr) {
                 std::string itemText = "- " + plant->getName();
-                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 20, yPos, 14, WHITE);
+                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 20, yPos, 14, Color{85, 107, 95, 255}); // Dark forest green
                 yPos += 25;
-                
+
                 std::ostringstream priceStream;
                 priceStream << "  R" << std::fixed << std::setprecision(2) << plant->getPrice();
-                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, YELLOW);
+                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, Color{235, 186, 170, 255}); // Warm terracotta
                 yPos += 30;
             }
         }
-        
+
         // Draw total
         yPos += 10;
-        DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, WHITE);
+        DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 15;
-        
+
         std::ostringstream totalStream;
         totalStream << "Total: R" << std::fixed << std::setprecision(2) << customer->calculateTotal();
-        DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, GREEN);
+        DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, Color{120, 165, 120, 255}); // Soft green
     }
     
     // Draw buttons
@@ -317,15 +317,15 @@ void CustomerGreenhouseScreen::DrawGrid() {
             int x = gridStartX + col * cellSize;
             int y = gridStartY + row * cellSize;
             
-            // Determine cell color - matches staff greenhouse
-            Color cellColor = Color{50, 70, 60, 255};
+            // Determine cell color - soft pastel
+            Color cellColor = Color{245, 250, 247, 255}; // Very light sage
             if (row == selectedRow && col == selectedCol) {
-                cellColor = GOLD;
+                cellColor = Color{255, 247, 204, 255}; // Soft butter yellow
             }
-            
+
             // Draw cell background
             DrawRectangle(x + 1, y + 1, cellSize - 2, cellSize - 2, cellColor);
-            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, Color{40, 60, 50, 255});
+            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, Color{200, 210, 205, 255}); // Light sage border
             
             // Draw plant if exists
             Plant* plant = greenhouse->getPlantAt(row, col);
@@ -361,42 +361,42 @@ void CustomerGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         // Fallback: draw plant name
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 10);
-        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, DARKGREEN);
+        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, Color{85, 107, 95, 255}); // Dark forest green
     }
-    
+
     // Draw growth stage indicator at bottom of cell (no health bar for customers)
     std::string stage = plant->getState()->getStateName();
     int stageWidth = MeasureText(stage.c_str(), 11);
-    Color stageColor = plant->isReadyForSale() ? GREEN : ORANGE;
+    Color stageColor = plant->isReadyForSale() ? Color{120, 165, 120, 255} : Color{235, 186, 170, 255}; // Soft green / Terracotta
     DrawText(stage.c_str(), x + (cellSize - stageWidth) / 2, y + cellSize - 18, 11, stageColor);
 }
 
 void CustomerGreenhouseScreen::DrawButtons() {
     Customer* customer = manager->GetCustomer();
     bool hasCartItems = (customer != nullptr && customer->getCartSize() > 0);
-    
+
     // Back to Sales Floor button
-    Color backColor = backButtonHovered ? DARKGRAY : Color{100, 100, 100, 255};
+    Color backColor = backButtonHovered ? Color{255, 200, 195, 255} : Color{245, 215, 220, 255}; // Coral hover / Soft rose
     DrawRectangleRec(backToSalesFloorButton, backColor);
-    DrawRectangleLinesEx(backToSalesFloorButton, 2, BLACK);
+    DrawRectangleLinesEx(backToSalesFloorButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* backText = "Back to Sales Floor";
     int backTextWidth = MeasureText(backText, 16);
     DrawText(backText,
              backToSalesFloorButton.x + (backToSalesFloorButton.width - backTextWidth) / 2,
              backToSalesFloorButton.y + (backToSalesFloorButton.height - 16) / 2,
              16,
-             WHITE);
-    
+             Color{85, 107, 95, 255}); // Dark forest green
+
     // View Cart button
-    Color cartColor = hasCartItems ? 
-                      (viewCartHovered ? Color{0, 120, 200, 255} : Color{50, 150, 220, 255}) : GRAY;
+    Color cartColor = hasCartItems ?
+                      (viewCartHovered ? Color{210, 225, 240, 255} : Color{220, 237, 245, 255}) : Color{200, 210, 205, 255}; // Sky blue hover / Light sky blue / Light sage disabled
     DrawRectangleRec(viewCartButton, cartColor);
-    DrawRectangleLinesEx(viewCartButton, 2, BLACK);
+    DrawRectangleLinesEx(viewCartButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* cartText = "View Cart";
     int cartTextWidth = MeasureText(cartText, 18);
     DrawText(cartText,
              viewCartButton.x + (viewCartButton.width - cartTextWidth) / 2,
              viewCartButton.y + (viewCartButton.height - 18) / 2,
              18,
-             WHITE);
+             hasCartItems ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green or muted
 }

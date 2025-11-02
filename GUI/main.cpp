@@ -94,7 +94,7 @@ int main() {
         }
 
         int fps = GetFPS();
-        DrawText(TextFormat("FPS: %d", fps), screenWidth - 100, 10, 20, DARKGRAY);
+        DrawText(TextFormat("FPS: %d", fps), screenWidth - 100, 10, 20, Color{60, 60, 60, 255}); // Darker grey for better visibility
 
         EndDrawing();
 

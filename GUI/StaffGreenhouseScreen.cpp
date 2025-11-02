@@ -511,33 +511,33 @@ void StaffGreenhouseScreen::HandleRunOneScheduled() {
 }
 
 void StaffGreenhouseScreen::Draw() {
-    ClearBackground(GRAY);
-    
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+
     DrawLeftPanel();
     DrawMiddlePanel();
     DrawRightPanel();
-    
+
     if (schedulerOverlayActive) {
         DrawSchedulerOverlay();
     }
 }
 
 void StaffGreenhouseScreen::DrawLeftPanel() {
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{40, 40, 50, 255});
-    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, BLACK);
-    
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{230, 224, 237, 255}); // Soft lavender
+    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+
     int yPos = 20;
-    
-    DrawText("STAFF MODE", 20, yPos, 20, YELLOW);
+
+    DrawText("STAFF MODE", 20, yPos, 20, Color{235, 186, 170, 255}); // Warm terracotta
     yPos += 35;
-    
-    DrawText("Greenhouse Manager", 20, yPos, 16, LIGHTGRAY);
+
+    DrawText("Greenhouse Manager", 20, yPos, 16, Color{120, 140, 125, 255}); // Medium sage
     yPos += 30;
-    
+
     DrawDayCounter();
     yPos += 60;
-    
-    DrawLine(20, yPos, leftPanelWidth - 20, yPos, WHITE);
+
+    DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 15;
     
     if (selectedPlant != nullptr) {
@@ -545,118 +545,118 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
         
         // Draw warning if dead
         if (isDead) {
-            DrawText("DEAD PLANT", 20, yPos, 18, RED);
+            DrawText("DEAD PLANT", 20, yPos, 18, Color{200, 100, 100, 255}); // Soft red
             yPos += 30;
         }
-        
-        DrawText("SELECTED PLANT", 20, yPos, 18, isDead ? RED : YELLOW);
+
+        DrawText("SELECTED PLANT", 20, yPos, 18, isDead ? Color{200, 100, 100, 255} : Color{235, 186, 170, 255}); // Soft red / Terracotta
         yPos += 30;
-        
+
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 16, WHITE);
+        DrawText(plantNameText.c_str(), 20, yPos, 16, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 25;
-        
+
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(idText.c_str(), 20, yPos, 13, Color{120, 140, 125, 255}); // Medium sage
         yPos += 25;
-        
+
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        Color stateColor = isDead ? RED : LIGHTGRAY;
+        Color stateColor = isDead ? Color{200, 100, 100, 255} : Color{120, 140, 125, 255}; // Soft red / Medium sage
         DrawText(stateText.c_str(), 20, yPos, 13, stateColor);
         yPos += 25;
-        
+
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(ageStream.str().c_str(), 20, yPos, 13, Color{120, 140, 125, 255}); // Medium sage
         yPos += 30;
-        
-        DrawLine(20, yPos, leftPanelWidth - 20, yPos, DARKGRAY);
+
+        DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{200, 210, 205, 255}); // Light sage
         yPos += 15;
-        
+
         if (isDead) {
-            DrawText("This plant has died.", 20, yPos, 14, RED);
+            DrawText("This plant has died.", 20, yPos, 14, Color{200, 100, 100, 255}); // Soft red
             yPos += 22;
-            DrawText("Use 'Remove Dead'", 20, yPos, 14, ORANGE);
+            DrawText("Use 'Remove Dead'", 20, yPos, 14, Color{235, 186, 170, 255}); // Warm terracotta
             yPos += 18;
-            DrawText("button to dispose", 20, yPos, 14, ORANGE);
+            DrawText("button to dispose", 20, yPos, 14, Color{235, 186, 170, 255}); // Warm terracotta
             yPos += 18;
-            DrawText("of it.", 20, yPos, 14, ORANGE);
+            DrawText("of it.", 20, yPos, 14, Color{235, 186, 170, 255}); // Warm terracotta
         } else {
-            DrawText("PLANT STATUS:", 20, yPos, 14, SKYBLUE);
+            DrawText("PLANT STATUS:", 20, yPos, 14, Color{220, 237, 245, 255}); // Light sky blue
             yPos += 25;
-            
+
             std::ostringstream healthStream;
             healthStream << "Health: " << selectedPlant->getHealthLevel() << "%";
-            Color healthColor = selectedPlant->getHealthLevel() > 70 ? GREEN : 
-                               selectedPlant->getHealthLevel() > 40 ? YELLOW : RED;
+            Color healthColor = selectedPlant->getHealthLevel() > 70 ? Color{120, 165, 120, 255} :
+                               selectedPlant->getHealthLevel() > 40 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255}; // Soft green / Terracotta / Soft red
             DrawText(healthStream.str().c_str(), 20, yPos, 14, healthColor);
             yPos += 22;
-            
+
             std::ostringstream waterStream;
             waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
-            Color waterColor = selectedPlant->getWaterLevel() > 50 ? SKYBLUE : 
-                              selectedPlant->getWaterLevel() > 25 ? ORANGE : RED;
+            Color waterColor = selectedPlant->getWaterLevel() > 50 ? Color{220, 237, 245, 255} :
+                              selectedPlant->getWaterLevel() > 25 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255}; // Light sky blue / Terracotta / Soft red
             DrawText(waterStream.str().c_str(), 20, yPos, 14, waterColor);
             yPos += 22;
-            
+
             std::ostringstream nutrientStream;
             nutrientStream << "Nutrients: " << selectedPlant->getNutrientLevel() << "%";
-            Color nutrientColor = selectedPlant->getNutrientLevel() > 50 ? Color{150, 255, 150, 255} : 
-                                 selectedPlant->getNutrientLevel() > 25 ? ORANGE : RED;
+            Color nutrientColor = selectedPlant->getNutrientLevel() > 50 ? Color{120, 165, 120, 255} :
+                                 selectedPlant->getNutrientLevel() > 25 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255}; // Soft green / Terracotta / Soft red
             DrawText(nutrientStream.str().c_str(), 20, yPos, 14, nutrientColor);
             yPos += 22;
-            
+
             std::ostringstream sunStream;
             sunStream << "Sunlight: " << selectedPlant->getSunlightExposure() << "%";
-            DrawText(sunStream.str().c_str(), 20, yPos, 14, GOLD);
+            DrawText(sunStream.str().c_str(), 20, yPos, 14, Color{255, 247, 204, 255}); // Soft butter yellow
             yPos += 30;
         }
-        
+
     } else {
-        DrawText("INSTRUCTIONS:", 20, yPos, 16, YELLOW);
+        DrawText("INSTRUCTIONS:", 20, yPos, 16, Color{235, 186, 170, 255}); // Warm terracotta
         yPos += 30;
-        
-        DrawText("1. Click a plant to select", 20, yPos, 13, WHITE);
+
+        DrawText("1. Click a plant to select", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("2. Use care buttons", 20, yPos, 13, WHITE);
+        DrawText("2. Use care buttons", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("3. Monitor health status", 20, yPos, 13, WHITE);
+        DrawText("3. Monitor health status", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("4. Transfer when ready", 20, yPos, 13, WHITE);
+        DrawText("4. Transfer when ready", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 18;
-        DrawText("   for sale", 20, yPos, 13, WHITE);
+        DrawText("   for sale", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 22;
-        DrawText("5. Remove dead plants", 20, yPos, 13, WHITE);
+        DrawText("5. Remove dead plants", 20, yPos, 13, Color{85, 107, 95, 255}); // Dark forest green
     }
 }
 
 void StaffGreenhouseScreen::DrawMiddlePanel() {
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{60, 80, 70, 255});
-    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, BLACK);
-    
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{206, 237, 223, 255}); // Soft mint
+    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+
     const char* header = "STAFF GREENHOUSE - PLANT CARE";
     int headerSize = 22;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             leftPanelWidth + (middlePanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
+    DrawText(header,
+             leftPanelWidth + (middlePanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             Color{85, 107, 95, 255}); // Dark forest green
     
     DrawGrid();
 }
 
 void StaffGreenhouseScreen::DrawRightPanel() {
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{30, 50, 40, 255});
-    
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{255, 236, 214, 255}); // Peachy cream
+
     const char* header = "CARE ACTIONS";
     int headerSize = 18;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
+    DrawText(header,
+             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             Color{85, 107, 95, 255}); // Dark forest green
     
     DrawButtons();
     DrawSchedulerInfo();
@@ -673,16 +673,16 @@ void StaffGreenhouseScreen::DrawGrid() {
             
             Plant* plant = greenhouse->getPlantAt(row, col);
             bool isDead = IsPlantDead(plant);
-            
-            Color cellColor = Color{50, 70, 60, 255};
+
+            Color cellColor = Color{245, 250, 247, 255}; // Very light sage
             if (row == selectedRow && col == selectedCol) {
-                cellColor = isDead ? Color{180, 50, 50, 255} : GOLD;
+                cellColor = isDead ? Color{255, 220, 220, 255} : Color{255, 247, 204, 255}; // Light red / Soft butter yellow
             } else if (isDead) {
-                cellColor = Color{80, 30, 30, 255};  // Dark red for dead plants
+                cellColor = Color{245, 215, 215, 255};  // Soft rose for dead plants
             }
-            
+
             DrawRectangle(x + 1, y + 1, cellSize - 2, cellSize - 2, cellColor);
-            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, isDead ? RED : Color{40, 60, 50, 255});
+            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, isDead ? Color{200, 100, 100, 255} : Color{200, 210, 205, 255}); // Soft red / Light sage border
             
             // Draw plant if exists
             if (plant != nullptr) {
@@ -692,7 +692,7 @@ void StaffGreenhouseScreen::DrawGrid() {
                 if (isDead) {
                     const char* skullIcon = "X";
                     int iconWidth = MeasureText(skullIcon, 30);
-                    DrawText(skullIcon, x + (cellSize - iconWidth) / 2, y + cellSize / 2 - 15, 30, RED);
+                    DrawText(skullIcon, x + (cellSize - iconWidth) / 2, y + cellSize / 2 - 15, 30, Color{200, 100, 100, 255}); // Soft red
                 }
             }
         }
@@ -723,21 +723,21 @@ void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
     } else {
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 10);
-        Color textColor = isDead ? Color{150, 50, 50, 255} : DARKGREEN;
+        Color textColor = isDead ? Color{200, 100, 100, 255} : Color{85, 107, 95, 255}; // Soft red / Dark forest green
         DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, textColor);
     }
-    
+
     if (!isDead) {
         // Draw health bar only for living plants
         int healthBarWidth = cellSize - 10;
         int healthBarHeight = 4;
         int healthBarX = x + 5;
         int healthBarY = y + cellSize - 8;
-        
+
         int health = plant->getHealthLevel();
-        Color healthColor = health > 70 ? GREEN : health > 40 ? YELLOW : RED;
-        
-        DrawRectangle(healthBarX, healthBarY, healthBarWidth, healthBarHeight, DARKGRAY);
+        Color healthColor = health > 70 ? Color{120, 165, 120, 255} : health > 40 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255}; // Soft green / Terracotta / Soft red
+
+        DrawRectangle(healthBarX, healthBarY, healthBarWidth, healthBarHeight, Color{200, 210, 205, 255}); // Light sage background
         DrawRectangle(healthBarX, healthBarY, (healthBarWidth * health) / 100, healthBarHeight, healthColor);
     }
 }
@@ -867,17 +867,17 @@ void StaffGreenhouseScreen::DrawButtons() {
 void StaffGreenhouseScreen::DrawSchedulerInfo() {
     int yPos = screenHeight - 250;
     
-    DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, DARKGRAY);
+    DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, Color{200, 210, 205, 255}); // Light sage
     yPos += 10;
-    
-    DrawText("SCHEDULER:", screenWidth - rightPanelWidth + 20, yPos, 14, YELLOW);
+
+    DrawText("SCHEDULER:", screenWidth - rightPanelWidth + 20, yPos, 14, Color{235, 186, 170, 255}); // Warm terracotta
     yPos += 22;
-    
+
     CareScheduler* scheduler = manager->GetCareScheduler();
     if (scheduler != nullptr && !scheduler->empty()) {
-        DrawText("Tasks queued", screenWidth - rightPanelWidth + 20, yPos, 12, GREEN);
+        DrawText("Tasks queued", screenWidth - rightPanelWidth + 20, yPos, 12, Color{120, 165, 120, 255}); // Soft green
     } else {
-        DrawText("No tasks", screenWidth - rightPanelWidth + 20, yPos, 12, GRAY);
+        DrawText("No tasks", screenWidth - rightPanelWidth + 20, yPos, 12, Color{120, 140, 125, 255}); // Medium sage
     }
 }
 
@@ -887,31 +887,31 @@ void StaffGreenhouseScreen::DrawDayCounter() {
     std::ostringstream dayStream;
     dayStream << "Day: " << days;
     
-    DrawText(dayStream.str().c_str(), 20, 85, 24, GOLD);
+    DrawText(dayStream.str().c_str(), 20, 85, 24, Color{235, 186, 170, 255}); // Warm terracotta
 }
 
 void StaffGreenhouseScreen::DrawSchedulerOverlay() {
     DrawRectangle(0, 0, screenWidth, screenHeight, Color{0, 0, 0, 180});
-    
+
     int overlayWidth = 650;
     int overlayHeight = 500;
     int overlayX = (screenWidth - overlayWidth) / 2;
     int overlayY = (screenHeight - overlayHeight) / 2;
-    
-    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, Color{40, 40, 60, 255});
-    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY), 
-                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)}, 
-                        3, GOLD);
-    
+
+    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, Color{230, 224, 237, 255}); // Soft lavender
+    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY),
+                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)},
+                        3, Color{235, 186, 170, 255}); // Warm terracotta border
+
     const char* title = "CARE SCHEDULER";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, WHITE);
-    
+    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, Color{85, 107, 95, 255}); // Dark forest green
+
     int yPos = overlayY + 60;
-    
+
     // FIXED: Use displayedQueueSize instead of recalculating
     if (displayedQueueSize > 0) {
-        DrawText("Next 3 Queued Tasks:", overlayX + 20, yPos, 18, YELLOW);
+        DrawText("Next 3 Queued Tasks:", overlayX + 20, yPos, 18, Color{235, 186, 170, 255}); // Warm terracotta
         yPos += 30;
         
         Greenhouse* greenhouse = manager->GetGreenhouse();
@@ -981,7 +981,7 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
         DrawLine(overlayX + 20, yPos, overlayX + overlayWidth - 20, yPos, DARKGRAY);
         yPos += 25;
         
-        DrawText("Choose an action:", overlayX + 20, yPos, 16, WHITE);
+        DrawText("Choose an action:", overlayX + 20, yPos, 16, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 35;
     } else {
         DrawText("No tasks in queue!", overlayX + 30, yPos, 18, ORANGE);

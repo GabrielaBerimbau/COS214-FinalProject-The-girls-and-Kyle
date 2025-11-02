@@ -342,13 +342,13 @@ double DecorationScreen::CalculateOriginalPrice() {
 }
 
 void DecorationScreen::Draw() {
-    ClearBackground(Color{30, 50, 40, 255});
-    
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+
     // Draw header
     const char* header = "DECORATE YOUR PLANT";
     int headerSize = 32;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, WHITE);
+    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{85, 107, 95, 255}); // Dark forest green
     
     DrawPlantPreview();
     DrawPotSelection();
@@ -369,8 +369,8 @@ void DecorationScreen::DrawPlantPreview() {
         250
     };
     
-    DrawRectangleRec(previewBox, Color{50, 70, 60, 255});
-    DrawRectangleLinesEx(previewBox, 3, GOLD);
+    DrawRectangleRec(previewBox, Color{210, 210, 210, 255}); // Light grey
+    DrawRectangleLinesEx(previewBox, 3, Color{120, 120, 120, 255}); // Dark grey
 
 
     Plant* walker = currentPlant;
@@ -501,10 +501,10 @@ void DecorationScreen::DrawPotSelection() {
     // Draw pot buttons
     for (int i = 0; i < 10; i++) {
         bool isSelected = (hasPot && selectedPotColor == potColors[i]);
-        Color btnColor = isSelected ? SKYBLUE : (potHovered[i] ? LIGHTGRAY : Color{100, 100, 100, 255});
+        Color btnColor = isSelected ? Color{255, 247, 204, 255} : (potHovered[i] ? Color{230, 230, 230, 255} : Color{210, 210, 210, 255}); // Soft butter yellow : Light grey hover : Light grey
         
         DrawRectangleRec(potButtons[i], btnColor);
-        DrawRectangleLinesEx(potButtons[i], isSelected ? 4 : 2, isSelected ? GOLD : BLACK);
+        DrawRectangleLinesEx(potButtons[i], isSelected ? 4 : 2, isSelected ? Color{235, 186, 170, 255} : Color{85, 107, 95, 255}); // Warm terracotta : Dark forest green
         
         // Draw pot texture preview
         Texture2D potTexture = manager->GetPotTexture(potColors[i]);

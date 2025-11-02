@@ -41,9 +41,9 @@ void StartScreen::InitializeUI() {
         static_cast<float>(buttonHeight)
     };
     
-    // Default colors
-    customerButtonColor = DARKGREEN;
-    staffButtonColor = DARKBLUE;
+    // Pastel plant nursery colors
+    customerButtonColor = Color{206, 237, 223, 255}; // Soft mint
+    staffButtonColor = Color{230, 224, 237, 255}; // Soft lavender
 }
 
 void StartScreen::Update() {
@@ -89,7 +89,7 @@ void StartScreen::Draw() {
 }
 
 void StartScreen::DrawBackground() {
-    ClearBackground(Color{40, 60, 50, 255}); // Dark greenish background
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green background
 }
 
 void StartScreen::DrawTitle() {
@@ -100,36 +100,36 @@ void StartScreen::DrawTitle() {
     int screenHeight = GetScreenHeight();
     
     // Draw title shadow
-    DrawText(title, 
-             (screenWidth - titleWidth) / 2 + 3, 
-             screenHeight / 4 + 3, 
-             titleFontSize, 
-             BLACK);
-    
+    DrawText(title,
+             (screenWidth - titleWidth) / 2 + 3,
+             screenHeight / 4 + 3,
+             titleFontSize,
+             Color{85, 107, 95, 100}); // Soft shadow
+
     // Draw title
-    DrawText(title, 
-             (screenWidth - titleWidth) / 2, 
-             screenHeight / 4, 
-             titleFontSize, 
-             WHITE);
+    DrawText(title,
+             (screenWidth - titleWidth) / 2,
+             screenHeight / 4,
+             titleFontSize,
+             Color{85, 107, 95, 255}); // Dark forest green
     
     // Draw subtitle
     const char* subtitle = "Select Your Mode";
     int subtitleFontSize = 24;
     int subtitleWidth = MeasureText(subtitle, subtitleFontSize);
-    DrawText(subtitle, 
-             (screenWidth - subtitleWidth) / 2, 
-             screenHeight / 4 + 80, 
-             subtitleFontSize, 
-             LIGHTGRAY);
+    DrawText(subtitle,
+             (screenWidth - subtitleWidth) / 2,
+             screenHeight / 4 + 80,
+             subtitleFontSize,
+             Color{120, 140, 125, 255}); // Medium sage green
 }
 
 void StartScreen::DrawButtons() {
     // Customer button
-    Color custBtnColor = customerButtonHovered ? DARKGREEN : Color{30, 100, 50, 255};
+    Color custBtnColor = customerButtonHovered ? Color{255, 200, 195, 255} : Color{206, 237, 223, 255}; // Coral hover / Soft mint
     DrawRectangleRec(customerButton, custBtnColor);
-    DrawRectangleLinesEx(customerButton, 3, WHITE);
-    
+    DrawRectangleLinesEx(customerButton, 3, Color{85, 107, 95, 255}); // Dark forest green border
+
     const char* customerText = "CUSTOMER MODE";
     int customerTextSize = 30;
     int customerTextWidth = MeasureText(customerText, customerTextSize);
@@ -137,12 +137,12 @@ void StartScreen::DrawButtons() {
              customerButton.x + (customerButton.width - customerTextWidth) / 2,
              customerButton.y + (customerButton.height - customerTextSize) / 2,
              customerTextSize,
-             WHITE);
-    
+             Color{85, 107, 95, 255}); // Dark forest green
+
     // Staff button
-    Color staffBtnColor = staffButtonHovered ? DARKBLUE : Color{30, 50, 100, 255};
+    Color staffBtnColor = staffButtonHovered ? Color{255, 200, 195, 255} : Color{230, 224, 237, 255}; // Coral hover / Soft lavender
     DrawRectangleRec(staffButton, staffBtnColor);
-    DrawRectangleLinesEx(staffButton, 3, WHITE);
+    DrawRectangleLinesEx(staffButton, 3, Color{85, 107, 95, 255}); // Dark forest green border
     
     const char* staffText = "STAFF MODE";
     int staffTextSize = 30;
@@ -151,7 +151,7 @@ void StartScreen::DrawButtons() {
              staffButton.x + (staffButton.width - staffTextWidth) / 2,
              staffButton.y + (staffButton.height - staffTextSize) / 2,
              staffTextSize,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
     
     // Draw hover hints
     if (customerButtonHovered) {
@@ -162,9 +162,9 @@ void StartScreen::DrawButtons() {
                  (GetScreenWidth() - hintWidth) / 2,
                  customerButton.y + customerButton.height + 20,
                  hintSize,
-                 YELLOW);
+                 Color{235, 186, 170, 255}); // Warm terracotta
     }
-    
+
     if (staffButtonHovered) {
         const char* hint = "Manage plants and care for the greenhouse";
         int hintSize = 18;
@@ -173,6 +173,6 @@ void StartScreen::DrawButtons() {
                  (GetScreenWidth() - hintWidth) / 2,
                  staffButton.y + staffButton.height + 20,
                  hintSize,
-                 YELLOW);
+                 Color{235, 186, 170, 255}); // Warm terracotta
     }
 }
