@@ -76,7 +76,7 @@ jobs:
           LDFLAGS: "--coverage"
         run: |
           make clean || true
-          make -j"$(nproc)" build-all
+          make -j"$(nproc)" test
 
       # ---------- RUN TESTS ----------
 
