@@ -4,24 +4,16 @@
 #include "include/Plant.h"
 #include <iostream>
 
-/**
- * @author Sofia Finlayson
- * @date 2025-10-26
- * @brief Constructor for MatureState
- */
+
 MatureState::MatureState() {
     std::cout << "Plant entered Mature state - ready for sale!" << std::endl;
 }
 
-/**
- * @brief Destructor for MatureState
- */
+
 MatureState::~MatureState() {
 }
 
-/**
- * @brief Handle mature-specific behavior and state transitions
- */
+
 void MatureState::handleChange(Plant* plant) {
    int age = plant->getAge();
     int health = plant->getHealthLevel();
@@ -51,9 +43,7 @@ void MatureState::handleChange(Plant* plant) {
     }
 }
 
-/**
- * @brief Get the name of this state
- */
+
 std::string MatureState::getStateName() {
     return "Mature";
 }

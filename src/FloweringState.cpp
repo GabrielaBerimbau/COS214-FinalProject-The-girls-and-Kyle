@@ -4,25 +4,16 @@
 #include "include/Plant.h"
 #include <iostream>
 
-/**
- * @author Sofia Finlayson
- * @date 2025-10-26
- * @brief Constructor for FloweringState
- */
+
 FloweringState::FloweringState() {
     std::cout << "Plant entered Flowering state!" << std::endl;
 }
 
-/**
- * @brief Destructor for FloweringState
- * 
- */
+
 FloweringState::~FloweringState() {
 }
 
-/**
- * @brief Handle flowering-specific behavior and state transitions
- */
+
 void FloweringState::handleChange(Plant* plant) {
     int age = plant->getAge();
     int health = plant->getHealthLevel();
@@ -67,9 +58,7 @@ void FloweringState::handleChange(Plant* plant) {
     }
 }
 
-/**
- * @brief Get the name of this state
- */
+
 std::string FloweringState::getStateName() {
     return "Flowering";
 }
