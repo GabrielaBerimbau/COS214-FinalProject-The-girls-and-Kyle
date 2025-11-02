@@ -102,8 +102,8 @@ jobs:
                 --filter 'src/' --filter 'include/' \
                 --exclude 'external/' --exclude 'tests/' \
                 --html-details -o coverage_html/index.html \
-                --html-medium-threshold 25 \
-                --html-high-threshold 70
+                --html-medium-threshold 50 \
+                --html-high-threshold 75
 
 
       - name: Upload coverage HTML
