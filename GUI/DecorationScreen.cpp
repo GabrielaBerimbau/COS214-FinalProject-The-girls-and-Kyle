@@ -123,27 +123,12 @@ void DecorationScreen::LoadCurrentDecorations() {
     hasRibbon = false;
     hasPot = false;
 
-
     Plant* walker = currentPlant;
     while (auto dec = dynamic_cast<Decorator*>(walker)) {
         if (auto pot = dynamic_cast<DecorativePotDecorator*>(walker)) { hasPot = true; selectedPotColor = pot->getPotColor(); }
         if (dynamic_cast<RibbonDecorator*>(walker)) { hasRibbon = true; }
         walker = dec->getWrappedPlant();
     }
-
-    
-    // // Check for pot decorator
-    // DecorativePotDecorator* potDec = dynamic_cast<DecorativePotDecorator*>(currentPlant);
-    // if (potDec != nullptr) {
-    //     selectedPotColor = potDec->getPotColor();
-    //     hasPot = true;
-    // }
-    
-    // // Check for ribbon decorator
-    // RibbonDecorator* ribbonDec = dynamic_cast<RibbonDecorator*>(currentPlant);
-    // if (ribbonDec != nullptr) {
-    //     hasRibbon = true;
-    // }
     
     // Store original state
     originalPotColor = selectedPotColor;
@@ -236,43 +221,15 @@ void DecorationScreen::HandleConfirm() {
     std::cout << "[DecorationScreen] Confirming decorations..." << std::endl;
     
     // Apply decorations using backend
-    // First remove existing decorations if changed
     bool needsUpdate = (hasRibbon != originalHasRibbon) || 
                        (hasPot != originalHasPot) || 
                        (hasPot && selectedPotColor != originalPotColor);
     
     if (needsUpdate) {
-        // The cart index might have changed if decorators were added/removed
-        // So we need to refresh the plant reference
         int idx = manager->GetCurrentCartIndex();
-        
-        // Remove old ribbon if needed
-        // if (originalHasRibbon && !hasRibbon) {
-        //     std::cout << "[DecorationScreen] Removing old ribbon decoration" << std::endl;
-        // }
-        
-        // // Remove old pot if needed
-        // if (originalHasPot && !hasPot) {
-        //     std::cout << "[DecorationScreen] Removing old pot decoration" << std::endl;
-        // }
-        
-        // // Add new ribbon if needed
-        // if (hasRibbon && !originalHasRibbon) {
-        //     customer->decorateCartItemWithRibbon(currentCartIndex);
-        //     std::cout << "[DecorationScreen] Added ribbon decoration" << std::endl;
-        // }
-        
-        // // Add new pot if needed (or replace)
-        // if (hasPot && (!originalHasPot || selectedPotColor != originalPotColor)) {
-        //     customer->decorateCartItemWithPot(currentCartIndex, selectedPotColor);
-        //     std::cout << "[DecorationScreen] Added " << selectedPotColor << " pot decoration" << std::endl;
-        // }
-
-
 
         if (originalHasRibbon && !hasRibbon) {
             customer->removeRibbonFromCartItem(idx);
-            // refresh local view
             currentPlant = customer->getPlantFromCart(idx);
         }
         if (originalHasPot && !hasPot) {
@@ -280,12 +237,10 @@ void DecorationScreen::HandleConfirm() {
             currentPlant = customer->getPlantFromCart(idx);
         }
         if (hasPot && originalHasPot && (selectedPotColor != originalPotColor)) {
-            // replace pot: remove, then add with new color
             customer->removePotFromCartItem(idx);
             currentPlant = customer->getPlantFromCart(idx);
         }
 
-        // Now add new/changed selections
         if (hasRibbon && !originalHasRibbon) {
             customer->decorateCartItemWithRibbon(idx);
             currentPlant = customer->getPlantFromCart(idx);
@@ -296,20 +251,13 @@ void DecorationScreen::HandleConfirm() {
         }
     }
     
-    // Reset state
     currentPlant = nullptr;
-    
-    // Return to cart view
     manager->SwitchScreen(GameScreen::CART_VIEW);
 }
 
 void DecorationScreen::HandleBack() {
     std::cout << "[DecorationScreen] Cancelling decoration changes" << std::endl;
-    
-    // Reset state
     currentPlant = nullptr;
-    
-    // Return to cart view without applying changes
     manager->SwitchScreen(GameScreen::CART_VIEW);
 }
 
@@ -324,31 +272,25 @@ double DecorationScreen::CalculateCurrentPrice() {
 
     double price = basePlant ? basePlant->getPrice() : 0.0;
 
-    // Add decoration costs based on PREVIEW selections
-    if (hasRibbon) {
-        price += 15.0; // RIBBON_PRICE from RibbonDecorator.h
-    }
-    if (hasPot) {
-        price += 80.0; // POT_PRICE from DecorativePotDecorator.h (was incorrectly 20.0)
-    }
+    if (hasRibbon) { price += 15.0; }
+    if (hasPot)    { price += 80.0; }
 
     return price;
 }
 
 double DecorationScreen::CalculateOriginalPrice() {
     if (currentPlant == nullptr) return 0.0;
-    
     return currentPlant->getPrice();
 }
 
 void DecorationScreen::Draw() {
     ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
 
-    // Draw header
+    // Header
     const char* header = "DECORATE YOUR PLANT";
     int headerSize = 32;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{85, 107, 95, 255}); // Dark forest green
+    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{45, 59, 53, 255});
     
     DrawPlantPreview();
     DrawPotSelection();
@@ -361,7 +303,7 @@ void DecorationScreen::DrawPlantPreview() {
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr || currentPlant == nullptr) return;
     
-    // Draw preview box
+    // Preview box
     Rectangle previewBox = Rectangle{
         static_cast<float>(screenWidth / 2 - 200),
         100,
@@ -369,9 +311,8 @@ void DecorationScreen::DrawPlantPreview() {
         250
     };
     
-    DrawRectangleRec(previewBox, Color{210, 210, 210, 255}); // Light grey
-    DrawRectangleLinesEx(previewBox, 3, Color{120, 120, 120, 255}); // Dark grey
-
+    DrawRectangleRec(previewBox, Color{234, 238, 236, 255});
+    DrawRectangleLinesEx(previewBox, 3, Color{120, 120, 120, 255});
 
     Plant* walker = currentPlant;
     while (auto dec = dynamic_cast<Decorator*>(walker)) { walker = dec->getWrappedPlant(); }
@@ -405,69 +346,17 @@ void DecorationScreen::DrawPlantPreview() {
                 float rs = 150.0f / ribbonTexture.width;
                 int rw = (int)(ribbonTexture.width * rs);
                 int rh = (int)(ribbonTexture.height * rs);
-                int rx = (int)(previewBox.x + (previewBox.width - rw) / 2);
-                int ry = py - 15;
+                int rx = (int)(previewBox.x + (previewBox.width - rw) / 2+5);
+                // was: int ry = (int)(py + sh * 0.18f);
+                int ry = (int)(py + sh * 0.32f);  // lower on stem/pot
                 DrawTextureEx(ribbonTexture, Vector2{(float)rx, (float)ry}, 0.0f, rs, WHITE);
             }
         }
     }
-
-
     
-    // Get base plant name for texture
-    // std::string plantName = currentPlant->getName();
-    // Texture2D plantTexture = manager->GetPlantTexture(plantName);
-    
-    // if (plantTexture.id != 0) {
-    //     // Draw plant
-    //     float scale = 200.0f / plantTexture.height;
-    //     int scaledWidth = static_cast<int>(plantTexture.width * scale);
-    //     int scaledHeight = static_cast<int>(plantTexture.height * scale);
-        
-    //     int plantX = previewBox.x + (previewBox.width - scaledWidth) / 2;
-    //     int plantY = previewBox.y + (previewBox.height - scaledHeight) / 2 - 10;
-        
-    //     DrawTextureEx(plantTexture, Vector2{static_cast<float>(plantX), static_cast<float>(plantY)}, 
-    //                  0.0f, scale, WHITE);
-        
-    //     // Draw pot decoration if selected
-    //     if (hasPot && !selectedPotColor.empty()) {
-    //         Texture2D potTexture = manager->GetPotTexture(selectedPotColor);
-            
-    //         if (potTexture.id != 0) {
-    //             float potScale = 220.0f / potTexture.width;
-    //             int potWidth = static_cast<int>(potTexture.width * potScale);
-    //             int potHeight = static_cast<int>(potTexture.height * potScale);
-                
-    //             int potX = previewBox.x + (previewBox.width - potWidth) / 2;
-    //             int potY = plantY + scaledHeight - potHeight + 30;
-                
-    //             DrawTextureEx(potTexture, Vector2{static_cast<float>(potX), static_cast<float>(potY)},
-    //                         0.0f, potScale, WHITE);
-    //         }
-    //     }
-        
-    //     // Draw ribbon decoration if selected
-    //     if (hasRibbon) {
-    //         Texture2D ribbonTexture = manager->GetRibbonTexture();
-            
-    //         if (ribbonTexture.id != 0) {
-    //             float ribbonScale = 150.0f / ribbonTexture.width;
-    //             int ribbonWidth = static_cast<int>(ribbonTexture.width * ribbonScale);
-    //             int ribbonHeight = static_cast<int>(ribbonTexture.height * ribbonScale);
-                
-    //             int ribbonX = previewBox.x + (previewBox.width - ribbonWidth) / 2;
-    //             int ribbonY = plantY - 15;
-                
-    //             DrawTextureEx(ribbonTexture, Vector2{static_cast<float>(ribbonX), static_cast<float>(ribbonY)},
-    //                         0.0f, ribbonScale, WHITE);
-    //         }
-    //     }
-    // }
-    
-    // Draw remove buttons if decorations exist
+    // Remove buttons if decorations exist
     if (hasRibbon) {
-        Color removeColor = removeRibbonHovered ? RED : Color{150, 50, 50, 255};
+        Color removeColor = removeRibbonHovered ? RED : Color{174, 83, 70, 255};
         DrawRectangleRec(removeRibbonButton, removeColor);
         DrawRectangleLinesEx(removeRibbonButton, 2, BLACK);
         const char* removeText = "Remove Ribbon";
@@ -480,7 +369,7 @@ void DecorationScreen::DrawPlantPreview() {
     }
     
     if (hasPot) {
-        Color removeColor = removePotHovered ? RED : Color{150, 50, 50, 255};
+        Color removeColor = removePotHovered ? RED : Color{174, 83, 70, 255};
         DrawRectangleRec(removePotButton, removeColor);
         DrawRectangleLinesEx(removePotButton, 2, BLACK);
         const char* removeText = "Remove Pot";
@@ -494,56 +383,60 @@ void DecorationScreen::DrawPlantPreview() {
 }
 
 void DecorationScreen::DrawPotSelection() {
-    const char* label = "Select Pot Color:";
+    const char* label = "Select Pot Colour:";
     int labelWidth = MeasureText(label, 20);
-    DrawText(label, screenWidth / 2 - labelWidth / 2, 355, 20, WHITE);  // Moved up from 380 to 355
-    
-    // Draw pot buttons
+    // was: 340
+    DrawText(label, screenWidth / 2 - labelWidth / 2, 355, 20, Color{45, 59, 53, 255});
+    // Pot buttons
     for (int i = 0; i < 10; i++) {
         bool isSelected = (hasPot && selectedPotColor == potColors[i]);
-        Color btnColor = isSelected ? Color{255, 247, 204, 255} : (potHovered[i] ? Color{230, 230, 230, 255} : Color{210, 210, 210, 255}); // Soft butter yellow : Light grey hover : Light grey
+        Color btnColor = isSelected ? Color{255, 247, 204, 255}
+                                    : (potHovered[i] ? Color{230, 230, 230, 255}
+                                                     : Color{210, 210, 210, 255});
         
         DrawRectangleRec(potButtons[i], btnColor);
-        DrawRectangleLinesEx(potButtons[i], isSelected ? 4 : 2, isSelected ? Color{235, 186, 170, 255} : Color{85, 107, 95, 255}); // Warm terracotta : Dark forest green
+        DrawRectangleLinesEx(potButtons[i], isSelected ? 4 : 2,
+                             isSelected ? Color{199, 102, 87, 255} : Color{45, 59, 53, 255});
         
-        // Draw pot texture preview
+        // Pot texture preview
         Texture2D potTexture = manager->GetPotTexture(potColors[i]);
         if (potTexture.id != 0) {
-            float scale = 70.0f / potTexture.width;  // Adjusted from 80 to 70 to fit in smaller button
+            float scale = 70.0f / potTexture.width;
             int texWidth = static_cast<int>(potTexture.width * scale);
             int texHeight = static_cast<int>(potTexture.height * scale);
-            
             int texX = potButtons[i].x + (potButtons[i].width - texWidth) / 2;
             int texY = potButtons[i].y + (potButtons[i].height - texHeight) / 2;
-            
             DrawTextureEx(potTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)},
-                         0.0f, scale, WHITE);
+                          0.0f, scale, WHITE);
         }
     }
 }
 
 void DecorationScreen::DrawRibbonOption() {
-    Color ribbonColor = hasRibbon ? GREEN : (ribbonToggleHovered ? DARKGRAY : GRAY);
+    Color ribbonColor = hasRibbon ? Color{206, 237, 223, 255}
+                                  : (ribbonToggleHovered ? Color{164, 211, 194, 255}
+                                                         : Color{206, 237, 223, 255});
     DrawRectangleRec(ribbonToggleButton, ribbonColor);
     DrawRectangleLinesEx(ribbonToggleButton, 3, BLACK);
     
-    const char* ribbonText = hasRibbon ? "✓ Ribbon Added" : "Add Ribbon";
+    const char* ribbonText = hasRibbon ? "Ribbon Added" : "Add Ribbon";
     int textWidth = MeasureText(ribbonText, 20);
     DrawText(ribbonText,
              ribbonToggleButton.x + (ribbonToggleButton.width - textWidth) / 2,
              ribbonToggleButton.y + (ribbonToggleButton.height - 20) / 2,
              20,
-             WHITE);
+             Color{45, 59, 53, 255});
 }
 
 void DecorationScreen::DrawPriceInfo() {
-    int priceY = screenHeight - 150;
+    // ↑ Move the price block up so it doesn't collide with bottom buttons
+    int priceY = screenHeight - 200;
     
     // Original price
     std::ostringstream originalStream;
     originalStream << "Original Price: R" << std::fixed << std::setprecision(2) << CalculateOriginalPrice();
     int originalWidth = MeasureText(originalStream.str().c_str(), 18);
-    DrawText(originalStream.str().c_str(), screenWidth / 2 - originalWidth / 2, priceY, 18, LIGHTGRAY);
+    DrawText(originalStream.str().c_str(), screenWidth / 2 - originalWidth / 2, priceY, 18, Color{86, 110, 100, 255});
     
     // New price with decorations
     double newPrice = CalculateCurrentPrice();
@@ -552,20 +445,20 @@ void DecorationScreen::DrawPriceInfo() {
     std::ostringstream newStream;
     newStream << "New Price: R" << std::fixed << std::setprecision(2) << newPrice;
     int newWidth = MeasureText(newStream.str().c_str(), 24);
-    DrawText(newStream.str().c_str(), screenWidth / 2 - newWidth / 2, priceY + 30, 24, GOLD);
+    DrawText(newStream.str().c_str(), screenWidth / 2 - newWidth / 2, priceY + 30, 24, Color{170, 133, 35, 255});
     
     // Price difference
     if (priceDiff > 0.01) {
         std::ostringstream diffStream;
         diffStream << "(+" << std::fixed << std::setprecision(2) << priceDiff << ")";
         int diffWidth = MeasureText(diffStream.str().c_str(), 16);
-        DrawText(diffStream.str().c_str(), screenWidth / 2 - diffWidth / 2, priceY + 60, 16, YELLOW);
+        DrawText(diffStream.str().c_str(), screenWidth / 2 - diffWidth / 2, priceY + 60, 16, Color{170, 133, 35, 255});
     }
 }
 
 void DecorationScreen::DrawButtons() {
-    // Confirm button
-    Color confirmColor = confirmHovered ? DARKGREEN : GREEN;
+    // Confirm button (mint)
+    Color confirmColor = confirmHovered ? Color{164, 211, 194, 255} : Color{206, 237, 223, 255};
     DrawRectangleRec(confirmButton, confirmColor);
     DrawRectangleLinesEx(confirmButton, 3, BLACK);
     const char* confirmText = "CONFIRM";
@@ -574,10 +467,10 @@ void DecorationScreen::DrawButtons() {
              confirmButton.x + (confirmButton.width - confirmWidth) / 2,
              confirmButton.y + (confirmButton.height - 22) / 2,
              22,
-             WHITE);
+             Color{45, 59, 53, 255});
     
-    // Back button
-    Color backColor = backHovered ? Color{150, 50, 50, 255} : Color{100, 50, 50, 255};
+    // Back button (terracotta family)
+    Color backColor = backHovered ? Color{174, 83, 70, 255} : Color{199, 102, 87, 255};
     DrawRectangleRec(backButton, backColor);
     DrawRectangleLinesEx(backButton, 3, BLACK);
     const char* backText = "CANCEL";
@@ -586,5 +479,5 @@ void DecorationScreen::DrawButtons() {
              backButton.x + (backButton.width - backWidth) / 2,
              backButton.y + (backButton.height - 22) / 2,
              22,
-             WHITE);
+             RAYWHITE);
 }

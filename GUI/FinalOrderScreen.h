@@ -136,6 +136,9 @@ private:
     void DrawInfoBox(const char* label, const char* value, int x, int y, int width);
     void DrawTextCentered(const char* text, int y, int fontSize, Color color);
 
+    Rectangle processingBackButton;
+    bool processingBackHovered;
+
 public:
     FinalOrderScreen(ScreenManager* mgr);
     ~FinalOrderScreen();

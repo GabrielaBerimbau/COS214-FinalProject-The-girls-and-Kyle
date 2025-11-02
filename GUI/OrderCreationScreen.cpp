@@ -98,7 +98,7 @@ void OrderCreationScreen::InitializeButtons() {
     };
 
     // Row 2: Proceed to Checkout (centered, larger)
-    int checkoutWidth = 250;
+    int checkoutWidth = 270;
     proceedToCheckoutButton = Rectangle{
         static_cast<float>(screenWidth / 2 - checkoutWidth / 2),
         static_cast<float>(bottomY + buttonHeight + buttonSpacing),

@@ -42,6 +42,8 @@ FinalOrderScreen::FinalOrderScreen(ScreenManager* mgr)
 
     InitializeLayout();
     InitializeButtons();
+    // IMPORTANT: ensure we have a customer + order immediately to avoid null derefs later
+    InitializeOrderData();
 }
 
 FinalOrderScreen::~FinalOrderScreen() {
@@ -49,7 +51,6 @@ FinalOrderScreen::~FinalOrderScreen() {
         delete paymentProcessor;
         paymentProcessor = nullptr;
     }
-
 }
 
 void FinalOrderScreen::Reset() {
@@ -100,7 +101,7 @@ void FinalOrderScreen::InitializeButtons() {
     int inputWidth = 400;
     int inputHeight = 50;
     int inputY = screenHeight / 2 - 100;
-    int inputSpacing = 85; 
+    int inputSpacing = 85;
 
     cardNumberInput = Rectangle{
         static_cast<float>(screenWidth / 2 - inputWidth / 2),
@@ -123,7 +124,7 @@ void FinalOrderScreen::InitializeButtons() {
         static_cast<float>(inputHeight)
     };
 
-    // Card Input buttons (autocomplete button not needed, using keyboard shortcut)
+    // Card Input buttons (autocomplete via keyboard 'A')
     int cardButtonWidth = 180;
 
     confirmCardButton = Rectangle{
@@ -174,7 +175,7 @@ void FinalOrderScreen::InitializeButtons() {
 void FinalOrderScreen::InitializeOrderData() {
     Customer* customer = manager->GetCustomer();
     if (!customer) {
-        std::cout << "[FinalOrderScreen] Error: No customer found!" << std::endl;
+        std::cout << "[FinalOrderScreen] Error: No customer found!\n";
         return;
     }
 
@@ -185,12 +186,17 @@ void FinalOrderScreen::InitializeOrderData() {
         manager->SetFinalOrder(finalOrder);
     }
 
+    if (!finalOrder) {
+        std::cout << "[FinalOrderScreen] Error: Could not create final order!\n";
+        return;
+    }
+
     // Get order total and customer balance
     orderTotal = finalOrder->calculateTotalPrice();
     customerBalance = customer->getBudget();
 
-    std::cout << "[FinalOrderScreen] Order Total: R" << orderTotal << std::endl;
-    std::cout << "[FinalOrderScreen] Customer Balance: R" << customerBalance << std::endl;
+    std::cout << "[FinalOrderScreen] Order Total: R" << orderTotal << "\n";
+    std::cout << "[FinalOrderScreen] Customer Balance: R" << customerBalance << "\n";
 }
 
 void FinalOrderScreen::GenerateReceiptLines() {
@@ -219,9 +225,7 @@ void FinalOrderScreen::GenerateReceiptLines() {
     std::istringstream receiptStream(formattedReceipt);
     std::string line;
     while (std::getline(receiptStream, line)) {
-        if (!line.empty()) {
-            receiptLines.push_back(line);
-        }
+        if (!line.empty()) receiptLines.push_back(line);
     }
 
     receiptLines.push_back("---------------------------------------");
@@ -231,11 +235,8 @@ void FinalOrderScreen::GenerateReceiptLines() {
     receiptLines.push_back("TOTAL: R" + totalStream.str());
 
     std::string paymentMethod = (paymentProcessor) ? "Card" : "Cash";
-    if (dynamic_cast<CashPayment*>(paymentProcessor)) {
-        paymentMethod = "Cash";
-    } else if (dynamic_cast<CreditCardPayment*>(paymentProcessor)) {
-        paymentMethod = "Credit Card";
-    }
+    if (dynamic_cast<CashPayment*>(paymentProcessor))       paymentMethod = "Cash";
+    else if (dynamic_cast<CreditCardPayment*>(paymentProcessor)) paymentMethod = "Credit Card";
     receiptLines.push_back("Payment Method: " + paymentMethod);
 
     std::ostringstream balanceStream;
@@ -272,23 +273,16 @@ void FinalOrderScreen::Update() {
 void FinalOrderScreen::Draw() {
     ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
 
+    // Last-ditch safety: ensure order data exists before any draw uses it
+    if (!finalOrder) InitializeOrderData();
+
     switch (currentState) {
-        case CheckoutState::PAYMENT_SELECTION:
-            DrawPaymentSelection();
-            break;
-        case CheckoutState::CARD_INPUT:
-            DrawCardInput();
-            break;
-        case CheckoutState::PROCESSING:
-            DrawProcessing();
-            break;
+        case CheckoutState::PAYMENT_SELECTION: DrawPaymentSelection(); break;
+        case CheckoutState::CARD_INPUT:        DrawCardInput();        break;
+        case CheckoutState::PROCESSING:        DrawProcessing();       break;
         case CheckoutState::SUCCESS:
-        case CheckoutState::FAILURE:
-            DrawSuccessFailure();
-            break;
-        case CheckoutState::RECEIPT:
-            DrawReceipt();
-            break;
+        case CheckoutState::FAILURE:           DrawSuccessFailure();   break;
+        case CheckoutState::RECEIPT:           DrawReceipt();          break;
     }
 }
 
@@ -303,7 +297,6 @@ void FinalOrderScreen::UpdatePaymentSelection() {
     if (cashHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         HandleCashPayment();
     }
-
     if (cardHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         HandleCardPayment();
     }
@@ -317,53 +310,42 @@ void FinalOrderScreen::DrawPaymentSelection() {
     int boxX = screenWidth / 2 - boxWidth / 2;
     int boxY = 180;
 
-    DrawRectangle(boxX, boxY, boxWidth, boxHeight, Color{210, 210, 210, 255}); // Light grey
-    DrawRectangleLinesEx(Rectangle{(float)boxX, (float)boxY, (float)boxWidth, (float)boxHeight}, 3, Color{120, 120, 120, 255}); // Dark grey
+    DrawRectangle(boxX, boxY, boxWidth, boxHeight, Color{210, 210, 210, 255});
+    DrawRectangleLinesEx(Rectangle{(float)boxX, (float)boxY, (float)boxWidth, (float)boxHeight}, 3, Color{120, 120, 120, 255});
 
     int textY = boxY + 30;
     int fontSize = 24;
 
     std::ostringstream totalStream;
     totalStream << std::fixed << std::setprecision(2) << orderTotal;
-    std::string totalText = "Order Total: R" + totalStream.str();
-    DrawTextCentered(totalText.c_str(), textY, fontSize, Color{180, 130, 50, 255}); // Dark gold/amber
+    DrawTextCentered(std::string("Order Total: R" + totalStream.str()).c_str(), textY, fontSize, Color{180, 130, 50, 255});
 
     textY += 50;
     std::ostringstream balanceStream;
     balanceStream << std::fixed << std::setprecision(2) << customerBalance;
-    std::string balanceText = "Your Balance: R" + balanceStream.str();
-    DrawTextCentered(balanceText.c_str(), textY, fontSize, Color{40, 120, 60, 255}); // Dark green
+    DrawTextCentered(std::string("Your Balance: R" + balanceStream.str()).c_str(), textY, fontSize, Color{40, 120, 60, 255});
 
     textY += 50;
     std::ostringstream remainingStream;
     remainingStream << std::fixed << std::setprecision(2) << (customerBalance - orderTotal);
-    std::string remainingText = "After Purchase: R" + remainingStream.str();
-    Color remainingColor = (customerBalance >= orderTotal) ? Color{85, 107, 95, 255} : Color{180, 40, 40, 255}; // Dark forest green : Dark red
-    DrawTextCentered(remainingText.c_str(), textY, fontSize, remainingColor);
+    Color remainingColor = (customerBalance >= orderTotal) ? Color{85, 107, 95, 255} : Color{180, 40, 40, 255};
+    DrawTextCentered(std::string("After Purchase: R" + remainingStream.str()).c_str(), textY, fontSize, remainingColor);
 
-    DrawTextCentered("Select Payment Method:", screenHeight / 2 - 20, 28, Color{85, 107, 95, 255}); // Dark forest green
+    DrawTextCentered("Select Payment Method:", screenHeight / 2 - 20, 28, Color{85, 107, 95, 255});
 
-    Color cashColor = cashHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
+    Color cashColor = cashHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255};
     DrawRectangleRec(cashButton, cashColor);
     DrawRectangleLinesEx(cashButton, 3, WHITE);
     const char* cashText = "CASH";
     int cashTextWidth = MeasureText(cashText, 30);
-    DrawText(cashText,
-             cashButton.x + (cashButton.width - cashTextWidth) / 2,
-             cashButton.y + (cashButton.height - 30) / 2,
-             30,
-             WHITE);
+    DrawText(cashText, cashButton.x + (cashButton.width - cashTextWidth) / 2, cashButton.y + (cashButton.height - 30) / 2, 30, WHITE);
 
-    Color cardColor = cardHovered ? Color{60, 90, 140, 255} : Color{70, 100, 150, 255}; // Lighter blue shades
+    Color cardColor = cardHovered ? Color{60, 90, 140, 255} : Color{70, 100, 150, 255};
     DrawRectangleRec(cardButton, cardColor);
     DrawRectangleLinesEx(cardButton, 3, WHITE);
     const char* cardText = "CREDIT CARD";
     int cardTextWidth = MeasureText(cardText, 30);
-    DrawText(cardText,
-             cardButton.x + (cardButton.width - cardTextWidth) / 2,
-             cardButton.y + (cardButton.height - 30) / 2,
-             30,
-             WHITE);
+    DrawText(cardText, cardButton.x + (cardButton.width - cardTextWidth) / 2, cardButton.y + (cardButton.height - 30) / 2, 30, WHITE);
 
     if (customerBalance < orderTotal) {
         DrawTextCentered("WARNING: Insufficient funds!", screenHeight - 80, 22, RED);
@@ -371,16 +353,16 @@ void FinalOrderScreen::DrawPaymentSelection() {
 }
 
 void FinalOrderScreen::HandleCashPayment() {
-    std::cout << "[FinalOrderScreen] Cash payment selected" << std::endl;
+    std::cout << "[FinalOrderScreen] Cash payment selected\n";
     currentState = CheckoutState::PROCESSING;
     processingTimer = 0.0f;
 
-    //Process payment immediately for cash
-    bool success = ProcessPayment(true);
+    // Process payment immediately for cash
+    ProcessPayment(true);
 }
 
 void FinalOrderScreen::HandleCardPayment() {
-    std::cout << "[FinalOrderScreen] Card payment selected, showing input form" << std::endl;
+    std::cout << "[FinalOrderScreen] Card payment selected, showing input form\n";
     currentState = CheckoutState::CARD_INPUT;
 }
 
@@ -393,43 +375,28 @@ void FinalOrderScreen::UpdateCardInput() {
     cancelCardHovered = CheckCollisionPointRec(mousePos, cancelCardButton);
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if (CheckCollisionPointRec(mousePos, cardNumberInput)) {
-            activeInputField = 1;
-        } else if (CheckCollisionPointRec(mousePos, cardExpiryInput)) {
-            activeInputField = 2;
-        } else if (CheckCollisionPointRec(mousePos, cardCVVInput)) {
-            activeInputField = 3;
-        } else {
-            activeInputField = 0;
-        }
+        if (CheckCollisionPointRec(mousePos, cardNumberInput))      activeInputField = 1;
+        else if (CheckCollisionPointRec(mousePos, cardExpiryInput)) activeInputField = 2;
+        else if (CheckCollisionPointRec(mousePos, cardCVVInput))    activeInputField = 3;
+        else                                                        activeInputField = 0;
     }
 
     int key = GetCharPressed();
     while (key > 0) {
         if (activeInputField == 1 && cardNumber.length() < maxCardNumberLength) {
-            if ((key >= '0' && key <= '9')) {
-                cardNumber += (char)key;
-            }
+            if ((key >= '0' && key <= '9')) cardNumber += (char)key;
         } else if (activeInputField == 2 && cardExpiry.length() < maxExpiryLength) {
-            if ((key >= '0' && key <= '9') || key == '/') {
-                cardExpiry += (char)key;
-            }
+            if ((key >= '0' && key <= '9') || key == '/') cardExpiry += (char)key;
         } else if (activeInputField == 3 && cardCVV.length() < maxCVVLength) {
-            if ((key >= '0' && key <= '9')) {
-                cardCVV += (char)key;
-            }
+            if ((key >= '0' && key <= '9')) cardCVV += (char)key;
         }
         key = GetCharPressed();
     }
 
     if (IsKeyPressed(KEY_BACKSPACE)) {
-        if (activeInputField == 1 && !cardNumber.empty()) {
-            cardNumber.pop_back();
-        } else if (activeInputField == 2 && !cardExpiry.empty()) {
-            cardExpiry.pop_back();
-        } else if (activeInputField == 3 && !cardCVV.empty()) {
-            cardCVV.pop_back();
-        }
+        if      (activeInputField == 1 && !cardNumber.empty()) cardNumber.pop_back();
+        else if (activeInputField == 2 && !cardExpiry.empty()) cardExpiry.pop_back();
+        else if (activeInputField == 3 && !cardCVV.empty())    cardCVV.pop_back();
     }
 
     if (IsKeyPressed(KEY_A)) {
@@ -439,7 +406,6 @@ void FinalOrderScreen::UpdateCardInput() {
     if (confirmCardHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         HandleConfirmCard();
     }
-
     if (cancelCardHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         HandleCancelCard();
     }
@@ -448,31 +414,31 @@ void FinalOrderScreen::UpdateCardInput() {
 void FinalOrderScreen::DrawCardInput() {
     DrawTextCentered("Enter Card Details", 60, 40, WHITE);
 
-    DrawText("Card Number:", cardNumberInput.x, cardNumberInput.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
-    Color numberBorder = (activeInputField == 1) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}; // Warm terracotta : Light sage
-    DrawRectangleRec(cardNumberInput, Color{245, 250, 247, 255}); // Very light sage
+    DrawText("Card Number:", cardNumberInput.x, cardNumberInput.y - 25, 18, Color{120, 140, 125, 255});
+    Color numberBorder = (activeInputField == 1) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255};
+    DrawRectangleRec(cardNumberInput, Color{245, 250, 247, 255});
     DrawRectangleLinesEx(cardNumberInput, 2, numberBorder);
-    DrawText(cardNumber.c_str(), cardNumberInput.x + 10, cardNumberInput.y + 15, 20, Color{85, 107, 95, 255}); // Dark forest green
+    DrawText(cardNumber.c_str(), cardNumberInput.x + 10, cardNumberInput.y + 15, 20, Color{85, 107, 95, 255});
 
-    DrawText("Expiry (MM/YY):", cardExpiryInput.x, cardExpiryInput.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
-    Color expiryBorder = (activeInputField == 2) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}; // Warm terracotta : Light sage
-    DrawRectangleRec(cardExpiryInput, Color{245, 250, 247, 255}); // Very light sage
+    DrawText("Expiry (MM/YY):", cardExpiryInput.x, cardExpiryInput.y - 25, 18, Color{120, 140, 125, 255});
+    Color expiryBorder = (activeInputField == 2) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255};
+    DrawRectangleRec(cardExpiryInput, Color{245, 250, 247, 255});
     DrawRectangleLinesEx(cardExpiryInput, 2, expiryBorder);
-    DrawText(cardExpiry.c_str(), cardExpiryInput.x + 10, cardExpiryInput.y + 15, 20, Color{85, 107, 95, 255}); // Dark forest green
+    DrawText(cardExpiry.c_str(), cardExpiryInput.x + 10, cardExpiryInput.y + 15, 20, Color{85, 107, 95, 255});
 
-    DrawText("CVV:", cardCVVInput.x, cardCVVInput.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
-    Color cvvBorder = (activeInputField == 3) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}; // Warm terracotta : Light sage
-    DrawRectangleRec(cardCVVInput, Color{245, 250, 247, 255}); // Very light sage
+    DrawText("CVV:", cardCVVInput.x, cardCVVInput.y - 25, 18, Color{120, 140, 125, 255});
+    Color cvvBorder = (activeInputField == 3) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255};
+    DrawRectangleRec(cardCVVInput, Color{245, 250, 247, 255});
     DrawRectangleLinesEx(cardCVVInput, 2, cvvBorder);
 
     std::string maskedCVV(cardCVV.length(), '*');
-    DrawText(maskedCVV.c_str(), cardCVVInput.x + 10, cardCVVInput.y + 15, 20, Color{85, 107, 95, 255}); // Dark forest green
+    DrawText(maskedCVV.c_str(), cardCVVInput.x + 10, cardCVVInput.y + 15, 20, Color{85, 107, 95, 255});
 
     const char* hintText = "Press 'A' to autocomplete (demo)";
     DrawText(hintText, screenWidth - 280, screenHeight - 100, 16, Color{150, 150, 150, 255});
 
     // Confirm button
-    Color confirmColor = confirmCardHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
+    Color confirmColor = confirmCardHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255};
     DrawRectangleRec(confirmCardButton, confirmColor);
     DrawRectangleLinesEx(confirmCardButton, 2, WHITE);
     const char* confirmText = "Confirm Payment";
@@ -497,19 +463,19 @@ void FinalOrderScreen::DrawCardInput() {
 }
 
 void FinalOrderScreen::HandleAutocomplete() {
-    std::cout << "[FinalOrderScreen] Autocompleting card details for demo" << std::endl;
+    std::cout << "[FinalOrderScreen] Autocompleting card details for demo\n";
     cardNumber = "4532015112830366";
-    cardExpiry = "12/25";
-    cardCVV = "123";
+    cardExpiry  = "12/25";
+    cardCVV     = "123";
 }
 
 void FinalOrderScreen::HandleConfirmCard() {
     if (!ValidateCardInput()) {
-        std::cout << "[FinalOrderScreen] Invalid card details" << std::endl;
+        std::cout << "[FinalOrderScreen] Invalid card details\n";
         return;
     }
 
-    std::cout << "[FinalOrderScreen] Card details confirmed, processing payment" << std::endl;
+    std::cout << "[FinalOrderScreen] Card details confirmed, processing payment\n";
     currentState = CheckoutState::PROCESSING;
     processingTimer = 0.0f;
 
@@ -517,11 +483,12 @@ void FinalOrderScreen::HandleConfirmCard() {
 }
 
 void FinalOrderScreen::HandleCancelCard() {
-    std::cout << "[FinalOrderScreen] Card input cancelled" << std::endl;
-    cardNumber = "";
-    cardExpiry = "";
-    cardCVV = "";
+    std::cout << "[FinalOrderScreen] Card input cancelled\n";
+    cardNumber.clear();
+    cardExpiry.clear();
+    cardCVV.clear();
     activeInputField = 0;
+    failureReason.clear();
     currentState = CheckoutState::PAYMENT_SELECTION;
 }
 
@@ -530,17 +497,14 @@ bool FinalOrderScreen::ValidateCardInput() {
         failureReason = "Invalid card number length";
         return false;
     }
-
     if (cardExpiry.length() != 5 || cardExpiry[2] != '/') {
         failureReason = "Invalid expiry format (use MM/YY)";
         return false;
     }
-
     if (cardCVV.length() != 3) {
         failureReason = "Invalid CVV (must be 3 digits)";
         return false;
     }
-
     return true;
 }
 
@@ -548,8 +512,6 @@ bool FinalOrderScreen::ValidateCardInput() {
 
 void FinalOrderScreen::UpdateProcessing() {
     processingTimer += GetFrameTime();
-
-    // After 2 seconds, transition to success/failure
     if (processingTimer >= 2.0f) {
         currentState = paymentSuccessful ? CheckoutState::SUCCESS : CheckoutState::FAILURE;
     }
@@ -572,100 +534,120 @@ void FinalOrderScreen::DrawProcessing() {
 // ==================== SUCCESS/FAILURE ====================
 
 void FinalOrderScreen::UpdateSuccessFailure() {
+    // Enlarge the Back button ONLY for insufficient funds on the failure screen
+    bool insufficient = (currentState == CheckoutState::FAILURE) &&
+                        (failureReason.empty() || failureReason == "Insufficient funds");
+
+    if (insufficient) {
+        exitToMenuButton.width = 370;                  // wider than default 250
+        exitToMenuButton.x     = (float)screenWidth/2 + 20;   // keep left edge where it was
+        exitToMenuButton.height = 70;                  // match other buttons
+    } else {
+        // restore defaults so other screens aren't affected
+        exitToMenuButton.width  = 250;
+        exitToMenuButton.x      = (float)screenWidth/2 + 20;
+        exitToMenuButton.height = 70;
+    }
+
     Vector2 mousePos = GetMousePosition();
 
     if (currentState == CheckoutState::SUCCESS) {
         continueHovered = CheckCollisionPointRec(mousePos, continueButton);
-
         if (continueHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             HandleContinue();
         }
     } else {
-        retryHovered = CheckCollisionPointRec(mousePos, retryButton);
+        retryHovered      = CheckCollisionPointRec(mousePos, retryButton);
         exitToMenuHovered = CheckCollisionPointRec(mousePos, exitToMenuButton);
 
         if (retryHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             HandleRetry();
         }
-
         if (exitToMenuHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            HandleExitToMenu();
+            HandleExitToMenu(); // to Sales Floor iff insufficient funds
         }
     }
 }
 
+
 void FinalOrderScreen::DrawSuccessFailure() {
     if (currentState == CheckoutState::SUCCESS) {
-        // Success screen
         DrawTextCentered("PAYMENT SUCCESSFUL!", screenHeight / 2 - 120, 45, LIME);
-
         DrawTextCentered("Your payment has been processed.", screenHeight / 2 - 40, 24, WHITE);
-        DrawTextCentered("Thank you for your purchase!", screenHeight / 2 - 5, 24, WHITE);
+        DrawTextCentered("Thank you for your purchase!",  screenHeight / 2 -  5, 24, WHITE);
 
-        // Continue button
-        Color continueColor = continueHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
+        Color continueColor = continueHovered ? Color{78, 146, 111, 255} : Color{94, 167, 128, 255};
         DrawRectangleRec(continueButton, continueColor);
         DrawRectangleLinesEx(continueButton, 3, WHITE);
         const char* continueText = "View Receipt";
-        int continueTextWidth = MeasureText(continueText, 28);
-        DrawText(continueText,
-                 continueButton.x + (continueButton.width - continueTextWidth) / 2,
-                 continueButton.y + 20,
-                 28,
-                 WHITE);
-    } else {
-        // Failure screen
-        DrawTextCentered("PAYMENT FAILED", screenHeight / 2 - 120, 45, RED);
-
-        std::string reason = failureReason.empty() ? "Insufficient funds" : failureReason;
-        DrawTextCentered(reason.c_str(), screenHeight / 2 - 50, 24, ORANGE);
-
-        DrawTextCentered("Would you like to try again?", screenHeight / 2 + 10, 22, LIGHTGRAY);
-
-        // Retry button
-        Color retryColor = retryHovered ? Color{50, 130, 80, 255} : Color{60, 150, 100, 255}; // Lighter green shades
-        DrawRectangleRec(retryButton, retryColor);
-        DrawRectangleLinesEx(retryButton, 3, WHITE);
-        const char* retryText = "Try Again";
-        int retryTextWidth = MeasureText(retryText, 26);
-        DrawText(retryText,
-                 retryButton.x + (retryButton.width - retryTextWidth) / 2,
-                 retryButton.y + 22,
-                 26,
-                 WHITE);
-
-        // Exit button
-        Color exitColor = exitToMenuHovered ? MAROON : Color{120, 50, 50, 255};
-        DrawRectangleRec(exitToMenuButton, exitColor);
-        DrawRectangleLinesEx(exitToMenuButton, 3, WHITE);
-        const char* exitText = "Exit to Menu";
-        int exitTextWidth = MeasureText(exitText, 26);
-        DrawText(exitText,
-                 exitToMenuButton.x + (exitToMenuButton.width - exitTextWidth) / 2,
-                 exitToMenuButton.y + 22,
-                 26,
-                 WHITE);
+        int tw = MeasureText(continueText, 28);
+        DrawText(continueText, continueButton.x + (continueButton.width - tw) / 2, continueButton.y + 20, 28, WHITE);
+        return;
     }
+
+    // -------- Failure screen (pastel palette) --------
+    // Softer berry red headline
+    DrawTextCentered("PAYMENT FAILED",        screenHeight / 2 - 120, 45, Color{203, 68, 74, 255});
+    // Warm amber reason
+    std::string reason = failureReason.empty() ? "Insufficient funds" : failureReason;
+    DrawTextCentered(reason.c_str(),          screenHeight / 2 -  50, 24, Color{223, 156, 86, 255});
+    // Muted sage prompt
+    DrawTextCentered("Would you like to try again?", screenHeight / 2 + 10, 22, Color{170, 182, 176, 255});
+
+    // Retry (pastel green)
+    Color retryColor = retryHovered ? Color{78, 146, 111, 255} : Color{94, 167, 128, 255};
+    DrawRectangleRec(retryButton, retryColor);
+    DrawRectangleLinesEx(retryButton, 3, WHITE);
+    const char* retryText = "Try Again";
+    int rt = MeasureText(retryText, 26);
+    DrawText(retryText, retryButton.x + (retryButton.width - rt) / 2, retryButton.y + 22, 26, WHITE);
+
+    // Right button: Back to Sales Floor ONLY for insufficient funds; else Exit to Menu
+    bool insufficient = (reason == "Insufficient funds");
+
+    // Pastel terracotta for the back/exit button
+    Color backBase  = insufficient ? Color{182, 106, 96, 255} : Color{150, 80, 80, 255};
+    Color backHover = insufficient ? Color{160,  85, 76, 255} : Color{130, 65, 65, 255};
+    Color exitColor = exitToMenuHovered ? backHover : backBase;
+
+    DrawRectangleRec(exitToMenuButton, exitColor);
+    DrawRectangleLinesEx(exitToMenuButton, 3, WHITE);
+
+    const char* rightText = insufficient ? "Back to Sales Floor" : "Exit to Menu";
+    int rtw = MeasureText(rightText, 26);
+    DrawText(rightText,
+             exitToMenuButton.x + (exitToMenuButton.width - rtw) / 2,
+             exitToMenuButton.y + 22,
+             26,
+             WHITE);
 }
 
+
 void FinalOrderScreen::HandleContinue() {
-    std::cout << "[FinalOrderScreen] Continuing to receipt" << std::endl;
+    std::cout << "[FinalOrderScreen] Continuing to receipt\n";
     GenerateReceiptLines();
     currentState = CheckoutState::RECEIPT;
 }
 
 void FinalOrderScreen::HandleRetry() {
-    std::cout << "[FinalOrderScreen] Retrying payment" << std::endl;
-    cardNumber = "";
-    cardExpiry = "";
-    cardCVV = "";
+    std::cout << "[FinalOrderScreen] Retrying payment\n";
+    cardNumber.clear();
+    cardExpiry.clear();
+    cardCVV.clear();
     activeInputField = 0;
-    failureReason = "";
+    failureReason.clear();
     currentState = CheckoutState::PAYMENT_SELECTION;
 }
 
 void FinalOrderScreen::HandleExitToMenu() {
-    std::cout << "[FinalOrderScreen] Exiting to main menu" << std::endl;
+    // If the failure was "Insufficient funds", this acts as a "Back to Sales Floor" button.
+    if (currentState == CheckoutState::FAILURE &&
+        (failureReason.empty() || failureReason == "Insufficient funds")) {
+        std::cout << "[FinalOrderScreen] Back to Sales Floor (insufficient funds)\n";
+        manager->SwitchScreen(GameScreen::SALES_FLOOR);
+        return;
+    }
+    std::cout << "[FinalOrderScreen] Exiting to main menu\n";
     manager->SwitchScreen(GameScreen::START);
 }
 
@@ -683,7 +665,7 @@ void FinalOrderScreen::UpdateReceipt() {
         // Clamp scroll
         float maxScroll = receiptLines.size() * 25.0f - 400.0f;
         if (receiptScrollOffset < 0) receiptScrollOffset = 0;
-        if (receiptScrollOffset > maxScroll && maxScroll > 0) receiptScrollOffset = maxScroll;
+        if (maxScroll > 0 && receiptScrollOffset > maxScroll) receiptScrollOffset = maxScroll;
     }
 
     if (exitProgramHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -703,7 +685,6 @@ void FinalOrderScreen::DrawReceipt() {
     DrawRectangle(boxX, boxY, boxWidth, boxHeight, Color{250, 250, 240, 255});
     DrawRectangleLinesEx(Rectangle{(float)boxX, (float)boxY, (float)boxWidth, (float)boxHeight}, 3, BLACK);
 
-    // Enable scissor mode for scrolling
     BeginScissorMode(boxX, boxY, boxWidth, boxHeight);
 
     int textY = boxY + 20 - (int)receiptScrollOffset;
@@ -714,7 +695,6 @@ void FinalOrderScreen::DrawReceipt() {
 
     EndScissorMode();
 
-    // Scroll hint
     if (receiptLines.size() * 25 > boxHeight) {
         DrawText("Scroll with mouse wheel", boxX + boxWidth / 2 - 100, boxY + boxHeight + 10, 16, LIGHTGRAY);
     }
@@ -733,7 +713,7 @@ void FinalOrderScreen::DrawReceipt() {
 }
 
 void FinalOrderScreen::HandleExitProgram() {
-    std::cout << "[FinalOrderScreen] Exiting program" << std::endl;
+    std::cout << "[FinalOrderScreen] Exiting program\n";
     manager->SwitchScreen(GameScreen::START);
 }
 
@@ -741,15 +721,27 @@ void FinalOrderScreen::HandleExitProgram() {
 
 bool FinalOrderScreen::ProcessPayment(bool isCash) {
     Customer* customer = manager->GetCustomer();
-    if (!customer || !finalOrder) {
+    if (!customer) {
         paymentSuccessful = false;
-        failureReason = "System error: Invalid customer or order";
+        failureReason = "System error: Invalid customer";
         return false;
     }
 
-    // Check if customer can afford
+    // Create order on demand if needed
+    if (!finalOrder) {
+        finalOrder = customer->createFinalOrder();
+        manager->SetFinalOrder(finalOrder);
+        if (!finalOrder) {
+            paymentSuccessful = false;
+            failureReason = "System error: Invalid order";
+            return false;
+        }
+        orderTotal = finalOrder->calculateTotalPrice();
+    }
+
+    // Check affordability first
     if (!customer->canAfford(orderTotal)) {
-        std::cout << "[FinalOrderScreen] Payment failed: Insufficient funds" << std::endl;
+        std::cout << "[FinalOrderScreen] Payment failed: Insufficient funds\n";
         paymentSuccessful = false;
         failureReason = "Insufficient funds";
         return false;
@@ -758,16 +750,13 @@ bool FinalOrderScreen::ProcessPayment(bool isCash) {
     // Create appropriate payment processor
     if (paymentProcessor) {
         delete paymentProcessor;
+        paymentProcessor = nullptr;
     }
-
-    if (isCash) {
-        paymentProcessor = new CashPayment();
-    } else {
-        paymentProcessor = new CreditCardPayment();
-    }
+    paymentProcessor = isCash ? static_cast<PaymentProcessor*>(new CashPayment())
+                              : static_cast<PaymentProcessor*>(new CreditCardPayment());
 
     // Process transaction using template method
-    std::cout << "[FinalOrderScreen] Processing transaction..." << std::endl;
+    std::cout << "[FinalOrderScreen] Processing transaction...\n";
     paymentProcessor->processTransaction(finalOrder);
 
     // Deduct from customer budget
@@ -776,9 +765,7 @@ bool FinalOrderScreen::ProcessPayment(bool isCash) {
     if (deducted) {
         paymentSuccessful = true;
         customerBalance = customer->getBudget();
-
-        // Cleanup will be done when viewing receipt
-        std::cout << "[FinalOrderScreen] Payment successful! New balance: R" << customerBalance << std::endl;
+        std::cout << "[FinalOrderScreen] Payment successful! New balance: R" << customerBalance << "\n";
         return true;
     } else {
         paymentSuccessful = false;
@@ -790,11 +777,8 @@ bool FinalOrderScreen::ProcessPayment(bool isCash) {
 void FinalOrderScreen::CleanupAfterPayment() {
     Customer* customer = manager->GetCustomer();
     if (!customer) return;
-
-    std::cout << "[FinalOrderScreen] Cleaning up after successful payment" << std::endl;
-
+    std::cout << "[FinalOrderScreen] Cleaning up after successful payment\n";
 }
-
 
 void FinalOrderScreen::DrawTextCentered(const char* text, int y, int fontSize, Color color) {
     int textWidth = MeasureText(text, fontSize);
@@ -803,9 +787,8 @@ void FinalOrderScreen::DrawTextCentered(const char* text, int y, int fontSize, C
 
 void FinalOrderScreen::DrawInfoBox(const char* label, const char* value, int x, int y, int width) {
     int height = 50;
-    DrawRectangle(x, y, width, height, Color{245, 250, 247, 255}); // Very light sage
-    DrawRectangleLinesEx(Rectangle{(float)x, (float)y, (float)width, (float)height}, 2, Color{200, 210, 205, 255}); // Light sage
-
-    DrawText(label, x + 10, y + 10, 18, Color{120, 140, 125, 255}); // Medium sage
-    DrawText(value, x + 10, y + 28, 20, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangle(x, y, width, height, Color{245, 250, 247, 255});
+    DrawRectangleLinesEx(Rectangle{(float)x, (float)y, (float)width, (float)height}, 2, Color{200, 210, 205, 255});
+    DrawText(label, x + 10, y + 10, 18, Color{120, 140, 125, 255});
+    DrawText(value, x + 10, y + 28, 20, Color{85, 107, 95, 255});
 }

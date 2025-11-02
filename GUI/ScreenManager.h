@@ -31,7 +31,8 @@ enum class GameScreen {
     ORDER_CONFIRMATION,
     CHECKOUT,
     RECEIPT,
-    STAFF_GREENHOUSE
+    STAFF_GREENHOUSE,
+    STAFF_SALES_FLOOR
 };
 
 class ScreenManager {

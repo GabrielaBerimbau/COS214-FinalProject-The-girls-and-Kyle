@@ -20,6 +20,9 @@ private:
     // Hover states
     bool customerButtonHovered;
     bool staffButtonHovered;
+
+    Rectangle exitButton;
+    bool exitHovered;
     
     void InitializeUI();
     void UpdateButtons();

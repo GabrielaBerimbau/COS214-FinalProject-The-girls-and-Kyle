@@ -68,6 +68,9 @@ private:
     
     // FIXED: Track actual queue size for display
     int displayedQueueSize;
+
+    Rectangle viewSalesFloorButton;
+    bool viewSalesFloorHovered;
     
     void InitializeLayout();
     void InitializeButtons();
