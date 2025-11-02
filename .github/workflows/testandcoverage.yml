@@ -2,7 +2,7 @@ name: Test & Coverage
 
 on:
   push:
-    branches: [ Dev, dev, main, feature/**, megan-coverage ]   # remove "megan-coverage" later
+    branches: [ Dev, dev, main, feature/**, megan-fixing-coverage ]   # remove "megan-coverage" later
   pull_request:
     branches: [ Dev, dev, main ]
   workflow_dispatch: {}
