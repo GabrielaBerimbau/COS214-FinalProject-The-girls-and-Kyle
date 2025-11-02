@@ -11,6 +11,12 @@
 #include "OrderCreationScreen.h"
 #include "FinalOrderScreen.h"
 #include "StaffSalesFloorScreen.h"   // <-- NEW
+#include "CheatMenuScreen.h"         // <-- EASTER EGG
+#include "FlappyBirdScreen.h"        // <-- EASTER EGG
+#include "SnakeScreen.h"             // <-- EASTER EGG
+#include "CheatsSubmenuScreen.h"     // <-- EASTER EGG
+#include "CreditsScreen.h"           // <-- EASTER EGG
+#include "MatrixRainScreen.h"        // <-- EASTER EGG
 
 int main() {
     const int screenWidth  = 1400;
@@ -32,6 +38,12 @@ int main() {
     DecorationScreen         decorationScreen(&manager);
     OrderCreationScreen      orderCreationScreen(&manager);
     FinalOrderScreen         finalOrderScreen(&manager);
+    CheatMenuScreen          cheatMenuScreen(&manager);         // <-- EASTER EGG
+    FlappyBirdScreen         flappyBirdScreen(&manager);        // <-- EASTER EGG
+    SnakeScreen              snakeScreen(&manager);             // <-- EASTER EGG
+    CheatsSubmenuScreen      cheatsSubmenuScreen(&manager);     // <-- EASTER EGG
+    CreditsScreen            creditsScreen(&manager);           // <-- EASTER EGG
+    MatrixRainScreen         matrixRainScreen(&manager);        // <-- EASTER EGG
 
     GameScreen lastScreen = manager.GetCurrentScreen();
 
@@ -100,6 +112,36 @@ int main() {
                 }
                 finalOrderScreen.Update();
                 finalOrderScreen.Draw();
+                break;
+
+            case GameScreen::CHEAT_MENU:  // <-- EASTER EGG
+                cheatMenuScreen.Update();
+                cheatMenuScreen.Draw();
+                break;
+
+            case GameScreen::FLAPPY_BIRD:  // <-- EASTER EGG
+                flappyBirdScreen.Update();
+                flappyBirdScreen.Draw();
+                break;
+
+            case GameScreen::SNAKE:  // <-- EASTER EGG
+                snakeScreen.Update();
+                snakeScreen.Draw();
+                break;
+
+            case GameScreen::CHEATS_SUBMENU:  // <-- EASTER EGG
+                cheatsSubmenuScreen.Update();
+                cheatsSubmenuScreen.Draw();
+                break;
+
+            case GameScreen::CREDITS:  // <-- EASTER EGG
+                creditsScreen.Update();
+                creditsScreen.Draw();
+                break;
+
+            case GameScreen::MATRIX_RAIN:  // <-- EASTER EGG
+                matrixRainScreen.Update();
+                matrixRainScreen.Draw();
                 break;
 
             default:

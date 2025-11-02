@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include <string>
+#include <vector>
 
 class ScreenManager;
 class Plant;
@@ -45,6 +46,11 @@ private:
     char requestText[256];
     int requestTextLength;
     std::string responseText;
+
+    // Konami code tracking
+    std::vector<int> konamiSequence;
+    const std::vector<int> konamiCode = {KEY_UP, KEY_UP, KEY_DOWN, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_LEFT, KEY_RIGHT, KEY_B, KEY_A};
+    void CheckKonamiCode(int key);
 
     // Reorder notification (Prototype pattern demonstration)
     bool showReorderNotification;

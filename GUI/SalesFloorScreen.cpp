@@ -163,6 +163,12 @@ void SalesFloorScreen::InitializeReorderNotification() {
 }
 
 void SalesFloorScreen::Update() {
+    // Check for Konami code keypresses (always active)
+    int key = GetKeyPressed();
+    if (key != 0) {
+        CheckKonamiCode(key);
+    }
+
     if (requestOverlayActive) {
         UpdateRequestOverlay();
     } else if (showReorderNotification) {
@@ -179,7 +185,7 @@ void SalesFloorScreen::Update() {
                 }
             }
         }
-        
+
         UpdateGrid();
         UpdateButtons();
     }
@@ -374,13 +380,24 @@ void SalesFloorScreen::HandleCreateOrder() {
 void SalesFloorScreen::HandleMakeRequest() {
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
-    Request* request = customer->createRequest(std::string(requestText));
-    
+
+    // Check for cheat code fallback
+    std::string requestStr = std::string(requestText);
+    std::string lowerRequest = requestStr;
+    std::transform(lowerRequest.begin(), lowerRequest.end(), lowerRequest.begin(), ::tolower);
+
+    if (lowerRequest.find("cheat") != std::string::npos) {
+        std::cout << "[CHEAT CODE] Detected 'cheat' keyword! Opening cheat menu..." << std::endl;
+        manager->SwitchScreen(GameScreen::CHEAT_MENU);
+        return;
+    }
+
+    Request* request = customer->createRequest(requestStr);
+
     SalesAssistant* salesAssistant = manager->GetSalesAssistant();
     if (salesAssistant != nullptr) {
         salesAssistant->handleRequest(request);
-        
+
         if (request->isHandled()) {
             responseText = "Request handled: " + request->getMessage();
 
@@ -429,11 +446,38 @@ void SalesFloorScreen::HandleMakeRequest() {
 // NEW: Handle back to start screen
 void SalesFloorScreen::HandleBackToStart() {
     std::cout << "[SalesFloorScreen] Returning to start screen" << std::endl;
-    
+
     // Optional: Delete customer when going back
     manager->DeleteCustomer();
-    
+
     manager->SwitchScreen(GameScreen::START);
+}
+
+void SalesFloorScreen::CheckKonamiCode(int key) {
+    // Add key to sequence
+    konamiSequence.push_back(key);
+
+    // Keep only last 10 keys
+    if (konamiSequence.size() > 10) {
+        konamiSequence.erase(konamiSequence.begin());
+    }
+
+    // Check if sequence matches Konami code
+    if (konamiSequence.size() == 10) {
+        bool match = true;
+        for (size_t i = 0; i < konamiCode.size(); i++) {
+            if (konamiSequence[i] != konamiCode[i]) {
+                match = false;
+                break;
+            }
+        }
+
+        if (match) {
+            std::cout << "[KONAMI CODE] Activated! Opening cheat menu..." << std::endl;
+            manager->SwitchScreen(GameScreen::CHEAT_MENU);
+            konamiSequence.clear();
+        }
+    }
 }
 
 void SalesFloorScreen::Draw() {
