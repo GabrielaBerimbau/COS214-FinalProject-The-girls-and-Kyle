@@ -95,7 +95,19 @@ class NurseryCoordinator: public NurseryMediator{
          */
         bool coordinatePurchaseWorkflow(std::string customerId, std::string plantName);
 
+        /**
+         * @brief Transfer a plant to a customer's cart
+         * @param plantName Name of the plant to transfer
+         * @param customer Pointer to the customer receiving the plant
+         * @return true if transfer successful, false otherwise
+         */
         bool transferPlantToCustomer(std::string plantName, Customer* customer);
+
+        /**
+         * @brief Return a plant back to display on the sales floor
+         * @param plant Pointer to the plant to return
+         * @return true if return successful, false otherwise
+         */
         bool returnPlantToDisplay(Plant* plant);
 };
 

@@ -38,6 +38,10 @@ class SalesAssistant: public StaffMembers{
          */
         SalesAssistant(NurseryMediator* med, std::string staffName, std::string staffId);
 
+        /**
+         * @brief Virtual destructor
+         * Ensures proper cleanup of sales assistant resources
+         */
         virtual ~SalesAssistant();
         
         /**
