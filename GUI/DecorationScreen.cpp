@@ -284,14 +284,20 @@ double DecorationScreen::CalculateOriginalPrice() {
 }
 
 void DecorationScreen::Draw() {
-    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+    Color bgColor = manager->IsAlternativeColors()
+        ? Color{30, 30, 35, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Soft sage green
+    ClearBackground(bgColor);
 
     // Header
     const char* header = "DECORATE YOUR PLANT";
     int headerSize = 32;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{45, 59, 53, 255});
-    
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{45, 59, 53, 255};    // Dark green
+    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, headerColor);
+
     DrawPlantPreview();
     DrawPotSelection();
     DrawRibbonOption();
@@ -310,9 +316,15 @@ void DecorationScreen::DrawPlantPreview() {
         400,
         250
     };
-    
-    DrawRectangleRec(previewBox, Color{234, 238, 236, 255});
-    DrawRectangleLinesEx(previewBox, 3, Color{120, 120, 120, 255});
+
+    Color previewBg = manager->IsAlternativeColors()
+        ? Color{50, 55, 55, 255}     // Dark preview box
+        : Color{234, 238, 236, 255}; // Light preview box
+    Color previewBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : Color{120, 120, 120, 255}; // Grey border
+    DrawRectangleRec(previewBox, previewBg);
+    DrawRectangleLinesEx(previewBox, 3, previewBorder);
 
     Plant* walker = currentPlant;
     while (auto dec = dynamic_cast<Decorator*>(walker)) { walker = dec->getWrappedPlant(); }
@@ -355,48 +367,86 @@ void DecorationScreen::DrawPlantPreview() {
     }
     
     // Remove buttons if decorations exist
+    Color removeButtonBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : BLACK;                     // Black
+    Color removeTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : WHITE;                     // White text
+
     if (hasRibbon) {
-        Color removeColor = removeRibbonHovered ? RED : Color{174, 83, 70, 255};
+        Color removeBase = manager->IsAlternativeColors()
+            ? Color{90, 50, 50, 255}     // Dark red
+            : Color{174, 83, 70, 255};   // Brown-red
+        Color removeHover = manager->IsAlternativeColors()
+            ? Color{120, 60, 60, 255}    // Lighter dark red
+            : RED;                       // Red
+        Color removeColor = removeRibbonHovered ? removeHover : removeBase;
         DrawRectangleRec(removeRibbonButton, removeColor);
-        DrawRectangleLinesEx(removeRibbonButton, 2, BLACK);
+        DrawRectangleLinesEx(removeRibbonButton, 2, removeButtonBorder);
         const char* removeText = "Remove Ribbon";
         int textWidth = MeasureText(removeText, 14);
         DrawText(removeText,
                  removeRibbonButton.x + (removeRibbonButton.width - textWidth) / 2,
                  removeRibbonButton.y + (removeRibbonButton.height - 14) / 2,
                  14,
-                 WHITE);
+                 removeTextColor);
     }
-    
+
     if (hasPot) {
-        Color removeColor = removePotHovered ? RED : Color{174, 83, 70, 255};
+        Color removeBase = manager->IsAlternativeColors()
+            ? Color{90, 50, 50, 255}     // Dark red
+            : Color{174, 83, 70, 255};   // Brown-red
+        Color removeHover = manager->IsAlternativeColors()
+            ? Color{120, 60, 60, 255}    // Lighter dark red
+            : RED;                       // Red
+        Color removeColor = removePotHovered ? removeHover : removeBase;
         DrawRectangleRec(removePotButton, removeColor);
-        DrawRectangleLinesEx(removePotButton, 2, BLACK);
+        DrawRectangleLinesEx(removePotButton, 2, removeButtonBorder);
         const char* removeText = "Remove Pot";
         int textWidth = MeasureText(removeText, 14);
         DrawText(removeText,
                  removePotButton.x + (removePotButton.width - textWidth) / 2,
                  removePotButton.y + (removePotButton.height - 14) / 2,
                  14,
-                 WHITE);
+                 removeTextColor);
     }
 }
 
 void DecorationScreen::DrawPotSelection() {
     const char* label = "Select Pot Colour:";
     int labelWidth = MeasureText(label, 20);
-    // was: 340
-    DrawText(label, screenWidth / 2 - labelWidth / 2, 355, 20, Color{45, 59, 53, 255});
+    Color labelColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{45, 59, 53, 255};    // Dark green
+    DrawText(label, screenWidth / 2 - labelWidth / 2, 355, 20, labelColor);
+
     // Pot buttons
     for (int i = 0; i < 10; i++) {
         bool isSelected = (hasPot && selectedPotColor == potColors[i]);
-        Color btnColor = isSelected ? Color{255, 247, 204, 255}
-                                    : (potHovered[i] ? Color{230, 230, 230, 255}
-                                                     : Color{210, 210, 210, 255});
-        
+
+        Color btnIdle = manager->IsAlternativeColors()
+            ? Color{60, 65, 60, 255}     // Dark grey
+            : Color{210, 210, 210, 255}; // Light grey
+        Color btnHover = manager->IsAlternativeColors()
+            ? Color{75, 80, 75, 255}     // Lighter dark grey
+            : Color{230, 230, 230, 255}; // Very light grey
+        Color btnSelected = manager->IsAlternativeColors()
+            ? Color{80, 90, 60, 255}     // Dark yellow-ish
+            : Color{255, 247, 204, 255}; // Light yellow
+
+        Color btnColor = isSelected ? btnSelected : (potHovered[i] ? btnHover : btnIdle);
+
+        Color btnBorderSelected = manager->IsAlternativeColors()
+            ? Color{255, 180, 160, 255}  // Light terracotta
+            : Color{199, 102, 87, 255};  // Brown-red
+        Color btnBorderNormal = manager->IsAlternativeColors()
+            ? Color{150, 220, 180, 255}  // Light mint
+            : Color{45, 59, 53, 255};    // Dark green
+
         DrawRectangleRec(potButtons[i], btnColor);
         DrawRectangleLinesEx(potButtons[i], isSelected ? 4 : 2,
-                             isSelected ? Color{199, 102, 87, 255} : Color{45, 59, 53, 255});
+                             isSelected ? btnBorderSelected : btnBorderNormal);
         
         // Pot texture preview
         Texture2D potTexture = manager->GetPotTexture(potColors[i]);
@@ -413,71 +463,114 @@ void DecorationScreen::DrawPotSelection() {
 }
 
 void DecorationScreen::DrawRibbonOption() {
-    Color ribbonColor = hasRibbon ? Color{206, 237, 223, 255}
-                                  : (ribbonToggleHovered ? Color{164, 211, 194, 255}
-                                                         : Color{206, 237, 223, 255});
+    Color ribbonIdle = manager->IsAlternativeColors()
+        ? Color{60, 80, 70, 255}     // Dark teal-ish
+        : Color{206, 237, 223, 255}; // Soft mint
+    Color ribbonHover = manager->IsAlternativeColors()
+        ? Color{70, 95, 85, 255}     // Lighter teal-ish
+        : Color{164, 211, 194, 255}; // Darker mint
+    Color ribbonSelected = manager->IsAlternativeColors()
+        ? Color{75, 100, 90, 255}    // Selected teal
+        : Color{206, 237, 223, 255}; // Soft mint
+    Color ribbonColor = hasRibbon ? ribbonSelected : (ribbonToggleHovered ? ribbonHover : ribbonIdle);
     DrawRectangleRec(ribbonToggleButton, ribbonColor);
-    DrawRectangleLinesEx(ribbonToggleButton, 3, BLACK);
-    
+
+    Color ribbonBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : BLACK;                     // Black
+    DrawRectangleLinesEx(ribbonToggleButton, 3, ribbonBorder);
+
     const char* ribbonText = hasRibbon ? "Ribbon Added" : "Add Ribbon";
     int textWidth = MeasureText(ribbonText, 20);
+    Color ribbonTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{45, 59, 53, 255};    // Dark green
     DrawText(ribbonText,
              ribbonToggleButton.x + (ribbonToggleButton.width - textWidth) / 2,
              ribbonToggleButton.y + (ribbonToggleButton.height - 20) / 2,
              20,
-             Color{45, 59, 53, 255});
+             ribbonTextColor);
 }
 
 void DecorationScreen::DrawPriceInfo() {
-    // ↑ Move the price block up so it doesn't collide with bottom buttons
     int priceY = screenHeight - 200;
-    
+
+    Color originalPriceColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{86, 110, 100, 255};  // Medium dark green
+
     // Original price
     std::ostringstream originalStream;
     originalStream << "Original Price: R" << std::fixed << std::setprecision(2) << CalculateOriginalPrice();
     int originalWidth = MeasureText(originalStream.str().c_str(), 18);
-    DrawText(originalStream.str().c_str(), screenWidth / 2 - originalWidth / 2, priceY, 18, Color{86, 110, 100, 255});
-    
+    DrawText(originalStream.str().c_str(), screenWidth / 2 - originalWidth / 2, priceY, 18, originalPriceColor);
+
     // New price with decorations
     double newPrice = CalculateCurrentPrice();
     double priceDiff = newPrice - CalculateOriginalPrice();
-    
+
+    Color newPriceColor = manager->IsAlternativeColors()
+        ? Color{220, 190, 100, 255}  // Light gold
+        : Color{170, 133, 35, 255};  // Dark gold
+
     std::ostringstream newStream;
     newStream << "New Price: R" << std::fixed << std::setprecision(2) << newPrice;
     int newWidth = MeasureText(newStream.str().c_str(), 24);
-    DrawText(newStream.str().c_str(), screenWidth / 2 - newWidth / 2, priceY + 30, 24, Color{170, 133, 35, 255});
-    
+    DrawText(newStream.str().c_str(), screenWidth / 2 - newWidth / 2, priceY + 30, 24, newPriceColor);
+
     // Price difference
     if (priceDiff > 0.01) {
         std::ostringstream diffStream;
         diffStream << "(+" << std::fixed << std::setprecision(2) << priceDiff << ")";
         int diffWidth = MeasureText(diffStream.str().c_str(), 16);
-        DrawText(diffStream.str().c_str(), screenWidth / 2 - diffWidth / 2, priceY + 60, 16, Color{170, 133, 35, 255});
+        DrawText(diffStream.str().c_str(), screenWidth / 2 - diffWidth / 2, priceY + 60, 16, newPriceColor);
     }
 }
 
 void DecorationScreen::DrawButtons() {
+    Color buttonBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : BLACK;                     // Black
+
     // Confirm button (mint)
-    Color confirmColor = confirmHovered ? Color{164, 211, 194, 255} : Color{206, 237, 223, 255};
+    Color confirmIdle = manager->IsAlternativeColors()
+        ? Color{60, 80, 70, 255}     // Dark teal-ish
+        : Color{206, 237, 223, 255}; // Soft mint
+    Color confirmHover = manager->IsAlternativeColors()
+        ? Color{70, 95, 85, 255}     // Lighter teal-ish
+        : Color{164, 211, 194, 255}; // Darker mint
+    Color confirmColor = confirmHovered ? confirmHover : confirmIdle;
     DrawRectangleRec(confirmButton, confirmColor);
-    DrawRectangleLinesEx(confirmButton, 3, BLACK);
+    DrawRectangleLinesEx(confirmButton, 3, buttonBorder);
     const char* confirmText = "CONFIRM";
     int confirmWidth = MeasureText(confirmText, 22);
+    Color confirmTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{45, 59, 53, 255};    // Dark green
     DrawText(confirmText,
              confirmButton.x + (confirmButton.width - confirmWidth) / 2,
              confirmButton.y + (confirmButton.height - 22) / 2,
              22,
-             Color{45, 59, 53, 255});
-    
+             confirmTextColor);
+
     // Back button (terracotta family)
-    Color backColor = backHovered ? Color{174, 83, 70, 255} : Color{199, 102, 87, 255};
+    Color backIdle = manager->IsAlternativeColors()
+        ? Color{90, 50, 50, 255}     // Dark red
+        : Color{199, 102, 87, 255};  // Brown-red
+    Color backHoverColor = manager->IsAlternativeColors()
+        ? Color{110, 65, 60, 255}    // Lighter dark red
+        : Color{174, 83, 70, 255};   // Darker brown-red
+    Color backColor = backHovered ? backHoverColor : backIdle;
     DrawRectangleRec(backButton, backColor);
-    DrawRectangleLinesEx(backButton, 3, BLACK);
+    DrawRectangleLinesEx(backButton, 3, buttonBorder);
     const char* backText = "CANCEL";
     int backWidth = MeasureText(backText, 22);
+    Color backTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : RAYWHITE;                  // White
     DrawText(backText,
              backButton.x + (backButton.width - backWidth) / 2,
              backButton.y + (backButton.height - 22) / 2,
              22,
-             RAYWHITE);
+             backTextColor);
 }

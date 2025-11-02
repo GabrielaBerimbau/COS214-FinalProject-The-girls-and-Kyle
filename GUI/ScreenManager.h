@@ -61,7 +61,10 @@ private:
     // Time tracking for real-time updates
     float lastUpdateTime;
     int daysCounter;
-    
+
+    // Color scheme toggle
+    bool useAlternativeColors;
+
     // Asset management
     std::map<std::string, Texture2D> plantTextures;
     std::map<std::string, Texture2D> potTextures;
@@ -131,6 +134,10 @@ public:
     void DeleteCustomer();
 
     void PerformDailyUpdate();
+
+    // Color scheme management
+    bool IsAlternativeColors() const;
+    void ToggleColorScheme();
 };
 
 #endif // SCREEN_MANAGER_H

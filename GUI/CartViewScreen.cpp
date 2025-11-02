@@ -153,28 +153,41 @@ void CartViewScreen::HandleBack() {
 }
 
 void CartViewScreen::Draw() {
-    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+    // Light mode: Soft sage green | Dark mode: Dark background
+    Color bgColor = manager->IsAlternativeColors()
+        ? Color{30, 30, 35, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Light sage green
+    ClearBackground(bgColor);
 
     // Draw header
     const char* header = "YOUR CART";
     int headerSize = 36;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{45, 59, 53, 255}); // deeper forest
-    
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint for dark mode
+        : Color{45, 59, 53, 255};    // Deeper forest
+    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, headerColor);
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr || customer->getCartSize() == 0) {
         const char* emptyText = "Cart is empty!";
         int emptyWidth = MeasureText(emptyText, 24);
-        DrawText(emptyText, screenWidth / 2 - emptyWidth / 2, screenHeight / 2, 24, Color{86, 110, 100, 255}); // clearer mid-sage
+        Color emptyColor = manager->IsAlternativeColors()
+            ? Color{160, 160, 160, 255}  // Light grey
+            : Color{86, 110, 100, 255};  // Mid-sage
+        DrawText(emptyText, screenWidth / 2 - emptyWidth / 2, screenHeight / 2, 24, emptyColor);
         return;
     }
-    
+
     // Draw cart counter
     std::ostringstream counterStream;
     counterStream << "Item " << (currentIndex + 1) << " of " << customer->getCartSize();
     std::string counterText = counterStream.str();
     int counterWidth = MeasureText(counterText.c_str(), 20);
-    DrawText(counterText.c_str(), screenWidth / 2 - counterWidth / 2, 90, 20, Color{199, 102, 87, 255}); // terracotta
+    Color counterColor = manager->IsAlternativeColors()
+        ? Color{255, 150, 130, 255}  // Light coral for dark mode
+        : Color{199, 102, 87, 255};  // Terracotta
+    DrawText(counterText.c_str(), screenWidth / 2 - counterWidth / 2, 90, 20, counterColor);
     
     DrawPlantDisplay();
     DrawPlantInfo();
@@ -197,8 +210,15 @@ void CartViewScreen::DrawPlantDisplay() {
         400
     };
     
-    DrawRectangleRec(displayBox, Color{234, 238, 236, 255}); // softer card fill
-    DrawRectangleLinesEx(displayBox, 3, Color{120, 120, 120, 255}); // Dark grey border
+    // Card colors
+    Color cardFill = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark card
+        : Color{234, 238, 236, 255}; // Light card
+    Color cardBorder = manager->IsAlternativeColors()
+        ? Color{80, 80, 85, 255}     // Lighter grey for dark mode
+        : Color{120, 120, 120, 255}; // Dark grey
+    DrawRectangleRec(displayBox, cardFill);
+    DrawRectangleLinesEx(displayBox, 3, cardBorder);
 
     bool hasRibbon = false, hasPot = false;
     std::string potColor;
@@ -271,12 +291,18 @@ void CartViewScreen::DrawPlantInfo() {
     
     // Plant name
     std::string nameText = plant->getName();
-    DrawText(nameText.c_str(), infoX, infoY, 24, Color{45, 59, 53, 255}); // deeper forest
+    Color nameColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{45, 59, 53, 255};    // Deeper forest
+    DrawText(nameText.c_str(), infoX, infoY, 24, nameColor);
     infoY += 35;
-    
+
     // Plant ID
     std::string idText = "ID: " + plant->getID();
-    DrawText(idText.c_str(), infoX, infoY, 16, Color{86, 110, 100, 255}); // clearer mid-sage
+    Color idColor = manager->IsAlternativeColors()
+        ? Color{140, 140, 140, 255}  // Light grey
+        : Color{86, 110, 100, 255};  // Mid-sage
+    DrawText(idText.c_str(), infoX, infoY, 16, idColor);
     infoY += 25;
 
     // Discover decorations by walking the chain
@@ -290,26 +316,36 @@ void CartViewScreen::DrawPlantInfo() {
         w = d->getWrappedPlant();
     }
 
+    Color decorColor = manager->IsAlternativeColors()
+        ? Color{255, 150, 130, 255}  // Light coral
+        : Color{199, 102, 87, 255};  // Terracotta
+    Color potDecorColor = manager->IsAlternativeColors()
+        ? Color{130, 170, 220, 255}  // Light blue
+        : Color{88, 118, 159, 255};  // Slate blue
+
     if (hasRibbon || hasPot) {
-        DrawText("Decorations:", infoX, infoY, 18, Color{199, 102, 87, 255}); // terracotta
+        DrawText("Decorations:", infoX, infoY, 18, decorColor);
         infoY += 25;
 
         if (hasRibbon) {
-            DrawText("- Ribbon", infoX + 20, infoY, 16, Color{199, 102, 87, 255}); // terracotta item
+            DrawText("- Ribbon", infoX + 20, infoY, 16, decorColor);
             infoY += 22;
         }
         if (hasPot) {
             std::string potText = "- " + potColor + " Pot";
-            DrawText(potText.c_str(), infoX + 20, infoY, 16, Color{88, 118, 159, 255}); // slate blue
+            DrawText(potText.c_str(), infoX + 20, infoY, 16, potDecorColor);
             infoY += 22;
         }
         infoY += 10;
     }
-    
+
     // Price (large and highlighted)
     std::ostringstream priceStream;
     priceStream << "Price: R" << std::fixed << std::setprecision(2) << plant->getPrice();
-    DrawText(priceStream.str().c_str(), infoX, infoY, 28, Color{45, 59, 53, 255}); // deeper forest
+    Color priceColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{45, 59, 53, 255};    // Deeper forest
+    DrawText(priceStream.str().c_str(), infoX, infoY, 28, priceColor);
 }
 
 void CartViewScreen::DrawNavigationArrows() {
@@ -317,9 +353,15 @@ void CartViewScreen::DrawNavigationArrows() {
     if (customer == nullptr || customer->getCartSize() <= 1) return;
 
     // Colors
-    const Color fillIdle  = Color{230, 240, 235, 255}; // soft pastel background
-    const Color fillHover = Color{210, 237, 235, 255}; // hover pastel
-    const Color border    = Color{45, 59, 53, 255};    // dark forest green for outlines
+    Color fillIdle = manager->IsAlternativeColors()
+        ? Color{50, 50, 55, 255}     // Dark button
+        : Color{230, 240, 235, 255}; // Soft pastel
+    Color fillHover = manager->IsAlternativeColors()
+        ? Color{65, 65, 70, 255}     // Lighter on hover
+        : Color{210, 237, 235, 255}; // Hover pastel
+    Color border = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : Color{45, 59, 53, 255};    // Dark forest green
 
     // --- LEFT ARROW ---
     Color leftColor = leftArrowHovered ? fillHover : fillIdle;
@@ -347,27 +389,46 @@ void CartViewScreen::DrawNavigationArrows() {
 
 
 void CartViewScreen::DrawButtons() {
+    Color border = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{45, 59, 53, 255};    // Deeper forest
+    Color textColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{45, 59, 53, 255};    // Dark text
+
     // Decorate button
-    Color decorateColor = decorateHovered ? Color{215, 195, 220, 255} : Color{230, 224, 237, 255}; // Lavender hover / Soft lavender
+    Color decorateIdle = manager->IsAlternativeColors()
+        ? Color{55, 45, 65, 255}     // Dark purple
+        : Color{230, 224, 237, 255}; // Soft lavender
+    Color decorateHover = manager->IsAlternativeColors()
+        ? Color{70, 55, 85, 255}     // Lighter purple
+        : Color{215, 195, 220, 255}; // Lavender hover
+    Color decorateColor = decorateHovered ? decorateHover : decorateIdle;
     DrawRectangleRec(decorateButton, decorateColor);
-    DrawRectangleLinesEx(decorateButton, 3, Color{45, 59, 53, 255}); // deeper forest
+    DrawRectangleLinesEx(decorateButton, 3, border);
     const char* decorateText = "DECORATE PLANT";
     int decorateTextWidth = MeasureText(decorateText, 22);
     DrawText(decorateText,
              decorateButton.x + (decorateButton.width - decorateTextWidth) / 2,
              decorateButton.y + (decorateButton.height - 22) / 2,
              22,
-             Color{45, 59, 53, 255});
+             textColor);
 
     // Back button
-    Color backColor = backHovered ? Color{235, 225, 230, 255} : Color{245, 240, 242, 255};
+    Color backIdle = manager->IsAlternativeColors()
+        ? Color{50, 50, 55, 255}     // Dark grey
+        : Color{245, 240, 242, 255}; // Light pink-grey
+    Color backHoverColor = manager->IsAlternativeColors()
+        ? Color{65, 65, 70, 255}     // Lighter grey
+        : Color{235, 225, 230, 255}; // Darker pink-grey
+    Color backColor = backHovered ? backHoverColor : backIdle;
     DrawRectangleRec(backToSalesFloorButton, backColor);
-    DrawRectangleLinesEx(backToSalesFloorButton, 2, Color{45, 59, 53, 255});
+    DrawRectangleLinesEx(backToSalesFloorButton, 2, border);
     const char* backText = "Back to Sales Floor";
     int backTextWidth = MeasureText(backText, 18);
     DrawText(backText,
              backToSalesFloorButton.x + (backToSalesFloorButton.width - backTextWidth) / 2,
              backToSalesFloorButton.y + (backToSalesFloorButton.height - 18) / 2,
              18,
-             Color{45, 59, 53, 255});
+             textColor);
 }
