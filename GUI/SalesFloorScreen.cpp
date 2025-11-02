@@ -732,50 +732,81 @@ void SalesFloorScreen::DrawButtons() {
 
 void SalesFloorScreen::DrawRequestOverlay() {
     DrawRectangle(0, 0, screenWidth, screenHeight, Color{0, 0, 0, 180});
-    
+
     int overlayWidth = 600;
     int overlayHeight = 400;
     int overlayX = (screenWidth - overlayWidth) / 2;
     int overlayY = (screenHeight - overlayHeight) / 2;
-    
-    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, Color{40, 40, 60, 255});
-    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY), 
-                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)}, 
-                        3, GOLD);
-    
+
+    Color overlayBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Soft sage green
+    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, overlayBg);
+
+    Color overlayBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY),
+                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)},
+                        3, overlayBorder);
+
     const char* title = "Submit Request to Staff";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, WHITE);
-    
+    Color titleColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, titleColor);
+
     int inputY = overlayY + 70;
-    DrawRectangle(overlayX + 20, inputY, overlayWidth - 40, 40, WHITE);
-    DrawRectangleLines(overlayX + 20, inputY, overlayWidth - 40, 40, BLACK);
-    DrawText(requestText, overlayX + 30, inputY + 10, 20, BLACK);
-    
+    Color inputBg = manager->IsAlternativeColors()
+        ? Color{60, 65, 60, 255}     // Dark input
+        : Color{245, 250, 247, 255}; // Very light sage
+    DrawRectangle(overlayX + 20, inputY, overlayWidth - 40, 40, inputBg);
+
+    Color inputBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawRectangleLines(overlayX + 20, inputY, overlayWidth - 40, 40, inputBorder);
+
+    Color inputText = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(requestText, overlayX + 30, inputY + 10, 20, inputText);
+
     if (static_cast<int>(GetTime() * 2) % 2 == 0) {
         int cursorX = overlayX + 30 + MeasureText(requestText, 20);
-        DrawText("|", cursorX, inputY + 10, 20, BLACK);
+        DrawText("|", cursorX, inputY + 10, 20, inputText);
     }
-    
-    DrawText("Type your request and press ENTER to submit", 
-             overlayX + 20, inputY + 50, 16, LIGHTGRAY);
-    DrawText("Press ESC to cancel", 
-             overlayX + 20, inputY + 75, 16, LIGHTGRAY);
-    
+
+    Color instructionColor = manager->IsAlternativeColors()
+        ? Color{160, 180, 170, 255}  // Medium grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    DrawText("Type your request and press ENTER to submit",
+             overlayX + 20, inputY + 50, 16, instructionColor);
+    DrawText("Press ESC to cancel",
+             overlayX + 20, inputY + 75, 16, instructionColor);
+
     if (!responseText.empty()) {
         int responseY = inputY + 110;
-        DrawText("Response:", overlayX + 20, responseY, 18, YELLOW);
-        
+        Color responseHeaderColor = manager->IsAlternativeColors()
+            ? Color{220, 190, 100, 255}  // Light gold
+            : Color{170, 133, 35, 255};  // Dark gold
+        DrawText("Response:", overlayX + 20, responseY, 18, responseHeaderColor);
+
         int maxWidth = overlayWidth - 60;
         int lineY = responseY + 30;
         std::istringstream iss(responseText);
         std::string word;
         std::string currentLine;
-        
+
+        Color responseTextColor = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
+
         while (iss >> word) {
             std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
             if (MeasureText(testLine.c_str(), 16) > maxWidth) {
-                DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, WHITE);
+                DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, responseTextColor);
                 lineY += 22;
                 currentLine = word;
             } else {
@@ -783,32 +814,45 @@ void SalesFloorScreen::DrawRequestOverlay() {
             }
         }
         if (!currentLine.empty()) {
-            DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, WHITE);
+            DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, responseTextColor);
         }
     }
-    
+
     Rectangle closeButton = Rectangle{
         static_cast<float>(overlayX + overlayWidth / 2 - 50),
         static_cast<float>(overlayY + overlayHeight - 60),
         100,
         40
     };
-    
+
     Vector2 mousePos = GetMousePosition();
     bool closeHovered = CheckCollisionPointRec(mousePos, closeButton);
-    
-    Color closeColor = closeHovered ? DARKGRAY : GRAY;
+
+    Color closeIdle = manager->IsAlternativeColors()
+        ? Color{60, 60, 65, 255}     // Dark grey
+        : Color{200, 210, 205, 255}; // Light grey
+    Color closeHoverColor = manager->IsAlternativeColors()
+        ? Color{75, 75, 80, 255}     // Lighter dark grey
+        : Color{180, 190, 185, 255}; // Darker grey
+    Color closeColor = closeHovered ? closeHoverColor : closeIdle;
     DrawRectangleRec(closeButton, closeColor);
-    DrawRectangleLinesEx(closeButton, 2, BLACK);
-    
+
+    Color closeBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawRectangleLinesEx(closeButton, 2, closeBorder);
+
     const char* closeText = "Close";
     int closeTextWidth = MeasureText(closeText, 20);
+    Color closeTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
     DrawText(closeText,
              closeButton.x + (closeButton.width - closeTextWidth) / 2,
              closeButton.y + (closeButton.height - 20) / 2,
              20,
-             WHITE);
-    
+             closeTextColor);
+
     if (closeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         requestOverlayActive = false;
     }
