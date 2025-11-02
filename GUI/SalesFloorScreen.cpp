@@ -4,6 +4,8 @@
 #include <cstring>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
+#include <vector>
 
 // Backend includes
 #include "../include/Customer.h"
@@ -381,10 +383,42 @@ void SalesFloorScreen::HandleMakeRequest() {
         
         if (request->isHandled()) {
             responseText = "Request handled: " + request->getMessage();
-            
-            std::string plantName = request->extractPlantName();
-            if (!plantName.empty()) {
-                responseText += "\n\nPlant '" + plantName + "' has been added to your cart!";
+
+            // Extract all plant keywords from the message
+            std::vector<std::string> plantTypes = {
+                "cactus", "aloe", "succulent",
+                "potato", "radish", "carrot", "vegetable",
+                "rose", "daisy", "flower", "strelitzia",
+                "venusflytrap", "venus", "flytrap", "monstera",
+                "plant"
+            };
+
+            std::string msg = request->getMessage();
+            std::transform(msg.begin(), msg.end(), msg.begin(), ::tolower);
+
+            std::vector<std::string> foundPlants;
+            for(const std::string& plantType : plantTypes){
+                if(msg.find(plantType) != std::string::npos){
+                    std::string capitalizedPlant = plantType;
+                    if(!capitalizedPlant.empty()){
+                        capitalizedPlant[0] = std::toupper(capitalizedPlant[0]);
+                    }
+                    if(std::find(foundPlants.begin(), foundPlants.end(), capitalizedPlant) == foundPlants.end()){
+                        foundPlants.push_back(capitalizedPlant);
+                    }
+                }
+            }
+
+            if (!foundPlants.empty()) {
+                if(foundPlants.size() == 1){
+                    responseText += "\n\nPlant '" + foundPlants[0] + "' has been added to your cart!";
+                } else {
+                    responseText += "\n\n" + std::to_string(foundPlants.size()) + " plants have been added to your cart: ";
+                    for(size_t i = 0; i < foundPlants.size(); i++){
+                        if(i > 0) responseText += ", ";
+                        responseText += foundPlants[i];
+                    }
+                }
             }
         } else {
             responseText = "Request could not be handled at this time.";
