@@ -304,7 +304,11 @@ void SalesFloorScreen::HandleBackToStart() {
 }
 
 void SalesFloorScreen::Draw() {
-    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+    // Light mode: Soft sage green | Dark mode: Dark background
+    Color bgColor = manager->IsAlternativeColors()
+        ? Color{30, 30, 35, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Light sage green
+    ClearBackground(bgColor);
 
     DrawLeftPanel();
     DrawMiddlePanel();
@@ -316,89 +320,134 @@ void SalesFloorScreen::Draw() {
 }
 
 void SalesFloorScreen::DrawLeftPanel() {
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{230, 224, 237, 255}); // Soft lavender
-    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{40, 38, 45, 255}     // Dark lavender
+        : Color{230, 224, 237, 255}; // Soft lavender
+    Color lineColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color textColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color budgetColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 150, 255}  // Light green
+        : Color{120, 165, 120, 255}; // Soft green
+
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, panelBg);
+    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, lineColor);
 
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
 
     int yPos = 20;
 
-    DrawText("CUSTOMER INFO", 20, yPos, 20, Color{85, 107, 95, 255}); // Dark forest green
+    DrawText("CUSTOMER INFO", 20, yPos, 20, headerColor);
     yPos += 35;
 
     std::string nameText = "Name: " + customer->getName();
-    DrawText(nameText.c_str(), 20, yPos, 16, Color{85, 107, 95, 255}); // Dark forest green
+    DrawText(nameText.c_str(), 20, yPos, 16, textColor);
     yPos += 25;
 
     std::ostringstream budgetStream;
     budgetStream << "Budget: R" << std::fixed << std::setprecision(2) << customer->getBudget();
-    DrawText(budgetStream.str().c_str(), 20, yPos, 18, Color{120, 165, 120, 255}); // Soft green
+    DrawText(budgetStream.str().c_str(), 20, yPos, 18, budgetColor);
     yPos += 45;
 
-    DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{85, 107, 95, 255}); // Dark forest green
+    DrawLine(20, yPos, leftPanelWidth - 20, yPos, lineColor);
     yPos += 15;
 
+    Color accentColor = manager->IsAlternativeColors()
+        ? Color{255, 150, 130, 255}  // Light coral
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    Color detailColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    Color waterColor = manager->IsAlternativeColors()
+        ? Color{130, 170, 220, 255}  // Light blue
+        : Color{50, 120, 160, 255};  // Darker blue
+    Color nutrientColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 150, 255}  // Light green
+        : Color{120, 165, 120, 255}; // Soft green
+    Color priceColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+
     if (selectedPlant != nullptr) {
-        DrawText("SELECTED PLANT", 20, yPos, 20, Color{235, 186, 170, 255}); // Warm terracotta
+        DrawText("SELECTED PLANT", 20, yPos, 20, accentColor);
         yPos += 35;
-        
+
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 18, Color{85, 107, 95, 255}); // Dark forest green
+        DrawText(plantNameText.c_str(), 20, yPos, 18, textColor);
         yPos += 30;
 
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 14, Color{120, 140, 125, 255}); // Medium sage
+        DrawText(idText.c_str(), 20, yPos, 14, detailColor);
         yPos += 25;
 
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        DrawText(stateText.c_str(), 20, yPos, 14, Color{120, 140, 125, 255}); // Medium sage
+        DrawText(stateText.c_str(), 20, yPos, 14, detailColor);
         yPos += 25;
 
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 14, Color{120, 140, 125, 255}); // Medium sage
+        DrawText(ageStream.str().c_str(), 20, yPos, 14, detailColor);
         yPos += 25;
 
         std::ostringstream healthStream;
         healthStream << "Health: " << selectedPlant->getHealthLevel() << "%";
-        Color healthColor = selectedPlant->getHealthLevel() > 70 ? Color{120, 165, 120, 255} :
-                           selectedPlant->getHealthLevel() > 40 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255}; // Soft green / Terracotta / Soft red
+        Color healthGood = manager->IsAlternativeColors() ? Color{150, 220, 150, 255} : Color{120, 165, 120, 255};
+        Color healthMed = manager->IsAlternativeColors() ? Color{255, 200, 130, 255} : Color{235, 186, 170, 255};
+        Color healthBad = manager->IsAlternativeColors() ? Color{255, 120, 120, 255} : Color{200, 100, 100, 255};
+        Color healthColor = selectedPlant->getHealthLevel() > 70 ? healthGood :
+                           selectedPlant->getHealthLevel() > 40 ? healthMed : healthBad;
         DrawText(healthStream.str().c_str(), 20, yPos, 14, healthColor);
         yPos += 25;
 
         std::ostringstream waterStream;
         waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
-        DrawText(waterStream.str().c_str(), 20, yPos, 14, Color{50, 120, 160, 255}); // Darker blue for visibility
+        DrawText(waterStream.str().c_str(), 20, yPos, 14, waterColor);
         yPos += 25;
 
         std::ostringstream nutrientStream;
         nutrientStream << "Nutrients: " << selectedPlant->getNutrientLevel() << "%";
-        DrawText(nutrientStream.str().c_str(), 20, yPos, 14, Color{120, 165, 120, 255}); // Soft green
+        DrawText(nutrientStream.str().c_str(), 20, yPos, 14, nutrientColor);
         yPos += 30;
 
         std::ostringstream priceStream;
         priceStream << "Price: R" << std::fixed << std::setprecision(2) << selectedPlant->getPrice();
-        DrawText(priceStream.str().c_str(), 20, yPos, 24, Color{85, 107, 95, 255}); // Bigger & darker - Dark forest green
+        DrawText(priceStream.str().c_str(), 20, yPos, 24, priceColor);
         yPos += 40;
 
     } else {
-        DrawText("INSTRUCTIONS:", 20, yPos, 18, Color{235, 186, 170, 255}); // Warm terracotta
+        DrawText("INSTRUCTIONS:", 20, yPos, 18, accentColor);
         yPos += 30;
 
-        DrawText("- Click plants to select", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
+        DrawText("- Click plants to select", 20, yPos, 16, textColor);
         yPos += 25;
-        DrawText("- View plant details here", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
+        DrawText("- View plant details here", 20, yPos, 16, textColor);
         yPos += 25;
-        DrawText("- Add to cart when ready", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
+        DrawText("- Add to cart when ready", 20, yPos, 16, textColor);
         yPos += 25;
-        DrawText("- Use buttons to navigate", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
+        DrawText("- Use buttons to navigate", 20, yPos, 16, textColor);
     }
 }
 
 void SalesFloorScreen::DrawMiddlePanel() {
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{206, 237, 223, 255}); // Soft mint
-    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+    Color middleBg = manager->IsAlternativeColors()
+        ? Color{35, 45, 40, 255}     // Dark mint
+        : Color{206, 237, 223, 255}; // Soft mint
+    Color lineColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, middleBg);
+    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, lineColor);
 
     const char* header = "SALES FLOOR";
     int headerSize = 24;
@@ -407,13 +456,32 @@ void SalesFloorScreen::DrawMiddlePanel() {
              leftPanelWidth + (middlePanelWidth - headerWidth) / 2,
              20,
              headerSize,
-             Color{85, 107, 95, 255}); // Dark forest green
-    
+             headerColor);
+
     DrawGrid();
 }
 
 void SalesFloorScreen::DrawRightPanel() {
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{255, 236, 214, 255}); // Peachy cream
+    Color rightBg = manager->IsAlternativeColors()
+        ? Color{50, 45, 40, 255}     // Dark peachy
+        : Color{255, 236, 214, 255}; // Peachy cream
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color emptyColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    Color textColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color priceColor = manager->IsAlternativeColors()
+        ? Color{160, 160, 160, 255}  // Grey
+        : Color{100, 100, 100, 255}; // Medium grey
+    Color totalColor = manager->IsAlternativeColors()
+        ? Color{120, 220, 150, 255}  // Light green
+        : GREEN;
+
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, rightBg);
 
     const char* header = "CART";
     int headerSize = 20;
@@ -422,19 +490,19 @@ void SalesFloorScreen::DrawRightPanel() {
              screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2,
              20,
              headerSize,
-             Color{85, 107, 95, 255}); // Dark forest green
-    
+             headerColor);
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
+
     std::vector<Plant*> cart = customer->getCart();
     int yPos = 60;
-    
+
     if (cart.empty()) {
-        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, Color{120, 140, 125, 255}); // Medium sage
+        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, emptyColor);
     } else {
         Vector2 mousePos = GetMousePosition();
-        
+
         for (size_t i = 0; i < cart.size(); i++) {
             Plant* plant = cart[i];
             if (plant != nullptr) {
@@ -446,67 +514,80 @@ void SalesFloorScreen::DrawRightPanel() {
                     20,
                     20
                 };
-                
+
                 bool removeHovered = CheckCollisionPointRec(mousePos, removeBtn);
-                Color removeBtnColor = removeHovered ? Color{255, 150, 150, 255} : Color{200, 100, 100, 255}; // Light red hover / Soft red
+                Color removeIdle = manager->IsAlternativeColors() ? Color{150, 70, 70, 255} : Color{200, 100, 100, 255};
+                Color removeHover = manager->IsAlternativeColors() ? Color{180, 90, 90, 255} : Color{255, 150, 150, 255};
+                Color removeBtnColor = removeHovered ? removeHover : removeIdle;
+                Color removeBorder = manager->IsAlternativeColors() ? Color{150, 220, 180, 255} : Color{85, 107, 95, 255};
                 DrawRectangleRec(removeBtn, removeBtnColor);
-                DrawRectangleLinesEx(removeBtn, 1, Color{85, 107, 95, 255}); // Dark forest green
-                DrawText("X", removeX + 6, removeY + 3, 14, Color{255, 255, 255, 255}); // White
-                
+                DrawRectangleLinesEx(removeBtn, 1, removeBorder);
+                DrawText("X", removeX + 6, removeY + 3, 14, WHITE);
+
                 if (removeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     std::cout << "[SalesFloorScreen] Removing item " << i << " from cart" << std::endl;
                     customer->returnPlantToSalesFloor((int)i);
                     //break;
                     return;
                 }
-                
+
                 std::string itemText = plant->getName();
-                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 45, yPos + 3, 14, Color{85, 107, 95, 255}); // Dark forest green
+                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 45, yPos + 3, 14, textColor);
                 yPos += 25;
-                
+
                 std::ostringstream priceStream;
                 priceStream << "  R" << std::fixed << std::setprecision(2) << plant->getPrice();
-                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, Color{100, 100, 100, 255}); // Medium grey
+                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, priceColor);
                 yPos += 30;
             }
         }
-        
+
         yPos += 10;
         DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, WHITE);
         yPos += 15;
-        
+
         double cartTotal = 0.0;
         for (Plant* p : cart) {
             if (p != nullptr) {
                 cartTotal += p->getPrice();
             }
         }
-        
+
         std::ostringstream totalStream;
         totalStream << "Total: R" << std::fixed << std::setprecision(2) << cartTotal;
-        DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, GREEN);
+        DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, totalColor);
     }
-    
+
     DrawButtons();
 }
 
 void SalesFloorScreen::DrawGrid() {
     SalesFloor* salesFloor = manager->GetSalesFloor();
     if (salesFloor == nullptr) return;
-    
+
+    Color cellIdle = manager->IsAlternativeColors()
+        ? Color{50, 55, 50, 255}     // Dark sage
+        : Color{245, 250, 247, 255}; // Very light sage
+    Color cellSelected = manager->IsAlternativeColors()
+        ? Color{80, 80, 60, 255}     // Dark yellow
+        : Color{255, 247, 204, 255}; // Soft butter yellow
+    Color cellBorder = manager->IsAlternativeColors()
+        ? Color{80, 90, 85, 255}     // Grey-green
+        : Color{200, 210, 205, 255}; // Light sage
+
     for (int row = 0; row < gridRows; row++) {
         for (int col = 0; col < gridCols; col++) {
             int x = gridStartX + col * cellSize;
             int y = gridStartY + row * cellSize;
-            
-            Color cellColor = Color{245, 250, 247, 255}; // Very light sage
+
+            Color cellColor = cellIdle;
             if (row == selectedRow && col == selectedCol) {
-                cellColor = Color{255, 247, 204, 255}; // Soft butter yellow
+                cellColor = cellSelected;
             }
 
             DrawRectangle(x + 2, y + 2, cellSize - 4, cellSize - 4, cellColor);
-            DrawRectangleLines(x + 2, y + 2, cellSize - 4, cellSize - 4, Color{200, 210, 205, 255}); // Light sage
-            
+            DrawRectangleLines(x + 2, y + 2, cellSize - 4, cellSize - 4, cellBorder);
+
             Plant* plant = salesFloor->getPlantAt(row, col);
             if (plant != nullptr) {
                 DrawPlantInCell(plant, row, col);
@@ -533,144 +614,199 @@ void SalesFloorScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         
         DrawTextureEx(plantTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)}, 0.0f, scale, WHITE);
     } else {
+        Color nameColor = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 12);
-        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 12, Color{85, 107, 95, 255}); // Dark forest green
+        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 12, nameColor);
     }
 
+    Color priceColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
     std::ostringstream priceStream;
     priceStream << "R" << static_cast<int>(plant->getPrice());
     std::string priceText = priceStream.str();
     int priceWidth = MeasureText(priceText.c_str(), 16);
-    DrawText(priceText.c_str(), x + (cellSize - priceWidth) / 2, y + cellSize - 25, 16, Color{85, 107, 95, 255}); // Bigger & darker - Dark forest green
+    DrawText(priceText.c_str(), x + (cellSize - priceWidth) / 2, y + cellSize - 25, 16, priceColor);
 }
 
 void SalesFloorScreen::DrawButtons() {
     Customer* customer = manager->GetCustomer();
     bool hasCartItems = (customer != nullptr && customer->getCartSize() > 0);
-    
+
+    Color border = manager->IsAlternativeColors() ? Color{150, 220, 180, 255} : Color{85, 107, 95, 255};
+    Color textActive = manager->IsAlternativeColors() ? Color{240, 240, 240, 255} : Color{85, 107, 95, 255};
+    Color textMuted = manager->IsAlternativeColors() ? Color{120, 120, 120, 255} : Color{150, 160, 155, 255};
+    Color disabled = manager->IsAlternativeColors() ? Color{60, 65, 60, 255} : Color{200, 210, 205, 255};
+
     // Add to Cart button
-    Color addColor = (selectedPlant != nullptr) ?
-                     (addToCartHovered ? Color{100, 145, 100, 255} : Color{120, 165, 120, 255}) : Color{200, 210, 205, 255}; // Dark soft green hover / Soft green / Light sage disabled
+    Color addIdle = manager->IsAlternativeColors() ? Color{40, 80, 50, 255} : Color{120, 165, 120, 255};
+    Color addHover = manager->IsAlternativeColors() ? Color{50, 100, 60, 255} : Color{100, 145, 100, 255};
+    Color addColor = (selectedPlant != nullptr) ? (addToCartHovered ? addHover : addIdle) : disabled;
     DrawRectangleRec(addToCartButton, addColor);
-    DrawRectangleLinesEx(addToCartButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(addToCartButton, 2, border);
     const char* addText = "Add to Cart";
     int addTextWidth = MeasureText(addText, 18);
     DrawText(addText,
              addToCartButton.x + (addToCartButton.width - addTextWidth) / 2,
              addToCartButton.y + (addToCartButton.height - 18) / 2,
              18,
-             (selectedPlant != nullptr) ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green / Muted
+             (selectedPlant != nullptr) ? textActive : textMuted);
 
     // View Greenhouse button
-    Color greenhouseColor = viewGreenhouseHovered ? Color{210, 224, 230, 255} : Color{220, 237, 245, 255}; // Hover / Light sky blue
+    Color ghIdle = manager->IsAlternativeColors() ? Color{40, 50, 60, 255} : Color{220, 237, 245, 255};
+    Color ghHover = manager->IsAlternativeColors() ? Color{50, 65, 75, 255} : Color{210, 224, 230, 255};
+    Color greenhouseColor = viewGreenhouseHovered ? ghHover : ghIdle;
     DrawRectangleRec(viewGreenhouseButton, greenhouseColor);
-    DrawRectangleLinesEx(viewGreenhouseButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(viewGreenhouseButton, 2, border);
     const char* greenhouseText = "View Greenhouse";
     int greenhouseTextWidth = MeasureText(greenhouseText, 16);
     DrawText(greenhouseText,
              viewGreenhouseButton.x + (viewGreenhouseButton.width - greenhouseTextWidth) / 2,
              viewGreenhouseButton.y + (viewGreenhouseButton.height - 16) / 2,
              16,
-             Color{85, 107, 95, 255}); // Dark forest green
-    
+             textActive);
+
     // View Cart button
-    Color cartColor = hasCartItems ?
-                      (viewCartHovered ? Color{225, 176, 160, 255} : Color{235, 186, 170, 255}) : Color{200, 210, 205, 255}; // Hover / Warm terracotta / Light sage disabled
+    Color cartIdle = manager->IsAlternativeColors() ? Color{80, 50, 45, 255} : Color{235, 186, 170, 255};
+    Color cartHover = manager->IsAlternativeColors() ? Color{100, 65, 55, 255} : Color{225, 176, 160, 255};
+    Color cartColor = hasCartItems ? (viewCartHovered ? cartHover : cartIdle) : disabled;
+    Color cartBorder = manager->IsAlternativeColors() ? border : BLACK;
     DrawRectangleRec(viewCartButton, cartColor);
-    DrawRectangleLinesEx(viewCartButton, 2, BLACK);
+    DrawRectangleLinesEx(viewCartButton, 2, cartBorder);
     const char* cartText = "View Cart";
     int cartTextWidth = MeasureText(cartText, 18);
     DrawText(cartText,
              viewCartButton.x + (viewCartButton.width - cartTextWidth) / 2,
              viewCartButton.y + (viewCartButton.height - 18) / 2,
              18,
-             hasCartItems ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green / Muted
+             hasCartItems ? textActive : textMuted);
 
     // Create Order button
-    Color orderColor = hasCartItems ?
-                       (createOrderHovered ? Color{245, 237, 194, 255} : Color{255, 247, 204, 255}) : Color{200, 210, 205, 255}; // Hover / Soft butter yellow / Light sage disabled
+    Color orderIdle = manager->IsAlternativeColors() ? Color{70, 70, 50, 255} : Color{255, 247, 204, 255};
+    Color orderHover = manager->IsAlternativeColors() ? Color{85, 85, 60, 255} : Color{245, 237, 194, 255};
+    Color orderColor = hasCartItems ? (createOrderHovered ? orderHover : orderIdle) : disabled;
+    Color orderBorder = manager->IsAlternativeColors() ? border : BLACK;
     DrawRectangleRec(createOrderButton, orderColor);
-    DrawRectangleLinesEx(createOrderButton, 2, BLACK);
+    DrawRectangleLinesEx(createOrderButton, 2, orderBorder);
     const char* orderText = "Create Order";
     int orderTextWidth = MeasureText(orderText, 18);
     DrawText(orderText,
              createOrderButton.x + (createOrderButton.width - orderTextWidth) / 2,
              createOrderButton.y + (createOrderButton.height - 18) / 2,
              18,
-             hasCartItems ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green / Muted
+             hasCartItems ? textActive : textMuted);
 
     // Make Request button
-    Color requestColor = makeRequestHovered ? Color{215, 195, 220, 255} : Color{230, 224, 237, 255}; // Hover / Soft lavender
+    Color reqIdle = manager->IsAlternativeColors() ? Color{55, 45, 65, 255} : Color{230, 224, 237, 255};
+    Color reqHover = manager->IsAlternativeColors() ? Color{70, 55, 85, 255} : Color{215, 195, 220, 255};
+    Color requestColor = makeRequestHovered ? reqHover : reqIdle;
+    Color reqBorder = manager->IsAlternativeColors() ? border : BLACK;
     DrawRectangleRec(makeRequestButton, requestColor);
-    DrawRectangleLinesEx(makeRequestButton, 2, BLACK);
+    DrawRectangleLinesEx(makeRequestButton, 2, reqBorder);
     const char* requestText = "Make Request";
     int requestTextWidth = MeasureText(requestText, 16);
     DrawText(requestText,
              makeRequestButton.x + (makeRequestButton.width - requestTextWidth) / 2,
              makeRequestButton.y + (makeRequestButton.height - 16) / 2,
              16,
-             Color{85, 107, 95, 255}); // Dark forest green
-    
+             textActive);
+
     // NEW: Back to Start button
-    Color backColor = backToStartHovered ? Color{255, 200, 195, 255} : Color{245, 215, 220, 255}; // Coral hover / Soft rose
+    Color backIdle = manager->IsAlternativeColors() ? Color{80, 50, 50, 255} : Color{245, 215, 220, 255};
+    Color backHover = manager->IsAlternativeColors() ? Color{100, 65, 65, 255} : Color{255, 200, 195, 255};
+    Color backColor = backToStartHovered ? backHover : backIdle;
+    Color backBorder = manager->IsAlternativeColors() ? border : BLACK;
     DrawRectangleRec(backToStartButton, backColor);
-    DrawRectangleLinesEx(backToStartButton, 2, BLACK);
+    DrawRectangleLinesEx(backToStartButton, 2, backBorder);
     const char* backText = "Back to Start";
     int backTextWidth = MeasureText(backText, 16);
     DrawText(backText,
              backToStartButton.x + (backToStartButton.width - backTextWidth) / 2,
              backToStartButton.y + (backToStartButton.height - 16) / 2,
              16,
-             Color{85, 107, 95, 255}); // Dark forest green
+             textActive);
 }
 
 void SalesFloorScreen::DrawRequestOverlay() {
     DrawRectangle(0, 0, screenWidth, screenHeight, Color{0, 0, 0, 180});
-    
+
     int overlayWidth = 600;
     int overlayHeight = 400;
     int overlayX = (screenWidth - overlayWidth) / 2;
     int overlayY = (screenHeight - overlayHeight) / 2;
-    
-    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, Color{40, 40, 60, 255});
-    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY), 
-                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)}, 
-                        3, GOLD);
-    
+
+    Color overlayBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Soft sage green
+    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, overlayBg);
+
+    Color overlayBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawRectangleLinesEx(Rectangle{static_cast<float>(overlayX), static_cast<float>(overlayY),
+                                   static_cast<float>(overlayWidth), static_cast<float>(overlayHeight)},
+                        3, overlayBorder);
+
     const char* title = "Submit Request to Staff";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, WHITE);
-    
+    Color titleColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, titleColor);
+
     int inputY = overlayY + 70;
-    DrawRectangle(overlayX + 20, inputY, overlayWidth - 40, 40, WHITE);
-    DrawRectangleLines(overlayX + 20, inputY, overlayWidth - 40, 40, BLACK);
-    DrawText(requestText, overlayX + 30, inputY + 10, 20, BLACK);
-    
+    Color inputBg = manager->IsAlternativeColors()
+        ? Color{60, 65, 60, 255}     // Dark input
+        : Color{245, 250, 247, 255}; // Very light sage
+    DrawRectangle(overlayX + 20, inputY, overlayWidth - 40, 40, inputBg);
+
+    Color inputBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawRectangleLines(overlayX + 20, inputY, overlayWidth - 40, 40, inputBorder);
+
+    Color inputText = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(requestText, overlayX + 30, inputY + 10, 20, inputText);
+
     if (static_cast<int>(GetTime() * 2) % 2 == 0) {
         int cursorX = overlayX + 30 + MeasureText(requestText, 20);
-        DrawText("|", cursorX, inputY + 10, 20, BLACK);
+        DrawText("|", cursorX, inputY + 10, 20, inputText);
     }
-    
-    DrawText("Type your request and press ENTER to submit", 
-             overlayX + 20, inputY + 50, 16, LIGHTGRAY);
-    DrawText("Press ESC to cancel", 
-             overlayX + 20, inputY + 75, 16, LIGHTGRAY);
-    
+
+    Color instructionColor = manager->IsAlternativeColors()
+        ? Color{160, 180, 170, 255}  // Medium grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    DrawText("Type your request and press ENTER to submit",
+             overlayX + 20, inputY + 50, 16, instructionColor);
+    DrawText("Press ESC to cancel",
+             overlayX + 20, inputY + 75, 16, instructionColor);
+
     if (!responseText.empty()) {
         int responseY = inputY + 110;
-        DrawText("Response:", overlayX + 20, responseY, 18, YELLOW);
-        
+        Color responseHeaderColor = manager->IsAlternativeColors()
+            ? Color{220, 190, 100, 255}  // Light gold
+            : Color{170, 133, 35, 255};  // Dark gold
+        DrawText("Response:", overlayX + 20, responseY, 18, responseHeaderColor);
+
         int maxWidth = overlayWidth - 60;
         int lineY = responseY + 30;
         std::istringstream iss(responseText);
         std::string word;
         std::string currentLine;
-        
+
+        Color responseTextColor = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
+
         while (iss >> word) {
             std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
             if (MeasureText(testLine.c_str(), 16) > maxWidth) {
-                DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, WHITE);
+                DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, responseTextColor);
                 lineY += 22;
                 currentLine = word;
             } else {
@@ -678,32 +814,45 @@ void SalesFloorScreen::DrawRequestOverlay() {
             }
         }
         if (!currentLine.empty()) {
-            DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, WHITE);
+            DrawText(currentLine.c_str(), overlayX + 30, lineY, 16, responseTextColor);
         }
     }
-    
+
     Rectangle closeButton = Rectangle{
         static_cast<float>(overlayX + overlayWidth / 2 - 50),
         static_cast<float>(overlayY + overlayHeight - 60),
         100,
         40
     };
-    
+
     Vector2 mousePos = GetMousePosition();
     bool closeHovered = CheckCollisionPointRec(mousePos, closeButton);
-    
-    Color closeColor = closeHovered ? DARKGRAY : GRAY;
+
+    Color closeIdle = manager->IsAlternativeColors()
+        ? Color{60, 60, 65, 255}     // Dark grey
+        : Color{200, 210, 205, 255}; // Light grey
+    Color closeHoverColor = manager->IsAlternativeColors()
+        ? Color{75, 75, 80, 255}     // Lighter dark grey
+        : Color{180, 190, 185, 255}; // Darker grey
+    Color closeColor = closeHovered ? closeHoverColor : closeIdle;
     DrawRectangleRec(closeButton, closeColor);
-    DrawRectangleLinesEx(closeButton, 2, BLACK);
-    
+
+    Color closeBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawRectangleLinesEx(closeButton, 2, closeBorder);
+
     const char* closeText = "Close";
     int closeTextWidth = MeasureText(closeText, 20);
+    Color closeTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
     DrawText(closeText,
              closeButton.x + (closeButton.width - closeTextWidth) / 2,
              closeButton.y + (closeButton.height - 20) / 2,
              20,
-             WHITE);
-    
+             closeTextColor);
+
     if (closeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         requestOverlayActive = false;
     }

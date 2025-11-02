@@ -39,6 +39,11 @@ int main() {
         // Global per-frame updates
         manager.Update();
 
+        // Check for X key to toggle color scheme
+        if (IsKeyPressed(KEY_X)) {
+            manager.ToggleColorScheme();
+        }
+
         GameScreen currentScreen = manager.GetCurrentScreen();
         bool screenChanged = (currentScreen != lastScreen);
 

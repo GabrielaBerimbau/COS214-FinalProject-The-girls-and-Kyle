@@ -466,18 +466,27 @@ void OrderCreationScreen::HandleRestart() {
 }
 
 void OrderCreationScreen::Draw() {
-    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+    Color bgColor = manager->IsAlternativeColors()
+        ? Color{30, 30, 35, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Soft sage green
+    ClearBackground(bgColor);
 
     // Draw header
     const char* header = "CREATE YOUR ORDER";
     int headerSize = 36;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{85, 107, 95, 255}); // Dark forest green
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, headerColor);
 
     // Draw instructions
     const char* instruction = "Click items to select/deselect (multi-select enabled) - Add all selected to order";
     int instrWidth = MeasureText(instruction, 16);
-    DrawText(instruction, screenWidth / 2 - instrWidth / 2, 75, 16, Color{120, 140, 125, 255}); // Medium sage
+    Color instrColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    DrawText(instruction, screenWidth / 2 - instrWidth / 2, 75, 16, instrColor);
 
     if (isCreatingSuborder) {
         // Draw modal overlay
@@ -492,13 +501,23 @@ void OrderCreationScreen::Draw() {
 
 void OrderCreationScreen::DrawLeftPanel() {
     // Panel background
-    DrawRectangleRec(leftPanel, Color{210, 210, 210, 255}); // Light grey
-    DrawRectangleLinesEx(leftPanel, 2, Color{120, 120, 120, 255}); // Dark grey border
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark panel
+        : Color{210, 210, 210, 255}; // Light grey
+    DrawRectangleRec(leftPanel, panelBg);
+
+    Color panelBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : Color{120, 120, 120, 255}; // Dark grey border
+    DrawRectangleLinesEx(leftPanel, 2, panelBorder);
 
     // Panel title
     const char* title = "CART ITEMS";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, leftPanel.x + (leftPanel.width - titleWidth) / 2, leftPanel.y + 10, 24, Color{85, 107, 95, 255}); // Dark forest green
+    Color titleColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(title, leftPanel.x + (leftPanel.width - titleWidth) / 2, leftPanel.y + 10, 24, titleColor);
 
     DrawCartList();
 }
@@ -530,14 +549,24 @@ void OrderCreationScreen::DrawCartList() {
         Color bgColor;
         Color borderColor;
         if (cartTrackers[i].isAddedToOrder) {
-            bgColor = Color{200, 235, 200, 255}; // Light green - added
-            borderColor = Color{120, 165, 120, 255}; // Soft green
+            bgColor = manager->IsAlternativeColors()
+                ? Color{50, 80, 60, 255}     // Dark green - added
+                : Color{200, 235, 200, 255}; // Light green - added
+            borderColor = Color{120, 165, 120, 255}; // Soft green (same in both modes)
         } else if (selectedCartIndices.count(i) > 0) {
-            bgColor = Color{255, 247, 204, 255}; // Soft butter yellow - selected
-            borderColor = Color{235, 186, 170, 255}; // Warm terracotta
+            bgColor = manager->IsAlternativeColors()
+                ? Color{80, 90, 60, 255}     // Dark yellow-ish - selected
+                : Color{255, 247, 204, 255}; // Soft butter yellow - selected
+            borderColor = manager->IsAlternativeColors()
+                ? Color{255, 180, 160, 255}  // Light terracotta
+                : Color{235, 186, 170, 255}; // Warm terracotta
         } else {
-            bgColor = Color{245, 250, 247, 255}; // Very light sage - normal
-            borderColor = Color{200, 210, 205, 255}; // Light sage
+            bgColor = manager->IsAlternativeColors()
+                ? Color{55, 60, 55, 255}     // Dark grey - normal
+                : Color{245, 250, 247, 255}; // Very light sage - normal
+            borderColor = manager->IsAlternativeColors()
+                ? Color{100, 110, 100, 255}  // Medium grey border
+                : Color{200, 210, 205, 255}; // Light sage
         }
 
         DrawRectangleRec(itemRect, bgColor);
@@ -549,29 +578,48 @@ void OrderCreationScreen::DrawCartList() {
             displayName = displayName.substr(0, 12) + "...";
         }
 
-        DrawText(displayName.c_str(), itemRect.x + 5, itemRect.y + 5, 18, Color{85, 107, 95, 255}); // Dark forest green
+        Color nameColor = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
+        DrawText(displayName.c_str(), itemRect.x + 5, itemRect.y + 5, 18, nameColor);
 
         // Draw price
         std::ostringstream priceStream;
         priceStream << "R" << std::fixed << std::setprecision(2) << plant->getPrice();
-        DrawText(priceStream.str().c_str(), itemRect.x + 5, itemRect.y + 28, 16, Color{235, 186, 170, 255}); // Warm terracotta
+        Color priceColor = manager->IsAlternativeColors()
+            ? Color{255, 180, 160, 255}  // Light terracotta
+            : Color{235, 186, 170, 255}; // Warm terracotta
+        DrawText(priceStream.str().c_str(), itemRect.x + 5, itemRect.y + 28, 16, priceColor);
 
         // Draw status
         if (cartTrackers[i].isAddedToOrder) {
-            DrawText("ADDED", itemRect.x + itemRect.width - 65, itemRect.y + 20, 14, Color{120, 140, 125, 255}); // Medium sage
+            Color statusColor = manager->IsAlternativeColors()
+                ? Color{160, 200, 170, 255}  // Light green-grey
+                : Color{120, 140, 125, 255}; // Medium sage
+            DrawText("ADDED", itemRect.x + itemRect.width - 65, itemRect.y + 20, 14, statusColor);
         }
     }
 }
 
 void OrderCreationScreen::DrawRightPanel() {
     // Panel background
-    DrawRectangleRec(rightPanel, Color{210, 210, 210, 255}); // Light grey
-    DrawRectangleLinesEx(rightPanel, 2, Color{120, 120, 120, 255}); // Dark grey border
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark panel
+        : Color{210, 210, 210, 255}; // Light grey
+    DrawRectangleRec(rightPanel, panelBg);
+
+    Color panelBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : Color{120, 120, 120, 255}; // Dark grey border
+    DrawRectangleLinesEx(rightPanel, 2, panelBorder);
 
     // Panel title
     const char* title = "ORDER HIERARCHY";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, rightPanel.x + (rightPanel.width - titleWidth) / 2, rightPanel.y + 10, 24, Color{85, 107, 95, 255}); // Dark forest green
+    Color titleColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(title, rightPanel.x + (rightPanel.width - titleWidth) / 2, rightPanel.y + 10, 24, titleColor);
 
     DrawOrderHierarchy();
 }
@@ -618,23 +666,42 @@ void OrderCreationScreen::DrawOrderNode(OrderNode* node, int& yPos) {
     }
 
     // Determine color
-    Color bgColor = (selectedOrderNode == node) ? Color{255, 247, 204, 255} : Color{245, 250, 247, 255}; // Soft butter yellow : Very light sage
+    Color bgNormal = manager->IsAlternativeColors()
+        ? Color{55, 60, 55, 255}     // Dark grey
+        : Color{245, 250, 247, 255}; // Very light sage
+    Color bgSelected = manager->IsAlternativeColors()
+        ? Color{80, 90, 60, 255}     // Dark yellow-ish
+        : Color{255, 247, 204, 255}; // Soft butter yellow
+    Color bgColor = (selectedOrderNode == node) ? bgSelected : bgNormal;
     DrawRectangleRec(nodeRect, bgColor);
-    DrawRectangleLinesEx(nodeRect, 2, (selectedOrderNode == node) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}); // Warm terracotta : Light sage
+
+    Color borderNormal = manager->IsAlternativeColors()
+        ? Color{100, 110, 100, 255}  // Medium grey
+        : Color{200, 210, 205, 255}; // Light sage
+    Color borderSelected = manager->IsAlternativeColors()
+        ? Color{255, 180, 160, 255}  // Light terracotta
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    DrawRectangleLinesEx(nodeRect, 2, (selectedOrderNode == node) ? borderSelected : borderNormal);
 
     // Draw order name
     std::string displayName = node->order->getName();
     if (displayName.length() > 25) {
         displayName = displayName.substr(0, 22) + "...";
     }
-    DrawText(displayName.c_str(), nodeRect.x + 5, nodeRect.y + 5, 18, Color{85, 107, 95, 255}); // Dark forest green
+    Color nameColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(displayName.c_str(), nodeRect.x + 5, nodeRect.y + 5, 18, nameColor);
 
     // Draw item count
     int leafCount = node->leafCartIndices.size();
     int childCount = node->children.size();
     std::ostringstream infoStream;
     infoStream << "Items: " << leafCount << " | Suborders: " << childCount;
-    DrawText(infoStream.str().c_str(), nodeRect.x + 5, nodeRect.y + 28, 14, Color{120, 140, 125, 255}); // Medium sage
+    Color infoColor = manager->IsAlternativeColors()
+        ? Color{160, 180, 170, 255}  // Medium grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    DrawText(infoStream.str().c_str(), nodeRect.x + 5, nodeRect.y + 28, 14, infoColor);
 
     yPos += nodeHeight + 5;
 
@@ -649,8 +716,20 @@ void OrderCreationScreen::DrawOrderNode(OrderNode* node, int& yPos) {
 void OrderCreationScreen::DrawButtons() {
     int fontSize = 18;
 
+    Color buttonBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color disabledColor = manager->IsAlternativeColors()
+        ? Color{60, 60, 65, 255}     // Dark disabled
+        : Color{220, 220, 220, 255}; // Light grey disabled
+    Color activeText = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color disabledText = manager->IsAlternativeColors()
+        ? Color{100, 100, 100, 255}  // Dark grey
+        : Color{150, 150, 150, 255}; // Medium grey
+
     // Add to Order button
-    // Can add if we have at least one selected item that hasn't been added yet
     bool canAdd = false;
     if (selectedOrderNode != nullptr && !selectedCartIndices.empty()) {
         for (int index : selectedCartIndices) {
@@ -660,10 +739,15 @@ void OrderCreationScreen::DrawButtons() {
             }
         }
     }
-    Color addColor = canAdd ? (addToOrderHovered ? Color{140, 200, 150, 255} : Color{120, 165, 120, 255}) // Soft green hover / Soft green
-                            : Color{220, 220, 220, 255}; // Light grey disabled
+    Color addIdle = manager->IsAlternativeColors()
+        ? Color{50, 80, 60, 255}     // Dark green
+        : Color{120, 165, 120, 255}; // Soft green
+    Color addHover = manager->IsAlternativeColors()
+        ? Color{65, 100, 75, 255}    // Lighter green
+        : Color{140, 200, 150, 255}; // Soft green hover
+    Color addColor = canAdd ? (addToOrderHovered ? addHover : addIdle) : disabledColor;
     DrawRectangleRec(addToOrderButton, addColor);
-    DrawRectangleLinesEx(addToOrderButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(addToOrderButton, 2, buttonBorder);
 
     // Show count of selected items in button text
     std::string addText = "ADD TO ORDER";
@@ -675,60 +759,90 @@ void OrderCreationScreen::DrawButtons() {
              addToOrderButton.x + (addToOrderButton.width - addTextWidth) / 2,
              addToOrderButton.y + (addToOrderButton.height - fontSize) / 2,
              fontSize,
-             canAdd ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
+             canAdd ? activeText : disabledText);
 
     // Create Suborder button
     bool canCreateSub = selectedOrderNode != nullptr;
-    Color subColor = canCreateSub ? (createSuborderHovered ? Color{215, 195, 220, 255} : Color{230, 224, 237, 255}) // Lavender hover / Soft lavender
-                                  : Color{220, 220, 220, 255}; // Light grey disabled
+    Color subIdle = manager->IsAlternativeColors()
+        ? Color{70, 60, 80, 255}     // Dark lavender
+        : Color{230, 224, 237, 255}; // Soft lavender
+    Color subHover = manager->IsAlternativeColors()
+        ? Color{85, 75, 95, 255}     // Lighter lavender
+        : Color{215, 195, 220, 255}; // Lavender hover
+    Color subColor = canCreateSub ? (createSuborderHovered ? subHover : subIdle) : disabledColor;
     DrawRectangleRec(createSuborderButton, subColor);
-    DrawRectangleLinesEx(createSuborderButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(createSuborderButton, 2, buttonBorder);
     const char* subText = "SUBORDER";
     int subTextWidth = MeasureText(subText, fontSize);
     DrawText(subText,
              createSuborderButton.x + (createSuborderButton.width - subTextWidth) / 2,
              createSuborderButton.y + (createSuborderButton.height - fontSize) / 2,
              fontSize,
-             canCreateSub ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
+             canCreateSub ? activeText : disabledText);
 
     // Restart button
-    Color restartColor = restartHovered ? Color{255, 200, 195, 255} : Color{245, 215, 220, 255}; // Soft coral hover / Soft rose
+    Color restartIdle = manager->IsAlternativeColors()
+        ? Color{80, 50, 50, 255}     // Dark red
+        : Color{245, 215, 220, 255}; // Soft rose
+    Color restartHover = manager->IsAlternativeColors()
+        ? Color{100, 65, 65, 255}    // Lighter red
+        : Color{255, 200, 195, 255}; // Soft coral hover
+    Color restartColor = restartHovered ? restartHover : restartIdle;
     DrawRectangleRec(restartButton, restartColor);
-    DrawRectangleLinesEx(restartButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(restartButton, 2, buttonBorder);
     const char* restartText = "RESTART";
     int restartTextWidth = MeasureText(restartText, fontSize);
     DrawText(restartText,
              restartButton.x + (restartButton.width - restartTextWidth) / 2,
              restartButton.y + (restartButton.height - fontSize) / 2,
              fontSize,
-             Color{85, 107, 95, 255}); // Dark forest green
+             activeText);
 
     // Back button (returns to sales floor)
-    Color backColor = backHovered ? Color{235, 225, 230, 255} : Color{245, 240, 242, 255}; // Soft rose hover / Very light grey
+    Color backIdle = manager->IsAlternativeColors()
+        ? Color{60, 55, 60, 255}     // Dark grey
+        : Color{245, 240, 242, 255}; // Very light grey
+    Color backHover = manager->IsAlternativeColors()
+        ? Color{75, 70, 75, 255}     // Lighter grey
+        : Color{235, 225, 230, 255}; // Soft rose hover
+    Color backColor = backHovered ? backHover : backIdle;
     DrawRectangleRec(backButton, backColor);
-    DrawRectangleLinesEx(backButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(backButton, 2, buttonBorder);
     const char* backText = "BACK";
     int backTextWidth = MeasureText(backText, fontSize);
     DrawText(backText,
              backButton.x + (backButton.width - backTextWidth) / 2,
              backButton.y + (backButton.height - fontSize) / 2,
              fontSize,
-             Color{85, 107, 95, 255}); // Dark forest green
+             activeText);
 
     // Proceed to Checkout button (larger, bottom row)
     bool allAdded = AllCartItemsAdded();
     int checkoutFontSize = 20;
-    Color checkoutColor = allAdded ? (proceedToCheckoutHovered ? Color{250, 220, 170, 255} : Color{255, 236, 214, 255}) // Peachy cream hover / Peachy cream
-                                   : Color{220, 220, 220, 255}; // Light grey disabled
+    Color checkoutIdle = manager->IsAlternativeColors()
+        ? Color{100, 80, 60, 255}    // Dark peachy
+        : Color{255, 236, 214, 255}; // Peachy cream
+    Color checkoutHover = manager->IsAlternativeColors()
+        ? Color{120, 100, 75, 255}   // Lighter peachy
+        : Color{250, 220, 170, 255}; // Peachy cream hover
+    Color checkoutColor = allAdded ? (proceedToCheckoutHovered ? checkoutHover : checkoutIdle) : disabledColor;
     DrawRectangleRec(proceedToCheckoutButton, checkoutColor);
-    DrawRectangleLinesEx(proceedToCheckoutButton, 3, allAdded ? Color{235, 186, 170, 255} : Color{180, 180, 180, 255}); // Warm terracotta : Light grey
+
+    Color checkoutBorderActive = manager->IsAlternativeColors()
+        ? Color{255, 180, 160, 255}  // Light terracotta
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    Color checkoutBorderDisabled = manager->IsAlternativeColors()
+        ? Color{80, 80, 85, 255}     // Dark grey
+        : Color{180, 180, 180, 255}; // Light grey
+    DrawRectangleLinesEx(proceedToCheckoutButton, 3, allAdded ? checkoutBorderActive : checkoutBorderDisabled);
+
     const char* checkoutText = "PROCEED TO CHECKOUT";
     int checkoutTextWidth = MeasureText(checkoutText, checkoutFontSize);
     DrawText(checkoutText,
              proceedToCheckoutButton.x + (proceedToCheckoutButton.width - checkoutTextWidth) / 2,
              proceedToCheckoutButton.y + (proceedToCheckoutButton.height - checkoutFontSize) / 2,
              checkoutFontSize,
-             allAdded ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
+             allAdded ? activeText : disabledText);
 }
 
 void OrderCreationScreen::DrawSuborderCreationModal() {
@@ -742,53 +856,97 @@ void OrderCreationScreen::DrawSuborderCreationModal() {
     };
 
     // Modal background
-    DrawRectangleRec(modal, Color{230, 224, 237, 255}); // Soft lavender
-    DrawRectangleLinesEx(modal, 3, Color{235, 186, 170, 255}); // Warm terracotta
+    Color modalBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark lavender
+        : Color{230, 224, 237, 255}; // Soft lavender
+    DrawRectangleRec(modal, modalBg);
+
+    Color modalBorder = manager->IsAlternativeColors()
+        ? Color{255, 180, 160, 255}  // Light terracotta
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    DrawRectangleLinesEx(modal, 3, modalBorder);
 
     // Title
     const char* title = "Create Suborder";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, modal.x + (modal.width - titleWidth) / 2, modal.y + 10, 24, Color{85, 107, 95, 255}); // Dark forest green
+    Color titleColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(title, modal.x + (modal.width - titleWidth) / 2, modal.y + 10, 24, titleColor);
 
     // Instruction
     const char* instr = "Enter suborder name:";
-    DrawText(instr, nameInputBox.x, nameInputBox.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
+    Color instrColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    DrawText(instr, nameInputBox.x, nameInputBox.y - 25, 18, instrColor);
 
     // Text input box
-    DrawRectangleRec(nameInputBox, Color{245, 250, 247, 255}); // Very light sage
-    DrawRectangleLinesEx(nameInputBox, 2, Color{235, 186, 170, 255}); // Warm terracotta
-    DrawText(suborderNameInput.c_str(), nameInputBox.x + 5, nameInputBox.y + 10, 20, Color{85, 107, 95, 255}); // Dark forest green
+    Color inputBg = manager->IsAlternativeColors()
+        ? Color{60, 65, 60, 255}     // Dark input
+        : Color{245, 250, 247, 255}; // Very light sage
+    DrawRectangleRec(nameInputBox, inputBg);
+    DrawRectangleLinesEx(nameInputBox, 2, modalBorder);
+
+    Color inputText = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawText(suborderNameInput.c_str(), nameInputBox.x + 5, nameInputBox.y + 10, 20, inputText);
 
     // Cursor
     if ((int)(GetTime() * 2) % 2 == 0) {
         int textWidth = MeasureText(suborderNameInput.c_str(), 20);
-        DrawText("_", nameInputBox.x + 5 + textWidth, nameInputBox.y + 10, 20, Color{85, 107, 95, 255}); // Dark forest green
+        DrawText("_", nameInputBox.x + 5 + textWidth, nameInputBox.y + 10, 20, inputText);
     }
 
+    Color buttonBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color disabledColor = manager->IsAlternativeColors()
+        ? Color{60, 60, 65, 255}     // Dark disabled
+        : Color{220, 220, 220, 255}; // Light grey disabled
+    Color activeText = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color disabledText = manager->IsAlternativeColors()
+        ? Color{100, 100, 100, 255}  // Dark grey
+        : Color{150, 150, 150, 255}; // Medium grey
+
     // Confirm button
-    Color confirmColor = !suborderNameInput.empty() ? (confirmNameHovered ? Color{140, 200, 150, 255} : Color{120, 165, 120, 255}) // Soft green hover / Soft green
-                                                    : Color{220, 220, 220, 255}; // Light grey disabled
+    Color confirmIdle = manager->IsAlternativeColors()
+        ? Color{50, 80, 60, 255}     // Dark green
+        : Color{120, 165, 120, 255}; // Soft green
+    Color confirmHover = manager->IsAlternativeColors()
+        ? Color{65, 100, 75, 255}    // Lighter green
+        : Color{140, 200, 150, 255}; // Soft green hover
+    Color confirmColor = !suborderNameInput.empty() ? (confirmNameHovered ? confirmHover : confirmIdle) : disabledColor;
     DrawRectangleRec(confirmNameButton, confirmColor);
-    DrawRectangleLinesEx(confirmNameButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(confirmNameButton, 2, buttonBorder);
     const char* confirmText = "CONFIRM";
     int confirmTextWidth = MeasureText(confirmText, 20);
     DrawText(confirmText,
              confirmNameButton.x + (confirmNameButton.width - confirmTextWidth) / 2,
              confirmNameButton.y + (confirmNameButton.height - 20) / 2,
              20,
-             !suborderNameInput.empty() ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
+             !suborderNameInput.empty() ? activeText : disabledText);
 
     // Cancel button
-    Color cancelColor = cancelNameHovered ? Color{235, 225, 230, 255} : Color{245, 240, 242, 255}; // Soft rose hover / Very light grey
+    Color cancelIdle = manager->IsAlternativeColors()
+        ? Color{60, 55, 60, 255}     // Dark grey
+        : Color{245, 240, 242, 255}; // Very light grey
+    Color cancelHover = manager->IsAlternativeColors()
+        ? Color{75, 70, 75, 255}     // Lighter grey
+        : Color{235, 225, 230, 255}; // Soft rose hover
+    Color cancelColor = cancelNameHovered ? cancelHover : cancelIdle;
     DrawRectangleRec(cancelNameButton, cancelColor);
-    DrawRectangleLinesEx(cancelNameButton, 2, Color{85, 107, 95, 255}); // Dark forest green
+    DrawRectangleLinesEx(cancelNameButton, 2, buttonBorder);
     const char* cancelText = "CANCEL";
     int cancelTextWidth = MeasureText(cancelText, 20);
     DrawText(cancelText,
              cancelNameButton.x + (cancelNameButton.width - cancelTextWidth) / 2,
              cancelNameButton.y + (cancelNameButton.height - 20) / 2,
              20,
-             Color{85, 107, 95, 255}); // Dark forest green
+             activeText);
 }
 
 bool OrderCreationScreen::AllCartItemsAdded() const {

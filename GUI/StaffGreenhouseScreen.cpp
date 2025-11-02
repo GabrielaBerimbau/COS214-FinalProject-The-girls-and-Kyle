@@ -437,7 +437,10 @@ void StaffGreenhouseScreen::HandleRunOneScheduled() {
 }
 
 void StaffGreenhouseScreen::Draw() {
-    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+    Color bgColor = manager->IsAlternativeColors()
+        ? Color{30, 30, 35, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Soft sage green
+    ClearBackground(bgColor);
 
     DrawLeftPanel();
     DrawMiddlePanel();
@@ -449,65 +452,97 @@ void StaffGreenhouseScreen::Draw() {
 }
 
 void StaffGreenhouseScreen::DrawLeftPanel() {
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{230, 224, 237, 255}); // Soft lavender
-    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark panel
+        : Color{230, 224, 237, 255}; // Soft lavender
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, panelBg);
+
+    Color borderColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, borderColor);
 
     int yPos = 20;
 
-    DrawText("STAFF MODE", 20, yPos, 20, Color{235, 186, 170, 255}); // Warm terracotta
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{255, 180, 160, 255}  // Light terracotta
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    DrawText("STAFF MODE", 20, yPos, 20, headerColor);
     yPos += 35;
 
-    DrawText("Greenhouse Manager", 20, yPos, 16, Color{120, 140, 125, 255}); // Medium sage
+    Color subtitleColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    DrawText("Greenhouse Manager", 20, yPos, 16, subtitleColor);
     yPos += 30;
 
     DrawDayCounter();
     yPos += 60;
 
-    DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{85, 107, 95, 255});
+    DrawLine(20, yPos, leftPanelWidth - 20, yPos, borderColor);
     yPos += 15;
 
     if (selectedPlant != nullptr) {
         bool isDead = IsPlantDead(selectedPlant);
 
+        Color deadColor = manager->IsAlternativeColors()
+            ? Color{255, 140, 140, 255}  // Lighter red for dark mode
+            : Color{200, 100, 100, 255}; // Red for light mode
+        Color aliveHeaderColor = manager->IsAlternativeColors()
+            ? Color{255, 180, 160, 255}  // Light terracotta
+            : Color{235, 186, 170, 255}; // Warm terracotta
+        Color textColor = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
+        Color textSecondary = manager->IsAlternativeColors()
+            ? Color{160, 160, 160, 255}  // Medium grey
+            : Color{120, 140, 125, 255}; // Medium sage
+
         if (isDead) {
-            DrawText("DEAD PLANT", 20, yPos, 18, Color{200, 100, 100, 255});
+            DrawText("DEAD PLANT", 20, yPos, 18, deadColor);
             yPos += 30;
         }
 
-        DrawText("SELECTED PLANT", 20, yPos, 18, isDead ? Color{200, 100, 100, 255} : Color{235, 186, 170, 255});
+        DrawText("SELECTED PLANT", 20, yPos, 18, isDead ? deadColor : aliveHeaderColor);
         yPos += 30;
 
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 16, Color{85, 107, 95, 255});
+        DrawText(plantNameText.c_str(), 20, yPos, 16, textColor);
         yPos += 25;
 
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 13, Color{120, 140, 125, 255});
+        DrawText(idText.c_str(), 20, yPos, 13, textSecondary);
         yPos += 25;
 
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        Color stateColor = isDead ? Color{200, 100, 100, 255} : Color{120, 140, 125, 255};
+        Color stateColor = isDead ? deadColor : textSecondary;
         DrawText(stateText.c_str(), 20, yPos, 13, stateColor);
         yPos += 25;
 
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 13, Color{120, 140, 125, 255});
+        DrawText(ageStream.str().c_str(), 20, yPos, 13, textSecondary);
         yPos += 30;
 
-        DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{200, 210, 205, 255});
+        Color lineColor = manager->IsAlternativeColors()
+            ? Color{80, 80, 85, 255}     // Dark grey line
+            : Color{200, 210, 205, 255}; // Light grey line
+        DrawLine(20, yPos, leftPanelWidth - 20, yPos, lineColor);
         yPos += 15;
 
         if (isDead) {
-            DrawText("This plant has died.", 20, yPos, 14, Color{200, 100, 100, 255});
+            DrawText("This plant has died.", 20, yPos, 14, deadColor);
             yPos += 22;
-            DrawText("Use 'Remove Dead'", 20, yPos, 14, Color{235, 186, 170, 255});
+            DrawText("Use 'Remove Dead'", 20, yPos, 14, aliveHeaderColor);
             yPos += 18;
-            DrawText("button to dispose", 20, yPos, 14, Color{235, 186, 170, 255});
+            DrawText("button to dispose", 20, yPos, 14, aliveHeaderColor);
             yPos += 18;
-            DrawText("of it.", 20, yPos, 14, Color{235, 186, 170, 255});
+            DrawText("of it.", 20, yPos, 14, aliveHeaderColor);
         } else {
-            DrawText("PLANT STATUS:", 20, yPos, 14, Color{60, 60, 60, 255});
+            Color statusHeader = manager->IsAlternativeColors()
+                ? Color{200, 200, 200, 255}  // Light grey
+                : Color{60, 60, 60, 255};    // Dark grey
+            DrawText("PLANT STATUS:", 20, yPos, 14, statusHeader);
             yPos += 25;
 
             std::ostringstream healthStream;
@@ -519,7 +554,7 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
 
             std::ostringstream waterStream;
             waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
-            DrawText(waterStream.str().c_str(), 20, yPos, 14, Color{60, 60, 60, 255});
+            DrawText(waterStream.str().c_str(), 20, yPos, 14, statusHeader);
             yPos += 22;
 
             std::ostringstream nutrientStream;
@@ -531,54 +566,77 @@ void StaffGreenhouseScreen::DrawLeftPanel() {
 
             std::ostringstream sunStream;
             sunStream << "Sunlight: " << selectedPlant->getSunlightExposure() << "%";
-            DrawText(sunStream.str().c_str(), 20, yPos, 14, Color{60, 60, 60, 255});
+            DrawText(sunStream.str().c_str(), 20, yPos, 14, statusHeader);
             yPos += 30;
         }
     } else {
-        DrawText("INSTRUCTIONS:", 20, yPos, 16, Color{235, 186, 170, 255});
+        Color instructHeader = manager->IsAlternativeColors()
+            ? Color{255, 180, 160, 255}  // Light terracotta
+            : Color{235, 186, 170, 255}; // Warm terracotta
+        Color instructText = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
+
+        DrawText("INSTRUCTIONS:", 20, yPos, 16, instructHeader);
         yPos += 30;
 
-        DrawText("1. Click a plant to select", 20, yPos, 13, Color{85, 107, 95, 255});
+        DrawText("1. Click a plant to select", 20, yPos, 13, instructText);
         yPos += 22;
-        DrawText("2. Use care buttons", 20, yPos, 13, Color{85, 107, 95, 255});
+        DrawText("2. Use care buttons", 20, yPos, 13, instructText);
         yPos += 22;
-        DrawText("3. Monitor health status", 20, yPos, 13, Color{85, 107, 95, 255});
+        DrawText("3. Monitor health status", 20, yPos, 13, instructText);
         yPos += 22;
-        DrawText("4. Transfer when ready", 20, yPos, 13, Color{85, 107, 95, 255});
+        DrawText("4. Transfer when ready", 20, yPos, 13, instructText);
         yPos += 18;
-        DrawText("   for sale", 20, yPos, 13, Color{85, 107, 95, 255});
+        DrawText("   for sale", 20, yPos, 13, instructText);
         yPos += 22;
-        DrawText("5. Remove dead plants", 20, yPos, 13, Color{85, 107, 95, 255});
+        DrawText("5. Remove dead plants", 20, yPos, 13, instructText);
     }
 }
 
 void StaffGreenhouseScreen::DrawMiddlePanel() {
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{206, 237, 223, 255}); // Soft mint
-    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, Color{85, 107, 95, 255});
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{40, 45, 45, 255}     // Dark panel
+        : Color{206, 237, 223, 255}; // Soft mint
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, panelBg);
+
+    Color borderColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : Color{85, 107, 95, 255};   // Dark forest green
+    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, borderColor);
 
     const char* header = "STAFF GREENHOUSE - PLANT CARE";
     int headerSize = 22;
     int headerWidth = MeasureText(header, headerSize);
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
     DrawText(header,
              leftPanelWidth + (middlePanelWidth - headerWidth) / 2,
              20,
              headerSize,
-             Color{85, 107, 95, 255});
+             headerColor);
 
     DrawGrid();
 }
 
 void StaffGreenhouseScreen::DrawRightPanel() {
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{255, 236, 214, 255}); // Peachy cream
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{50, 45, 40, 255}     // Dark peachy panel
+        : Color{255, 236, 214, 255}; // Peachy cream
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, panelBg);
 
     const char* header = "CARE ACTIONS";
     int headerSize = 18;
     int headerWidth = MeasureText(header, headerSize);
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{255, 200, 150, 255}  // Light peachy
+        : Color{85, 107, 95, 255};   // Dark forest green
     DrawText(header,
              screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2,
              20,
              headerSize,
-             Color{85, 107, 95, 255});
+             headerColor);
 
     DrawButtons();
     DrawSchedulerInfo();
@@ -596,22 +654,42 @@ void StaffGreenhouseScreen::DrawGrid() {
             Plant* plant = greenhouse->getPlantAt(row, col);
             bool isDead = IsPlantDead(plant);
 
-            Color cellColor = Color{245, 250, 247, 255};
+            Color cellColorIdle = manager->IsAlternativeColors()
+                ? Color{50, 55, 50, 255}     // Dark cell
+                : Color{245, 250, 247, 255}; // Light cell
+            Color cellColorSelected = manager->IsAlternativeColors()
+                ? Color{80, 90, 60, 255}     // Dark yellow-ish selected
+                : Color{255, 247, 204, 255}; // Light yellow selected
+            Color cellColorDeadSelected = manager->IsAlternativeColors()
+                ? Color{90, 50, 50, 255}     // Dark red selected
+                : Color{255, 220, 220, 255}; // Light red selected
+            Color cellColorDead = manager->IsAlternativeColors()
+                ? Color{70, 45, 45, 255}     // Dark red-ish
+                : Color{245, 215, 215, 255}; // Light red-ish
+
+            Color cellColor = cellColorIdle;
             if (row == selectedRow && col == selectedCol) {
-                cellColor = isDead ? Color{255, 220, 220, 255} : Color{255, 247, 204, 255};
+                cellColor = isDead ? cellColorDeadSelected : cellColorSelected;
             } else if (isDead) {
-                cellColor = Color{245, 215, 215, 255};
+                cellColor = cellColorDead;
             }
 
             DrawRectangle(x + 1, y + 1, cellSize - 2, cellSize - 2, cellColor);
-            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, isDead ? Color{200, 100, 100, 255} : Color{200, 210, 205, 255});
+
+            Color borderColor = manager->IsAlternativeColors()
+                ? (isDead ? Color{255, 140, 140, 255} : Color{100, 110, 100, 255})
+                : (isDead ? Color{200, 100, 100, 255} : Color{200, 210, 205, 255});
+            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, borderColor);
 
             if (plant != nullptr) {
                 DrawPlantInCell(plant, row, col);
                 if (isDead) {
                     const char* skullIcon = "X";
                     int iconWidth = MeasureText(skullIcon, 30);
-                    DrawText(skullIcon, x + (cellSize - iconWidth) / 2, y + cellSize / 2 - 15, 30, Color{200, 100, 100, 255});
+                    Color skullColor = manager->IsAlternativeColors()
+                        ? Color{255, 140, 140, 255}  // Light red
+                        : Color{200, 100, 100, 255}; // Red
+                    DrawText(skullIcon, x + (cellSize - iconWidth) / 2, y + cellSize / 2 - 15, 30, skullColor);
                 }
             }
         }
@@ -640,7 +718,13 @@ void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
     } else {
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 10);
-        Color textColor = isDead ? Color{200, 100, 100, 255} : Color{85, 107, 95, 255};
+        Color deadTextColor = manager->IsAlternativeColors()
+            ? Color{255, 140, 140, 255}  // Light red
+            : Color{200, 100, 100, 255}; // Red
+        Color aliveTextColor = manager->IsAlternativeColors()
+            ? Color{180, 200, 190, 255}  // Light grey-green
+            : Color{85, 107, 95, 255};   // Dark forest green
+        Color textColor = isDead ? deadTextColor : aliveTextColor;
         DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, textColor);
     }
 
@@ -654,7 +738,10 @@ void StaffGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         Color healthColor = health > 70 ? Color{120, 165, 120, 255} :
                             health > 40 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255};
 
-        DrawRectangle(healthBarX, healthBarY, healthBarWidth, healthBarHeight, Color{200, 210, 205, 255});
+        Color healthBarBg = manager->IsAlternativeColors()
+            ? Color{60, 65, 60, 255}     // Dark grey background
+            : Color{200, 210, 205, 255}; // Light grey background
+        DrawRectangle(healthBarX, healthBarY, healthBarWidth, healthBarHeight, healthBarBg);
         DrawRectangle(healthBarX, healthBarY, (healthBarWidth * health) / 100, healthBarHeight, healthColor);
     }
 }
@@ -664,134 +751,208 @@ void StaffGreenhouseScreen::DrawButtons() {
     bool isDead = IsPlantDead(selectedPlant);
     bool canCare = hasSelection && !isDead;
 
-    // Pastel palette for nicer, distinct buttons
+    Color borderColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint border
+        : BLACK;                     // Black border
+    Color disabledColor = manager->IsAlternativeColors()
+        ? Color{60, 60, 65, 255}     // Dark disabled
+        : Color{180, 180, 180, 255}; // Light disabled
+    Color activeTextDark = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : BLACK;                     // Black text
+    Color disabledText = manager->IsAlternativeColors()
+        ? Color{100, 100, 100, 255}  // Dark grey
+        : DARKGRAY;                  // Dark grey
+
     // Water: soft teal
-    Color waterBase  = Color{120, 200, 220, 255};
-    Color waterHover = Color{100, 180, 200, 255};
-    Color waterColor = canCare ? (waterHovered ? waterHover : waterBase) : Color{180, 180, 180, 255};
+    Color waterBase = manager->IsAlternativeColors()
+        ? Color{60, 100, 110, 255}   // Dark teal
+        : Color{120, 200, 220, 255}; // Soft teal
+    Color waterHover = manager->IsAlternativeColors()
+        ? Color{70, 120, 130, 255}   // Lighter teal
+        : Color{100, 180, 200, 255}; // Darker teal
+    Color waterColor = canCare ? (waterHovered ? waterHover : waterBase) : disabledColor;
     DrawRectangleRec(waterButton, waterColor);
-    DrawRectangleLinesEx(waterButton, 2, BLACK);
+    DrawRectangleLinesEx(waterButton, 2, borderColor);
     const char* waterText = "Water";
     int waterTextWidth = MeasureText(waterText, 16);
     DrawText(waterText, waterButton.x + (waterButton.width - waterTextWidth) / 2,
-             waterButton.y + (waterButton.height - 16) / 2, 16, canCare ? BLACK : DARKGRAY);
+             waterButton.y + (waterButton.height - 16) / 2, 16, canCare ? activeTextDark : disabledText);
 
     // Fertilize: soft green
-    Color fertBase  = Color{150, 210, 160, 255};
-    Color fertHover = Color{130, 190, 140, 255};
-    Color fertColor = canCare ? (fertilizeHovered ? fertHover : fertBase) : Color{180, 180, 180, 255};
+    Color fertBase = manager->IsAlternativeColors()
+        ? Color{70, 100, 80, 255}    // Dark green
+        : Color{150, 210, 160, 255}; // Soft green
+    Color fertHover = manager->IsAlternativeColors()
+        ? Color{85, 120, 95, 255}    // Lighter green
+        : Color{130, 190, 140, 255}; // Darker green
+    Color fertColor = canCare ? (fertilizeHovered ? fertHover : fertBase) : disabledColor;
     DrawRectangleRec(fertilizeButton, fertColor);
-    DrawRectangleLinesEx(fertilizeButton, 2, BLACK);
+    DrawRectangleLinesEx(fertilizeButton, 2, borderColor);
     const char* fertText = "Fertilize";
     int fertTextWidth = MeasureText(fertText, 16);
     DrawText(fertText, fertilizeButton.x + (fertilizeButton.width - fertTextWidth) / 2,
-             fertilizeButton.y + (fertilizeButton.height - 16) / 2, 16, BLACK);
+             fertilizeButton.y + (fertilizeButton.height - 16) / 2, 16, activeTextDark);
 
     // Sunlight: light butter
-    Color sunBase  = Color{255, 235, 150, 255};
-    Color sunHover = Color{255, 225, 120, 255};
-    Color sunColor = canCare ? (sunlightHovered ? sunHover : sunBase) : Color{180, 180, 180, 255};
+    Color sunBase = manager->IsAlternativeColors()
+        ? Color{120, 110, 50, 255}   // Dark yellow
+        : Color{255, 235, 150, 255}; // Light butter
+    Color sunHover = manager->IsAlternativeColors()
+        ? Color{140, 130, 60, 255}   // Lighter yellow
+        : Color{255, 225, 120, 255}; // Darker butter
+    Color sunColor = canCare ? (sunlightHovered ? sunHover : sunBase) : disabledColor;
     DrawRectangleRec(adjustSunlightButton, sunColor);
-    DrawRectangleLinesEx(adjustSunlightButton, 2, BLACK);
+    DrawRectangleLinesEx(adjustSunlightButton, 2, borderColor);
     const char* sunText = "Sunlight";
     int sunTextWidth = MeasureText(sunText, 16);
     DrawText(sunText, adjustSunlightButton.x + (adjustSunlightButton.width - sunTextWidth) / 2,
-             adjustSunlightButton.y + (adjustSunlightButton.height - 16) / 2, 16, BLACK);
+             adjustSunlightButton.y + (adjustSunlightButton.height - 16) / 2, 16, activeTextDark);
 
     // Full care: soft lavender
-    Color fullBase  = Color{190, 160, 210, 255};
-    Color fullHover = Color{175, 145, 195, 255};
-    Color fullCareColor = canCare ? (fullCareHovered ? fullHover : fullBase) : Color{180, 180, 180, 255};
+    Color fullBase = manager->IsAlternativeColors()
+        ? Color{85, 70, 100, 255}    // Dark lavender
+        : Color{190, 160, 210, 255}; // Soft lavender
+    Color fullHover = manager->IsAlternativeColors()
+        ? Color{100, 85, 115, 255}   // Lighter lavender
+        : Color{175, 145, 195, 255}; // Darker lavender
+    Color fullCareColor = canCare ? (fullCareHovered ? fullHover : fullBase) : disabledColor;
     DrawRectangleRec(performFullCareButton, fullCareColor);
-    DrawRectangleLinesEx(performFullCareButton, 3, BLACK);
+    DrawRectangleLinesEx(performFullCareButton, 3, borderColor);
     const char* fullCareText = "FULL CARE";
     int fullCareTextWidth = MeasureText(fullCareText, 18);
+    Color fullCareTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : WHITE;                     // White text
     DrawText(fullCareText, performFullCareButton.x + (performFullCareButton.width - fullCareTextWidth) / 2,
-             performFullCareButton.y + (performFullCareButton.height - 18) / 2, 18, WHITE);
+             performFullCareButton.y + (performFullCareButton.height - 18) / 2, 18, fullCareTextColor);
 
     // Transfer: soft sky blue
     bool canTransfer = canCare && selectedPlant->isReadyForSale();
-    Color transBase  = Color{140, 180, 230, 255};
-    Color transHover = Color{120, 160, 210, 255};
-    Color transferColor = canTransfer ? (transferHovered ? transHover : transBase) : Color{180, 180, 180, 255};
+    Color transBase = manager->IsAlternativeColors()
+        ? Color{60, 80, 100, 255}    // Dark blue
+        : Color{140, 180, 230, 255}; // Soft sky blue
+    Color transHover = manager->IsAlternativeColors()
+        ? Color{70, 95, 120, 255}    // Lighter blue
+        : Color{120, 160, 210, 255}; // Darker blue
+    Color transferColor = canTransfer ? (transferHovered ? transHover : transBase) : disabledColor;
     DrawRectangleRec(transferToSalesFloorButton, transferColor);
-    DrawRectangleLinesEx(transferToSalesFloorButton, 3, BLACK);
+    DrawRectangleLinesEx(transferToSalesFloorButton, 3, borderColor);
     const char* transferText = "To Sales Floor";
     int transferTextWidth = MeasureText(transferText, 16);
+    Color transferTextColor = manager->IsAlternativeColors()
+        ? (canTransfer ? Color{240, 240, 240, 255} : disabledText)
+        : (canTransfer ? WHITE : DARKGRAY);
     DrawText(transferText, transferToSalesFloorButton.x + (transferToSalesFloorButton.width - transferTextWidth) / 2,
              transferToSalesFloorButton.y + (transferToSalesFloorButton.height - 16) / 2, 16,
-             canTransfer ? WHITE : DARKGRAY);
+             transferTextColor);
 
     // Remove dead: soft red
     bool canRemove = hasSelection && isDead;
-    Color remBase  = Color{230, 120, 120, 255};
-    Color remHover = Color{210, 90, 90, 255};
-    Color removeColor = canRemove ? (removeDeadHovered ? remHover : remBase) : Color{180, 180, 180, 255};
+    Color remBase = manager->IsAlternativeColors()
+        ? Color{100, 50, 50, 255}    // Dark red
+        : Color{230, 120, 120, 255}; // Soft red
+    Color remHover = manager->IsAlternativeColors()
+        ? Color{120, 60, 60, 255}    // Lighter red
+        : Color{210, 90, 90, 255};   // Darker red
+    Color removeColor = canRemove ? (removeDeadHovered ? remHover : remBase) : disabledColor;
     DrawRectangleRec(removeDeadPlantButton, removeColor);
-    DrawRectangleLinesEx(removeDeadPlantButton, 3, BLACK);
+    DrawRectangleLinesEx(removeDeadPlantButton, 3, borderColor);
     const char* removeText = "Remove Dead";
     int removeTextWidth = MeasureText(removeText, 15);
+    Color removeTextColor = manager->IsAlternativeColors()
+        ? (canRemove ? Color{240, 240, 240, 255} : disabledText)
+        : (canRemove ? WHITE : DARKGRAY);
     DrawText(removeText, removeDeadPlantButton.x + (removeDeadPlantButton.width - removeTextWidth) / 2,
              removeDeadPlantButton.y + (removeDeadPlantButton.height - 15) / 2, 15,
-             canRemove ? WHITE : DARKGRAY);
+             removeTextColor);
 
-    // Advance day: keep your yellow scheme
-    Color advanceBase  = Color{255, 150, 0, 255};
-    Color advanceHover = Color{255, 200, 0, 255};
+    // Advance day
+    Color advanceBase = manager->IsAlternativeColors()
+        ? Color{120, 70, 20, 255}    // Dark orange
+        : Color{255, 150, 0, 255};   // Orange
+    Color advanceHover = manager->IsAlternativeColors()
+        ? Color{140, 90, 30, 255}    // Lighter orange
+        : Color{255, 200, 0, 255};   // Yellow-orange
     Color advanceDayColor = advanceDayHovered ? advanceHover : advanceBase;
     DrawRectangleRec(advanceDayButton, advanceDayColor);
-    DrawRectangleLinesEx(advanceDayButton, 3, BLACK);
+    DrawRectangleLinesEx(advanceDayButton, 3, borderColor);
     const char* advanceDayText = "Advance Day";
     int advanceDayTextWidth = MeasureText(advanceDayText, 16);
     DrawText(advanceDayText, advanceDayButton.x + (advanceDayButton.width - advanceDayTextWidth) / 2,
-             advanceDayButton.y + (advanceDayButton.height - 16) / 2, 16, BLACK);
+             advanceDayButton.y + (advanceDayButton.height - 16) / 2, 16, activeTextDark);
 
-    // Run Scheduler: SAME yellow as Advance Day
+    // Run Scheduler: SAME colors as Advance Day
     Color schedulerColor = schedulerHovered ? advanceHover : advanceBase;
     DrawRectangleRec(runSchedulerButton, schedulerColor);
-    DrawRectangleLinesEx(runSchedulerButton, 2, BLACK);
+    DrawRectangleLinesEx(runSchedulerButton, 2, borderColor);
     const char* schedulerText = "Run Scheduler";
     int schedulerTextWidth = MeasureText(schedulerText, 15);
     DrawText(schedulerText, runSchedulerButton.x + (runSchedulerButton.width - schedulerTextWidth) / 2,
-             runSchedulerButton.y + (runSchedulerButton.height - 15) / 2, 15, BLACK);
+             runSchedulerButton.y + (runSchedulerButton.height - 15) / 2, 15, activeTextDark);
 
     // Back: neutral grey
-    Color backColor = backHovered ? DARKGRAY : Color{100, 100, 100, 255};
+    Color backBase = manager->IsAlternativeColors()
+        ? Color{50, 50, 50, 255}     // Dark grey
+        : Color{100, 100, 100, 255}; // Medium grey
+    Color backHoverColor = manager->IsAlternativeColors()
+        ? Color{70, 70, 70, 255}     // Lighter grey
+        : DARKGRAY;                  // Dark grey
+    Color backColor = backHovered ? backHoverColor : backBase;
     DrawRectangleRec(backButton, backColor);
-    DrawRectangleLinesEx(backButton, 2, BLACK);
+    DrawRectangleLinesEx(backButton, 2, borderColor);
     const char* backText = "Back";
     int backTextWidth = MeasureText(backText, 16);
+    Color backTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : WHITE;                     // White text
     DrawText(backText, backButton.x + (backButton.width - backTextWidth) / 2,
-             backButton.y + (backButton.height - 16) / 2, 16, WHITE);
+             backButton.y + (backButton.height - 16) / 2, 16, backTextColor);
 
-
-    Color viewBase  = Color{140, 180, 230, 255};
-    Color viewHover = Color{120, 160, 210, 255};
+    // View Sales Floor button
+    Color viewBase = manager->IsAlternativeColors()
+        ? Color{60, 80, 100, 255}    // Dark blue
+        : Color{140, 180, 230, 255}; // Soft sky blue
+    Color viewHover = manager->IsAlternativeColors()
+        ? Color{70, 95, 120, 255}    // Lighter blue
+        : Color{120, 160, 210, 255}; // Darker blue
     Color viewColor = viewSalesFloorHovered ? viewHover : viewBase;
     DrawRectangleRec(viewSalesFloorButton, viewColor);
-    DrawRectangleLinesEx(viewSalesFloorButton, 3, BLACK);
+    DrawRectangleLinesEx(viewSalesFloorButton, 3, borderColor);
     const char* viewText = "View Sales Floor";
     int viewW = MeasureText(viewText, 16);
+    Color viewTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : WHITE;                     // White text
     DrawText(viewText,
             viewSalesFloorButton.x + (viewSalesFloorButton.width - viewW)/2,
             viewSalesFloorButton.y + (viewSalesFloorButton.height - 16)/2,
-            16, WHITE);
+            16, viewTextColor);
 }
 
 void StaffGreenhouseScreen::DrawSchedulerInfo() {
     int yPos = screenHeight - 250;
 
-    DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, Color{200, 210, 205, 255});
+    Color lineColor = manager->IsAlternativeColors()
+        ? Color{80, 80, 85, 255}     // Dark line
+        : Color{200, 210, 205, 255}; // Light line
+    DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, lineColor);
     yPos += 10;
 
-    DrawText("SCHEDULER:", screenWidth - rightPanelWidth + 20, yPos, 14, Color{60, 60, 60, 255});
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey
+        : Color{60, 60, 60, 255};    // Dark grey
+    DrawText("SCHEDULER:", screenWidth - rightPanelWidth + 20, yPos, 14, headerColor);
     yPos += 22;
 
     CareScheduler* scheduler = manager->GetCareScheduler();
     if (scheduler != nullptr && !scheduler->empty()) {
-        DrawText("Tasks queued", screenWidth - rightPanelWidth + 20, yPos, 12, Color{60, 60, 60, 255});
+        DrawText("Tasks queued", screenWidth - rightPanelWidth + 20, yPos, 12, headerColor);
     } else {
-        DrawText("No tasks", screenWidth - rightPanelWidth + 20, yPos, 12, Color{120, 140, 125, 255});
+        Color noTasksColor = manager->IsAlternativeColors()
+            ? Color{140, 160, 150, 255}  // Medium grey-green
+            : Color{120, 140, 125, 255}; // Medium sage
+        DrawText("No tasks", screenWidth - rightPanelWidth + 20, yPos, 12, noTasksColor);
     }
 }
 
@@ -799,7 +960,10 @@ void StaffGreenhouseScreen::DrawDayCounter() {
     int days = manager->GetDaysCounter();
     std::ostringstream dayStream;
     dayStream << "Day: " << days;
-    DrawText(dayStream.str().c_str(), 20, 85, 24, Color{235, 186, 170, 255});
+    Color dayColor = manager->IsAlternativeColors()
+        ? Color{255, 180, 160, 255}  // Light terracotta
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    DrawText(dayStream.str().c_str(), 20, 85, 24, dayColor);
 }
 
 void StaffGreenhouseScreen::DrawSchedulerOverlay() {
@@ -810,19 +974,32 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
     int overlayX      = (screenWidth - overlayWidth) / 2;
     int overlayY      = (screenHeight - overlayHeight) / 2;
 
-    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, Color{230, 224, 237, 255}); // Soft lavender
+    Color overlayBg = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark lavender
+        : Color{230, 224, 237, 255}; // Soft lavender
+    DrawRectangle(overlayX, overlayY, overlayWidth, overlayHeight, overlayBg);
+
+    Color overlayBorder = manager->IsAlternativeColors()
+        ? Color{255, 180, 160, 255}  // Light terracotta
+        : Color{235, 186, 170, 255}; // Terracotta border
     DrawRectangleLinesEx(Rectangle{(float)overlayX, (float)overlayY, (float)overlayWidth, (float)overlayHeight},
-                         3, Color{235, 186, 170, 255}); // Terracotta border
+                         3, overlayBorder);
 
     const char* title = "CARE SCHEDULER";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, Color{50, 70, 60, 255}); // darker green
+    Color titleColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{50, 70, 60, 255};    // darker green
+    DrawText(title, overlayX + (overlayWidth - titleWidth) / 2, overlayY + 20, 24, titleColor);
 
     int yPos = overlayY + 60;
 
-    // Darker, clearer text
-    Color textMain = Color{40, 40, 40, 255};
-    Color textSub  = Color{70, 70, 70, 255};
+    Color textMain = manager->IsAlternativeColors()
+        ? Color{220, 220, 220, 255}  // Light grey
+        : Color{40, 40, 40, 255};    // Dark grey
+    Color textSub = manager->IsAlternativeColors()
+        ? Color{180, 180, 180, 255}  // Medium grey
+        : Color{70, 70, 70, 255};    // Dark grey
 
     if (displayedQueueSize > 0) {
         DrawText("Next 3 Queued Tasks:", overlayX + 20, yPos, 18, textMain);
@@ -869,7 +1046,10 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
             if (taskList.size() > 3) {
                 std::ostringstream remaining;
                 remaining << "...and " << (taskList.size() - 3) << " more tasks";
-                DrawText(remaining.str().c_str(), overlayX + 30, yPos, 14, Color{100, 100, 100, 255});
+                Color moreColor = manager->IsAlternativeColors()
+                    ? Color{120, 120, 120, 255}  // Medium grey
+                    : Color{100, 100, 100, 255}; // Dark grey
+                DrawText(remaining.str().c_str(), overlayX + 30, yPos, 14, moreColor);
                 yPos += 25;
             }
 
@@ -880,7 +1060,10 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
         }
 
         yPos += 20;
-        DrawLine(overlayX + 20, yPos, overlayX + overlayWidth - 20, yPos, DARKGRAY);
+        Color lineColor = manager->IsAlternativeColors()
+            ? Color{80, 80, 85, 255}  // Dark grey line
+            : DARKGRAY;               // Dark grey
+        DrawLine(overlayX + 20, yPos, overlayX + overlayWidth - 20, yPos, lineColor);
         yPos += 25;
 
         DrawText("Choose an action:", overlayX + 20, yPos, 16, textMain);
@@ -891,35 +1074,62 @@ void StaffGreenhouseScreen::DrawSchedulerOverlay() {
         DrawText("All plants are well cared for.", overlayX + 30, yPos, 14, textSub);
     }
 
-    // Overlay buttons with lighter colors
-    Color runAllBase  = Color{160, 220, 160, 255};
-    Color runAllHover = Color{130, 200, 130, 255};
+    Color buttonBorder = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : BLACK;                     // Black
+    Color buttonText = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : BLACK;                     // Black text
+
+    // Overlay buttons
+    Color runAllBase = manager->IsAlternativeColors()
+        ? Color{70, 100, 80, 255}    // Dark green
+        : Color{160, 220, 160, 255}; // Light green
+    Color runAllHover = manager->IsAlternativeColors()
+        ? Color{85, 120, 95, 255}    // Lighter green
+        : Color{130, 200, 130, 255}; // Darker green
     Color runAllColor = runAllHovered ? runAllHover : runAllBase;
     DrawRectangleRec(runAllButton, runAllColor);
-    DrawRectangleLinesEx(runAllButton, 2, BLACK);
+    DrawRectangleLinesEx(runAllButton, 2, buttonBorder);
     const char* runAllText = "Run All & Advance Day";
     int runAllTextWidth = MeasureText(runAllText, 16);
     DrawText(runAllText, runAllButton.x + (runAllButton.width - runAllTextWidth) / 2,
-             runAllButton.y + (runAllButton.height - 16) / 2, 16, BLACK);
+             runAllButton.y + (runAllButton.height - 16) / 2, 16, buttonText);
 
-    Color runOneBase  = Color{255, 200, 120, 255};
-    Color runOneHover = Color{255, 180, 90, 255};
+    Color runOneBase = manager->IsAlternativeColors()
+        ? Color{120, 90, 50, 255}    // Dark orange
+        : Color{255, 200, 120, 255}; // Light orange
+    Color runOneHover = manager->IsAlternativeColors()
+        ? Color{140, 110, 60, 255}   // Lighter orange
+        : Color{255, 180, 90, 255};  // Darker orange
     Color runOneColor = runOneHovered ? runOneHover : runOneBase;
     DrawRectangleRec(runOneButton, runOneColor);
-    DrawRectangleLinesEx(runOneButton, 2, BLACK);
+    DrawRectangleLinesEx(runOneButton, 2, buttonBorder);
     const char* runOneText = "Run One Task";
     int runOneTextWidth = MeasureText(runOneText, 16);
     DrawText(runOneText, runOneButton.x + (runOneButton.width - runOneTextWidth) / 2,
-             runOneButton.y + (runOneButton.height - 16) / 2, 16, BLACK);
+             runOneButton.y + (runOneButton.height - 16) / 2, 16, buttonText);
 
-    Color closeColor = closeOverlayHovered ? DARKGRAY : GRAY;
+    Color closeBase = manager->IsAlternativeColors()
+        ? Color{50, 50, 50, 255}     // Dark grey
+        : GRAY;                      // Grey
+    Color closeHover = manager->IsAlternativeColors()
+        ? Color{70, 70, 70, 255}     // Lighter grey
+        : DARKGRAY;                  // Dark grey
+    Color closeColor = closeOverlayHovered ? closeHover : closeBase;
     DrawRectangleRec(closeOverlayButton, closeColor);
-    DrawRectangleLinesEx(closeOverlayButton, 2, BLACK);
+    DrawRectangleLinesEx(closeOverlayButton, 2, buttonBorder);
     const char* closeText = schedulerTasksExecuted ? "Close & Advance Day" : "Close";
     int closeTextWidth = MeasureText(closeText, 14);
+    Color closeTextColor = manager->IsAlternativeColors()
+        ? Color{240, 240, 240, 255}  // Light text
+        : WHITE;                     // White text
     DrawText(closeText, closeOverlayButton.x + (closeOverlayButton.width - closeTextWidth) / 2,
-             closeOverlayButton.y + (closeOverlayButton.height - 14) / 2, 14, WHITE);
+             closeOverlayButton.y + (closeOverlayButton.height - 14) / 2, 14, closeTextColor);
 
+    Color hintColor = manager->IsAlternativeColors()
+        ? Color{140, 140, 140, 255}  // Medium grey
+        : DARKGRAY;                  // Dark grey
     DrawText(schedulerTasksExecuted ? "Press ESC to close & advance day" : "Press ESC to close",
-             overlayX + 20, overlayY + overlayHeight - 20, 12, DARKGRAY);
+             overlayX + 20, overlayY + overlayHeight - 20, 12, hintColor);
 }

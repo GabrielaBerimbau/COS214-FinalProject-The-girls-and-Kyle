@@ -29,7 +29,7 @@
 #include "../include/VenusFlyTrapFactory.h"
 #include "../include/CarrotFactory.h"
 
-ScreenManager::ScreenManager() 
+ScreenManager::ScreenManager()
     : currentScreen(GameScreen::START),
       previousScreen(GameScreen::START),
       mediator(nullptr),
@@ -44,8 +44,9 @@ ScreenManager::ScreenManager()
       currentCartIndex(0),
       finalOrder(nullptr),
       lastUpdateTime(0.0f),
-      daysCounter(0) {
-    
+      daysCounter(0),
+      useAlternativeColors(false) {
+
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 }
 
@@ -653,4 +654,16 @@ void ScreenManager::DeleteCustomer() {
         customer = nullptr;
         std::cout << "[ScreenManager] Customer deleted successfully" << std::endl;
     }
+}
+
+// Color scheme management
+bool ScreenManager::IsAlternativeColors() const {
+    return useAlternativeColors;
+}
+
+void ScreenManager::ToggleColorScheme() {
+    useAlternativeColors = !useAlternativeColors;
+    std::cout << "[ScreenManager] Color scheme toggled to: "
+              << (useAlternativeColors ? "Dark Mode" : "Light Mode (Sage Green)")
+              << std::endl;
 }
