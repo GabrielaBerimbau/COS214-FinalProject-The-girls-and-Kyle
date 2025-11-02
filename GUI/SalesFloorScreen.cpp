@@ -304,125 +304,125 @@ void SalesFloorScreen::HandleBackToStart() {
 }
 
 void SalesFloorScreen::Draw() {
-    ClearBackground(GRAY);
-    
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
+
     DrawLeftPanel();
     DrawMiddlePanel();
     DrawRightPanel();
-    
+
     if (requestOverlayActive) {
         DrawRequestOverlay();
     }
 }
 
 void SalesFloorScreen::DrawLeftPanel() {
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, DARKBLUE);
-    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, BLACK);
-    
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{230, 224, 237, 255}); // Soft lavender
+    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
+
     int yPos = 20;
-    
-    DrawText("CUSTOMER INFO", 20, yPos, 20, WHITE);
+
+    DrawText("CUSTOMER INFO", 20, yPos, 20, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 35;
-    
+
     std::string nameText = "Name: " + customer->getName();
-    DrawText(nameText.c_str(), 20, yPos, 16, LIGHTGRAY);
+    DrawText(nameText.c_str(), 20, yPos, 16, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 25;
-    
+
     std::ostringstream budgetStream;
     budgetStream << "Budget: R" << std::fixed << std::setprecision(2) << customer->getBudget();
-    DrawText(budgetStream.str().c_str(), 20, yPos, 18, GREEN);
+    DrawText(budgetStream.str().c_str(), 20, yPos, 18, Color{120, 165, 120, 255}); // Soft green
     yPos += 45;
-    
-    DrawLine(20, yPos, leftPanelWidth - 20, yPos, WHITE);
+
+    DrawLine(20, yPos, leftPanelWidth - 20, yPos, Color{85, 107, 95, 255}); // Dark forest green
     yPos += 15;
-    
+
     if (selectedPlant != nullptr) {
-        DrawText("SELECTED PLANT", 20, yPos, 20, YELLOW);
+        DrawText("SELECTED PLANT", 20, yPos, 20, Color{235, 186, 170, 255}); // Warm terracotta
         yPos += 35;
         
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 18, WHITE);
+        DrawText(plantNameText.c_str(), 20, yPos, 18, Color{85, 107, 95, 255}); // Dark forest green
         yPos += 30;
-        
+
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 14, LIGHTGRAY);
+        DrawText(idText.c_str(), 20, yPos, 14, Color{120, 140, 125, 255}); // Medium sage
         yPos += 25;
-        
+
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        DrawText(stateText.c_str(), 20, yPos, 14, LIGHTGRAY);
+        DrawText(stateText.c_str(), 20, yPos, 14, Color{120, 140, 125, 255}); // Medium sage
         yPos += 25;
-        
+
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 14, LIGHTGRAY);
+        DrawText(ageStream.str().c_str(), 20, yPos, 14, Color{120, 140, 125, 255}); // Medium sage
         yPos += 25;
-        
+
         std::ostringstream healthStream;
         healthStream << "Health: " << selectedPlant->getHealthLevel() << "%";
-        Color healthColor = selectedPlant->getHealthLevel() > 70 ? GREEN : 
-                           selectedPlant->getHealthLevel() > 40 ? YELLOW : RED;
+        Color healthColor = selectedPlant->getHealthLevel() > 70 ? Color{120, 165, 120, 255} :
+                           selectedPlant->getHealthLevel() > 40 ? Color{235, 186, 170, 255} : Color{200, 100, 100, 255}; // Soft green / Terracotta / Soft red
         DrawText(healthStream.str().c_str(), 20, yPos, 14, healthColor);
         yPos += 25;
-        
+
         std::ostringstream waterStream;
         waterStream << "Water: " << selectedPlant->getWaterLevel() << "%";
-        DrawText(waterStream.str().c_str(), 20, yPos, 14, SKYBLUE);
+        DrawText(waterStream.str().c_str(), 20, yPos, 14, Color{50, 120, 160, 255}); // Darker blue for visibility
         yPos += 25;
-        
+
         std::ostringstream nutrientStream;
         nutrientStream << "Nutrients: " << selectedPlant->getNutrientLevel() << "%";
-        DrawText(nutrientStream.str().c_str(), 20, yPos, 14, Color{150, 255, 150, 255});
+        DrawText(nutrientStream.str().c_str(), 20, yPos, 14, Color{120, 165, 120, 255}); // Soft green
         yPos += 30;
-        
+
         std::ostringstream priceStream;
         priceStream << "Price: R" << std::fixed << std::setprecision(2) << selectedPlant->getPrice();
-        DrawText(priceStream.str().c_str(), 20, yPos, 20, GOLD);
+        DrawText(priceStream.str().c_str(), 20, yPos, 24, Color{85, 107, 95, 255}); // Bigger & darker - Dark forest green
         yPos += 40;
-        
+
     } else {
-        DrawText("INSTRUCTIONS:", 20, yPos, 18, YELLOW);
+        DrawText("INSTRUCTIONS:", 20, yPos, 18, Color{235, 186, 170, 255}); // Warm terracotta
         yPos += 30;
-        
-        DrawText("- Click plants to select", 20, yPos, 14, WHITE);
+
+        DrawText("- Click plants to select", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
         yPos += 25;
-        DrawText("- View plant details here", 20, yPos, 14, WHITE);
+        DrawText("- View plant details here", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
         yPos += 25;
-        DrawText("- Add to cart when ready", 20, yPos, 14, WHITE);
+        DrawText("- Add to cart when ready", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
         yPos += 25;
-        DrawText("- Use buttons to navigate", 20, yPos, 14, WHITE);
+        DrawText("- Use buttons to navigate", 20, yPos, 16, Color{85, 107, 95, 255}); // Bigger - Dark forest green
     }
 }
 
 void SalesFloorScreen::DrawMiddlePanel() {
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{100, 100, 100, 255});
-    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, BLACK);
-    
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{206, 237, 223, 255}); // Soft mint
+    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, Color{85, 107, 95, 255}); // Dark forest green
+
     const char* header = "SALES FLOOR";
     int headerSize = 24;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             leftPanelWidth + (middlePanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             BLACK);
+    DrawText(header,
+             leftPanelWidth + (middlePanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             Color{85, 107, 95, 255}); // Dark forest green
     
     DrawGrid();
 }
 
 void SalesFloorScreen::DrawRightPanel() {
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, DARKGREEN);
-    
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{255, 236, 214, 255}); // Peachy cream
+
     const char* header = "CART";
     int headerSize = 20;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
+    DrawText(header,
+             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             Color{85, 107, 95, 255}); // Dark forest green
     
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
@@ -431,7 +431,7 @@ void SalesFloorScreen::DrawRightPanel() {
     int yPos = 60;
     
     if (cart.empty()) {
-        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, LIGHTGRAY);
+        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, Color{120, 140, 125, 255}); // Medium sage
     } else {
         Vector2 mousePos = GetMousePosition();
         
@@ -448,10 +448,10 @@ void SalesFloorScreen::DrawRightPanel() {
                 };
                 
                 bool removeHovered = CheckCollisionPointRec(mousePos, removeBtn);
-                Color removeBtnColor = removeHovered ? RED : Color{150, 50, 50, 255};
+                Color removeBtnColor = removeHovered ? Color{255, 150, 150, 255} : Color{200, 100, 100, 255}; // Light red hover / Soft red
                 DrawRectangleRec(removeBtn, removeBtnColor);
-                DrawRectangleLinesEx(removeBtn, 1, BLACK);
-                DrawText("X", removeX + 6, removeY + 3, 14, WHITE);
+                DrawRectangleLinesEx(removeBtn, 1, Color{85, 107, 95, 255}); // Dark forest green
+                DrawText("X", removeX + 6, removeY + 3, 14, Color{255, 255, 255, 255}); // White
                 
                 if (removeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     std::cout << "[SalesFloorScreen] Removing item " << i << " from cart" << std::endl;
@@ -461,12 +461,12 @@ void SalesFloorScreen::DrawRightPanel() {
                 }
                 
                 std::string itemText = plant->getName();
-                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 45, yPos + 3, 14, WHITE);
+                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 45, yPos + 3, 14, Color{85, 107, 95, 255}); // Dark forest green
                 yPos += 25;
                 
                 std::ostringstream priceStream;
                 priceStream << "  R" << std::fixed << std::setprecision(2) << plant->getPrice();
-                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, YELLOW);
+                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, Color{100, 100, 100, 255}); // Medium grey
                 yPos += 30;
             }
         }
@@ -499,13 +499,13 @@ void SalesFloorScreen::DrawGrid() {
             int x = gridStartX + col * cellSize;
             int y = gridStartY + row * cellSize;
             
-            Color cellColor = LIGHTGRAY;
+            Color cellColor = Color{245, 250, 247, 255}; // Very light sage
             if (row == selectedRow && col == selectedCol) {
-                cellColor = SKYBLUE;
+                cellColor = Color{255, 247, 204, 255}; // Soft butter yellow
             }
-            
+
             DrawRectangle(x + 2, y + 2, cellSize - 4, cellSize - 4, cellColor);
-            DrawRectangleLines(x + 2, y + 2, cellSize - 4, cellSize - 4, BLACK);
+            DrawRectangleLines(x + 2, y + 2, cellSize - 4, cellSize - 4, Color{200, 210, 205, 255}); // Light sage
             
             Plant* plant = salesFloor->getPlantAt(row, col);
             if (plant != nullptr) {
@@ -535,14 +535,14 @@ void SalesFloorScreen::DrawPlantInCell(Plant* plant, int row, int col) {
     } else {
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 12);
-        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 12, DARKGREEN);
+        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 12, Color{85, 107, 95, 255}); // Dark forest green
     }
-    
+
     std::ostringstream priceStream;
     priceStream << "R" << static_cast<int>(plant->getPrice());
     std::string priceText = priceStream.str();
-    int priceWidth = MeasureText(priceText.c_str(), 14);
-    DrawText(priceText.c_str(), x + (cellSize - priceWidth) / 2, y + cellSize - 25, 14, DARKGREEN);
+    int priceWidth = MeasureText(priceText.c_str(), 16);
+    DrawText(priceText.c_str(), x + (cellSize - priceWidth) / 2, y + cellSize - 25, 16, Color{85, 107, 95, 255}); // Bigger & darker - Dark forest green
 }
 
 void SalesFloorScreen::DrawButtons() {
@@ -550,33 +550,33 @@ void SalesFloorScreen::DrawButtons() {
     bool hasCartItems = (customer != nullptr && customer->getCartSize() > 0);
     
     // Add to Cart button
-    Color addColor = (selectedPlant != nullptr) ? 
-                     (addToCartHovered ? DARKGREEN : GREEN) : GRAY;
+    Color addColor = (selectedPlant != nullptr) ?
+                     (addToCartHovered ? Color{100, 145, 100, 255} : Color{120, 165, 120, 255}) : Color{200, 210, 205, 255}; // Dark soft green hover / Soft green / Light sage disabled
     DrawRectangleRec(addToCartButton, addColor);
-    DrawRectangleLinesEx(addToCartButton, 2, BLACK);
+    DrawRectangleLinesEx(addToCartButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* addText = "Add to Cart";
     int addTextWidth = MeasureText(addText, 18);
     DrawText(addText,
              addToCartButton.x + (addToCartButton.width - addTextWidth) / 2,
              addToCartButton.y + (addToCartButton.height - 18) / 2,
              18,
-             WHITE);
-    
+             (selectedPlant != nullptr) ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green / Muted
+
     // View Greenhouse button
-    Color greenhouseColor = viewGreenhouseHovered ? DARKBLUE : Color{50, 80, 120, 255};
+    Color greenhouseColor = viewGreenhouseHovered ? Color{210, 224, 230, 255} : Color{220, 237, 245, 255}; // Hover / Light sky blue
     DrawRectangleRec(viewGreenhouseButton, greenhouseColor);
-    DrawRectangleLinesEx(viewGreenhouseButton, 2, BLACK);
+    DrawRectangleLinesEx(viewGreenhouseButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* greenhouseText = "View Greenhouse";
     int greenhouseTextWidth = MeasureText(greenhouseText, 16);
     DrawText(greenhouseText,
              viewGreenhouseButton.x + (viewGreenhouseButton.width - greenhouseTextWidth) / 2,
              viewGreenhouseButton.y + (viewGreenhouseButton.height - 16) / 2,
              16,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
     
     // View Cart button
     Color cartColor = hasCartItems ?
-                      (viewCartHovered ? ORANGE : Color{200, 120, 50, 255}) : GRAY;
+                      (viewCartHovered ? Color{225, 176, 160, 255} : Color{235, 186, 170, 255}) : Color{200, 210, 205, 255}; // Hover / Warm terracotta / Light sage disabled
     DrawRectangleRec(viewCartButton, cartColor);
     DrawRectangleLinesEx(viewCartButton, 2, BLACK);
     const char* cartText = "View Cart";
@@ -585,11 +585,11 @@ void SalesFloorScreen::DrawButtons() {
              viewCartButton.x + (viewCartButton.width - cartTextWidth) / 2,
              viewCartButton.y + (viewCartButton.height - 18) / 2,
              18,
-             WHITE);
+             hasCartItems ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green / Muted
 
     // Create Order button
     Color orderColor = hasCartItems ?
-                       (createOrderHovered ? Color{0, 160, 200, 255} : Color{0, 120, 160, 255}) : GRAY;
+                       (createOrderHovered ? Color{245, 237, 194, 255} : Color{255, 247, 204, 255}) : Color{200, 210, 205, 255}; // Hover / Soft butter yellow / Light sage disabled
     DrawRectangleRec(createOrderButton, orderColor);
     DrawRectangleLinesEx(createOrderButton, 2, BLACK);
     const char* orderText = "Create Order";
@@ -598,10 +598,10 @@ void SalesFloorScreen::DrawButtons() {
              createOrderButton.x + (createOrderButton.width - orderTextWidth) / 2,
              createOrderButton.y + (createOrderButton.height - 18) / 2,
              18,
-             WHITE);
+             hasCartItems ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255}); // Dark forest green / Muted
 
     // Make Request button
-    Color requestColor = makeRequestHovered ? Color{150, 50, 150, 255} : Color{100, 50, 100, 255};
+    Color requestColor = makeRequestHovered ? Color{215, 195, 220, 255} : Color{230, 224, 237, 255}; // Hover / Soft lavender
     DrawRectangleRec(makeRequestButton, requestColor);
     DrawRectangleLinesEx(makeRequestButton, 2, BLACK);
     const char* requestText = "Make Request";
@@ -610,10 +610,10 @@ void SalesFloorScreen::DrawButtons() {
              makeRequestButton.x + (makeRequestButton.width - requestTextWidth) / 2,
              makeRequestButton.y + (makeRequestButton.height - 16) / 2,
              16,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
     
     // NEW: Back to Start button
-    Color backColor = backToStartHovered ? Color{200, 50, 50, 255} : Color{150, 50, 50, 255};
+    Color backColor = backToStartHovered ? Color{255, 200, 195, 255} : Color{245, 215, 220, 255}; // Coral hover / Soft rose
     DrawRectangleRec(backToStartButton, backColor);
     DrawRectangleLinesEx(backToStartButton, 2, BLACK);
     const char* backText = "Back to Start";
@@ -622,7 +622,7 @@ void SalesFloorScreen::DrawButtons() {
              backToStartButton.x + (backToStartButton.width - backTextWidth) / 2,
              backToStartButton.y + (backToStartButton.height - 16) / 2,
              16,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
 }
 
 void SalesFloorScreen::DrawRequestOverlay() {

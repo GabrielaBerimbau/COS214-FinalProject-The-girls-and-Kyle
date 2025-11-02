@@ -2,82 +2,73 @@
 #include "ScreenManager.h"
 #include <iostream>
 
-StartScreen::StartScreen(ScreenManager* mgr) 
+StartScreen::StartScreen(ScreenManager* mgr)
     : manager(mgr),
       customerButtonHovered(false),
       staffButtonHovered(false) {
-    
     InitializeUI();
 }
 
-StartScreen::~StartScreen() {
-    // Nothing to clean up
-}
+StartScreen::~StartScreen() {}
 
 void StartScreen::InitializeUI() {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-    
+    const int screenWidth  = GetScreenWidth();
+    const int screenHeight = GetScreenHeight();
+
     // Button dimensions
-    int buttonWidth = 300;
-    int buttonHeight = 80;
-    int buttonSpacing = 40;
-    
+    const int buttonWidth  = 300;
+    const int buttonHeight = 80;
+    const int buttonSpacing = 40;
+
     // Calculate button positions (centered)
-    int totalHeight = (buttonHeight * 2) + buttonSpacing;
-    int startY = (screenHeight - totalHeight) / 2;
-    
+    const int totalHeight = (buttonHeight * 2) + buttonSpacing;
+    const int startY = (screenHeight - totalHeight) / 2;
+
     customerButton = Rectangle{
-        static_cast<float>((screenWidth - buttonWidth) / 2),
-        static_cast<float>(startY),
-        static_cast<float>(buttonWidth),
-        static_cast<float>(buttonHeight)
+        (float)((screenWidth - buttonWidth) / 2),
+        (float)startY,
+        (float)buttonWidth,
+        (float)buttonHeight
     };
-    
+
     staffButton = Rectangle{
-        static_cast<float>((screenWidth - buttonWidth) / 2),
-        static_cast<float>(startY + buttonHeight + buttonSpacing),
-        static_cast<float>(buttonWidth),
-        static_cast<float>(buttonHeight)
+        (float)((screenWidth - buttonWidth) / 2),
+        (float)(startY + buttonHeight + buttonSpacing),
+        (float)buttonWidth,
+        (float)buttonHeight
     };
-    
-    // Default colors
-    customerButtonColor = DARKGREEN;
-    staffButtonColor = DARKBLUE;
+
+    // Pastel plant nursery colors
+    customerButtonColor = Color{206, 237, 223, 255}; // Soft mint
+    staffButtonColor    = Color{230, 224, 237, 255}; // Soft lavender
 }
 
 void StartScreen::Update() {
     UpdateButtons();
+
+    // ESC to quit
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        CloseWindow();
+    }
 }
 
 void StartScreen::UpdateButtons() {
     Vector2 mousePos = GetMousePosition();
-    
-    // Check customer button hover
+
+    // Hover
     customerButtonHovered = CheckCollisionPointRec(mousePos, customerButton);
-    
-    // Check staff button hover
-    staffButtonHovered = CheckCollisionPointRec(mousePos, staffButton);
-    
-    // Handle customer button click
+    staffButtonHovered    = CheckCollisionPointRec(mousePos, staffButton);
+
+    // Clicks
     if (customerButtonHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        std::cout << "[StartScreen] Customer Mode selected" << std::endl;
-        
-        // Generate random budget between 200 and 1000
-        double randomBudget = 200.0 + (std::rand() % 801); // 200 to 1000
-        
-        // Create new customer
+        std::cout << "[StartScreen] Customer Mode selected\n";
+        double randomBudget = 200.0 + (std::rand() % 801); // 200–1000
         manager->CreateNewCustomer(randomBudget);
-        
-        // Switch to sales floor screen
         manager->SwitchScreen(GameScreen::SALES_FLOOR);
     }
-    
-    // Handle staff button click
+
     if (staffButtonHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        std::cout << "[StartScreen] Staff Mode selected" << std::endl;
-        
-        // Switch to staff greenhouse screen
+        std::cout << "[StartScreen] Staff Mode selected\n";
         manager->SwitchScreen(GameScreen::STAFF_GREENHOUSE);
     }
 }
@@ -86,93 +77,84 @@ void StartScreen::Draw() {
     DrawBackground();
     DrawTitle();
     DrawButtons();
+
+    // Footer hint: centered near the bottom
+    const char* hint = "Press ESC to exit";
+    const int fontSize = 26;
+    int w = MeasureText(hint, fontSize);
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+    DrawText(hint,
+             (sw - w) / 2,
+             sh - 40,                       // 40 px from bottom
+             fontSize,
+             Color{120, 140, 125, 255});    // Medium sage
 }
 
 void StartScreen::DrawBackground() {
-    ClearBackground(Color{40, 60, 50, 255}); // Dark greenish background
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green background
 }
 
 void StartScreen::DrawTitle() {
     const char* title = "PLANT NURSERY SHOP";
-    int titleFontSize = 60;
-    int titleWidth = MeasureText(title, titleFontSize);
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-    
-    // Draw title shadow
-    DrawText(title, 
-             (screenWidth - titleWidth) / 2 + 3, 
-             screenHeight / 4 + 3, 
-             titleFontSize, 
-             BLACK);
-    
-    // Draw title
-    DrawText(title, 
-             (screenWidth - titleWidth) / 2, 
-             screenHeight / 4, 
-             titleFontSize, 
-             WHITE);
-    
-    // Draw subtitle
+    const int titleFontSize = 60;
+    const int titleWidth = MeasureText(title, titleFontSize);
+    const int sw = GetScreenWidth();
+    const int sh = GetScreenHeight();
+
+    // Shadow
+    DrawText(title,
+             (sw - titleWidth) / 2 + 3,
+             sh / 4 + 3,
+             titleFontSize,
+             Color{85, 107, 95, 100});
+
+    // Foreground
+    DrawText(title,
+             (sw - titleWidth) / 2,
+             sh / 4,
+             titleFontSize,
+             Color{85, 107, 95, 255});
+
+    // Subtitle
     const char* subtitle = "Select Your Mode";
-    int subtitleFontSize = 24;
-    int subtitleWidth = MeasureText(subtitle, subtitleFontSize);
-    DrawText(subtitle, 
-             (screenWidth - subtitleWidth) / 2, 
-             screenHeight / 4 + 80, 
-             subtitleFontSize, 
-             LIGHTGRAY);
+    const int subtitleFontSize = 24;
+    const int subtitleWidth = MeasureText(subtitle, subtitleFontSize);
+    DrawText(subtitle,
+             (sw - subtitleWidth) / 2,
+             sh / 4 + 80,
+             subtitleFontSize,
+             Color{120, 140, 125, 255});
 }
 
 void StartScreen::DrawButtons() {
+    Color border = Color{85, 107, 95, 255}; // Dark forest green
+
     // Customer button
-    Color custBtnColor = customerButtonHovered ? DARKGREEN : Color{30, 100, 50, 255};
-    DrawRectangleRec(customerButton, custBtnColor);
-    DrawRectangleLinesEx(customerButton, 3, WHITE);
-    
+    Color custFill = customerButtonHovered ? Color{192, 230, 215, 255} : customerButtonColor;
+    DrawRectangleRec(customerButton, custFill);
+    DrawRectangleLinesEx(customerButton, 3, border);
+
     const char* customerText = "CUSTOMER MODE";
-    int customerTextSize = 30;
+    const int customerTextSize = 30;
     int customerTextWidth = MeasureText(customerText, customerTextSize);
     DrawText(customerText,
              customerButton.x + (customerButton.width - customerTextWidth) / 2,
              customerButton.y + (customerButton.height - customerTextSize) / 2,
              customerTextSize,
-             WHITE);
-    
+             border);
+
     // Staff button
-    Color staffBtnColor = staffButtonHovered ? DARKBLUE : Color{30, 50, 100, 255};
-    DrawRectangleRec(staffButton, staffBtnColor);
-    DrawRectangleLinesEx(staffButton, 3, WHITE);
-    
+    Color staffFill = staffButtonHovered ? Color{218, 212, 230, 255} : staffButtonColor;
+    DrawRectangleRec(staffButton, staffFill);
+    DrawRectangleLinesEx(staffButton, 3, border);
+
     const char* staffText = "STAFF MODE";
-    int staffTextSize = 30;
+    const int staffTextSize = 30;
     int staffTextWidth = MeasureText(staffText, staffTextSize);
     DrawText(staffText,
              staffButton.x + (staffButton.width - staffTextWidth) / 2,
              staffButton.y + (staffButton.height - staffTextSize) / 2,
              staffTextSize,
-             WHITE);
-    
-    // Draw hover hints
-    if (customerButtonHovered) {
-        const char* hint = "Shop for plants with a random budget";
-        int hintSize = 18;
-        int hintWidth = MeasureText(hint, hintSize);
-        DrawText(hint,
-                 (GetScreenWidth() - hintWidth) / 2,
-                 customerButton.y + customerButton.height + 20,
-                 hintSize,
-                 YELLOW);
-    }
-    
-    if (staffButtonHovered) {
-        const char* hint = "Manage plants and care for the greenhouse";
-        int hintSize = 18;
-        int hintWidth = MeasureText(hint, hintSize);
-        DrawText(hint,
-                 (GetScreenWidth() - hintWidth) / 2,
-                 staffButton.y + staffButton.height + 20,
-                 hintSize,
-                 YELLOW);
-    }
+             border);
 }

@@ -98,7 +98,7 @@ void OrderCreationScreen::InitializeButtons() {
     };
 
     // Row 2: Proceed to Checkout (centered, larger)
-    int checkoutWidth = 250;
+    int checkoutWidth = 270;
     proceedToCheckoutButton = Rectangle{
         static_cast<float>(screenWidth / 2 - checkoutWidth / 2),
         static_cast<float>(bottomY + buttonHeight + buttonSpacing),
@@ -466,18 +466,18 @@ void OrderCreationScreen::HandleRestart() {
 }
 
 void OrderCreationScreen::Draw() {
-    ClearBackground(Color{30, 40, 50, 255});
+    ClearBackground(Color{216, 228, 220, 255}); // Soft sage green
 
     // Draw header
     const char* header = "CREATE YOUR ORDER";
     int headerSize = 36;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, WHITE);
+    DrawText(header, screenWidth / 2 - headerWidth / 2, 30, headerSize, Color{85, 107, 95, 255}); // Dark forest green
 
     // Draw instructions
     const char* instruction = "Click items to select/deselect (multi-select enabled) - Add all selected to order";
     int instrWidth = MeasureText(instruction, 16);
-    DrawText(instruction, screenWidth / 2 - instrWidth / 2, 75, 16, LIGHTGRAY);
+    DrawText(instruction, screenWidth / 2 - instrWidth / 2, 75, 16, Color{120, 140, 125, 255}); // Medium sage
 
     if (isCreatingSuborder) {
         // Draw modal overlay
@@ -492,13 +492,13 @@ void OrderCreationScreen::Draw() {
 
 void OrderCreationScreen::DrawLeftPanel() {
     // Panel background
-    DrawRectangleRec(leftPanel, Color{40, 50, 60, 255});
-    DrawRectangleLinesEx(leftPanel, 2, GOLD);
+    DrawRectangleRec(leftPanel, Color{210, 210, 210, 255}); // Light grey
+    DrawRectangleLinesEx(leftPanel, 2, Color{120, 120, 120, 255}); // Dark grey border
 
     // Panel title
     const char* title = "CART ITEMS";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, leftPanel.x + (leftPanel.width - titleWidth) / 2, leftPanel.y + 10, 24, YELLOW);
+    DrawText(title, leftPanel.x + (leftPanel.width - titleWidth) / 2, leftPanel.y + 10, 24, Color{85, 107, 95, 255}); // Dark forest green
 
     DrawCartList();
 }
@@ -530,14 +530,14 @@ void OrderCreationScreen::DrawCartList() {
         Color bgColor;
         Color borderColor;
         if (cartTrackers[i].isAddedToOrder) {
-            bgColor = Color{20, 80, 20, 255}; // Green - added
-            borderColor = GREEN;
+            bgColor = Color{200, 235, 200, 255}; // Light green - added
+            borderColor = Color{120, 165, 120, 255}; // Soft green
         } else if (selectedCartIndices.count(i) > 0) {
-            bgColor = Color{80, 90, 120, 255}; // Highlighted - selected
-            borderColor = SKYBLUE;
+            bgColor = Color{255, 247, 204, 255}; // Soft butter yellow - selected
+            borderColor = Color{235, 186, 170, 255}; // Warm terracotta
         } else {
-            bgColor = Color{50, 60, 70, 255}; // Normal
-            borderColor = DARKGRAY;
+            bgColor = Color{245, 250, 247, 255}; // Very light sage - normal
+            borderColor = Color{200, 210, 205, 255}; // Light sage
         }
 
         DrawRectangleRec(itemRect, bgColor);
@@ -549,29 +549,29 @@ void OrderCreationScreen::DrawCartList() {
             displayName = displayName.substr(0, 12) + "...";
         }
 
-        DrawText(displayName.c_str(), itemRect.x + 5, itemRect.y + 5, 18, WHITE);
+        DrawText(displayName.c_str(), itemRect.x + 5, itemRect.y + 5, 18, Color{85, 107, 95, 255}); // Dark forest green
 
         // Draw price
         std::ostringstream priceStream;
         priceStream << "R" << std::fixed << std::setprecision(2) << plant->getPrice();
-        DrawText(priceStream.str().c_str(), itemRect.x + 5, itemRect.y + 28, 16, GOLD);
+        DrawText(priceStream.str().c_str(), itemRect.x + 5, itemRect.y + 28, 16, Color{235, 186, 170, 255}); // Warm terracotta
 
         // Draw status
         if (cartTrackers[i].isAddedToOrder) {
-            DrawText("ADDED", itemRect.x + itemRect.width - 65, itemRect.y + 20, 14, LIGHTGRAY);
+            DrawText("ADDED", itemRect.x + itemRect.width - 65, itemRect.y + 20, 14, Color{120, 140, 125, 255}); // Medium sage
         }
     }
 }
 
 void OrderCreationScreen::DrawRightPanel() {
     // Panel background
-    DrawRectangleRec(rightPanel, Color{40, 50, 60, 255});
-    DrawRectangleLinesEx(rightPanel, 2, GOLD);
+    DrawRectangleRec(rightPanel, Color{210, 210, 210, 255}); // Light grey
+    DrawRectangleLinesEx(rightPanel, 2, Color{120, 120, 120, 255}); // Dark grey border
 
     // Panel title
     const char* title = "ORDER HIERARCHY";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, rightPanel.x + (rightPanel.width - titleWidth) / 2, rightPanel.y + 10, 24, YELLOW);
+    DrawText(title, rightPanel.x + (rightPanel.width - titleWidth) / 2, rightPanel.y + 10, 24, Color{85, 107, 95, 255}); // Dark forest green
 
     DrawOrderHierarchy();
 }
@@ -618,23 +618,23 @@ void OrderCreationScreen::DrawOrderNode(OrderNode* node, int& yPos) {
     }
 
     // Determine color
-    Color bgColor = (selectedOrderNode == node) ? Color{80, 90, 120, 255} : Color{50, 60, 70, 255};
+    Color bgColor = (selectedOrderNode == node) ? Color{255, 247, 204, 255} : Color{245, 250, 247, 255}; // Soft butter yellow : Very light sage
     DrawRectangleRec(nodeRect, bgColor);
-    DrawRectangleLinesEx(nodeRect, 2, (selectedOrderNode == node) ? SKYBLUE : DARKGRAY);
+    DrawRectangleLinesEx(nodeRect, 2, (selectedOrderNode == node) ? Color{235, 186, 170, 255} : Color{200, 210, 205, 255}); // Warm terracotta : Light sage
 
     // Draw order name
     std::string displayName = node->order->getName();
     if (displayName.length() > 25) {
         displayName = displayName.substr(0, 22) + "...";
     }
-    DrawText(displayName.c_str(), nodeRect.x + 5, nodeRect.y + 5, 18, WHITE);
+    DrawText(displayName.c_str(), nodeRect.x + 5, nodeRect.y + 5, 18, Color{85, 107, 95, 255}); // Dark forest green
 
     // Draw item count
     int leafCount = node->leafCartIndices.size();
     int childCount = node->children.size();
     std::ostringstream infoStream;
     infoStream << "Items: " << leafCount << " | Suborders: " << childCount;
-    DrawText(infoStream.str().c_str(), nodeRect.x + 5, nodeRect.y + 28, 14, LIGHTGRAY);
+    DrawText(infoStream.str().c_str(), nodeRect.x + 5, nodeRect.y + 28, 14, Color{120, 140, 125, 255}); // Medium sage
 
     yPos += nodeHeight + 5;
 
@@ -660,10 +660,10 @@ void OrderCreationScreen::DrawButtons() {
             }
         }
     }
-    Color addColor = canAdd ? (addToOrderHovered ? Color{0, 160, 80, 255} : Color{0, 120, 60, 255})
-                            : Color{60, 60, 60, 255};
+    Color addColor = canAdd ? (addToOrderHovered ? Color{140, 200, 150, 255} : Color{120, 165, 120, 255}) // Soft green hover / Soft green
+                            : Color{220, 220, 220, 255}; // Light grey disabled
     DrawRectangleRec(addToOrderButton, addColor);
-    DrawRectangleLinesEx(addToOrderButton, 2, BLACK);
+    DrawRectangleLinesEx(addToOrderButton, 2, Color{85, 107, 95, 255}); // Dark forest green
 
     // Show count of selected items in button text
     std::string addText = "ADD TO ORDER";
@@ -675,60 +675,60 @@ void OrderCreationScreen::DrawButtons() {
              addToOrderButton.x + (addToOrderButton.width - addTextWidth) / 2,
              addToOrderButton.y + (addToOrderButton.height - fontSize) / 2,
              fontSize,
-             canAdd ? WHITE : DARKGRAY);
+             canAdd ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
 
     // Create Suborder button
     bool canCreateSub = selectedOrderNode != nullptr;
-    Color subColor = canCreateSub ? (createSuborderHovered ? Color{100, 120, 200, 255} : Color{70, 90, 170, 255})
-                                  : Color{60, 60, 60, 255};
+    Color subColor = canCreateSub ? (createSuborderHovered ? Color{215, 195, 220, 255} : Color{230, 224, 237, 255}) // Lavender hover / Soft lavender
+                                  : Color{220, 220, 220, 255}; // Light grey disabled
     DrawRectangleRec(createSuborderButton, subColor);
-    DrawRectangleLinesEx(createSuborderButton, 2, BLACK);
+    DrawRectangleLinesEx(createSuborderButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* subText = "SUBORDER";
     int subTextWidth = MeasureText(subText, fontSize);
     DrawText(subText,
              createSuborderButton.x + (createSuborderButton.width - subTextWidth) / 2,
              createSuborderButton.y + (createSuborderButton.height - fontSize) / 2,
              fontSize,
-             canCreateSub ? WHITE : DARKGRAY);
+             canCreateSub ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
 
     // Restart button
-    Color restartColor = restartHovered ? Color{200, 80, 80, 255} : Color{150, 50, 50, 255};
+    Color restartColor = restartHovered ? Color{255, 200, 195, 255} : Color{245, 215, 220, 255}; // Soft coral hover / Soft rose
     DrawRectangleRec(restartButton, restartColor);
-    DrawRectangleLinesEx(restartButton, 2, BLACK);
+    DrawRectangleLinesEx(restartButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* restartText = "RESTART";
     int restartTextWidth = MeasureText(restartText, fontSize);
     DrawText(restartText,
              restartButton.x + (restartButton.width - restartTextWidth) / 2,
              restartButton.y + (restartButton.height - fontSize) / 2,
              fontSize,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
 
     // Back button (returns to sales floor)
-    Color backColor = backHovered ? Color{120, 60, 60, 255} : Color{90, 45, 45, 255};
+    Color backColor = backHovered ? Color{235, 225, 230, 255} : Color{245, 240, 242, 255}; // Soft rose hover / Very light grey
     DrawRectangleRec(backButton, backColor);
-    DrawRectangleLinesEx(backButton, 2, BLACK);
+    DrawRectangleLinesEx(backButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* backText = "BACK";
     int backTextWidth = MeasureText(backText, fontSize);
     DrawText(backText,
              backButton.x + (backButton.width - backTextWidth) / 2,
              backButton.y + (backButton.height - fontSize) / 2,
              fontSize,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
 
     // Proceed to Checkout button (larger, bottom row)
     bool allAdded = AllCartItemsAdded();
     int checkoutFontSize = 20;
-    Color checkoutColor = allAdded ? (proceedToCheckoutHovered ? Color{220, 180, 0, 255} : Color{180, 140, 0, 255})
-                                   : Color{60, 60, 60, 255};
+    Color checkoutColor = allAdded ? (proceedToCheckoutHovered ? Color{250, 220, 170, 255} : Color{255, 236, 214, 255}) // Peachy cream hover / Peachy cream
+                                   : Color{220, 220, 220, 255}; // Light grey disabled
     DrawRectangleRec(proceedToCheckoutButton, checkoutColor);
-    DrawRectangleLinesEx(proceedToCheckoutButton, 3, allAdded ? GOLD : DARKGRAY);
+    DrawRectangleLinesEx(proceedToCheckoutButton, 3, allAdded ? Color{235, 186, 170, 255} : Color{180, 180, 180, 255}); // Warm terracotta : Light grey
     const char* checkoutText = "PROCEED TO CHECKOUT";
     int checkoutTextWidth = MeasureText(checkoutText, checkoutFontSize);
     DrawText(checkoutText,
              proceedToCheckoutButton.x + (proceedToCheckoutButton.width - checkoutTextWidth) / 2,
              proceedToCheckoutButton.y + (proceedToCheckoutButton.height - checkoutFontSize) / 2,
              checkoutFontSize,
-             allAdded ? WHITE : DARKGRAY);
+             allAdded ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
 }
 
 void OrderCreationScreen::DrawSuborderCreationModal() {
@@ -742,53 +742,53 @@ void OrderCreationScreen::DrawSuborderCreationModal() {
     };
 
     // Modal background
-    DrawRectangleRec(modal, Color{50, 60, 70, 255});
-    DrawRectangleLinesEx(modal, 3, GOLD);
+    DrawRectangleRec(modal, Color{230, 224, 237, 255}); // Soft lavender
+    DrawRectangleLinesEx(modal, 3, Color{235, 186, 170, 255}); // Warm terracotta
 
     // Title
     const char* title = "Create Suborder";
     int titleWidth = MeasureText(title, 24);
-    DrawText(title, modal.x + (modal.width - titleWidth) / 2, modal.y + 10, 24, WHITE);
+    DrawText(title, modal.x + (modal.width - titleWidth) / 2, modal.y + 10, 24, Color{85, 107, 95, 255}); // Dark forest green
 
     // Instruction
     const char* instr = "Enter suborder name:";
-    DrawText(instr, nameInputBox.x, nameInputBox.y - 25, 18, LIGHTGRAY);
+    DrawText(instr, nameInputBox.x, nameInputBox.y - 25, 18, Color{120, 140, 125, 255}); // Medium sage
 
     // Text input box
-    DrawRectangleRec(nameInputBox, Color{70, 80, 90, 255});
-    DrawRectangleLinesEx(nameInputBox, 2, SKYBLUE);
-    DrawText(suborderNameInput.c_str(), nameInputBox.x + 5, nameInputBox.y + 10, 20, WHITE);
+    DrawRectangleRec(nameInputBox, Color{245, 250, 247, 255}); // Very light sage
+    DrawRectangleLinesEx(nameInputBox, 2, Color{235, 186, 170, 255}); // Warm terracotta
+    DrawText(suborderNameInput.c_str(), nameInputBox.x + 5, nameInputBox.y + 10, 20, Color{85, 107, 95, 255}); // Dark forest green
 
     // Cursor
     if ((int)(GetTime() * 2) % 2 == 0) {
         int textWidth = MeasureText(suborderNameInput.c_str(), 20);
-        DrawText("_", nameInputBox.x + 5 + textWidth, nameInputBox.y + 10, 20, WHITE);
+        DrawText("_", nameInputBox.x + 5 + textWidth, nameInputBox.y + 10, 20, Color{85, 107, 95, 255}); // Dark forest green
     }
 
     // Confirm button
-    Color confirmColor = !suborderNameInput.empty() ? (confirmNameHovered ? Color{0, 160, 80, 255} : Color{0, 120, 60, 255})
-                                                    : Color{60, 60, 60, 255};
+    Color confirmColor = !suborderNameInput.empty() ? (confirmNameHovered ? Color{140, 200, 150, 255} : Color{120, 165, 120, 255}) // Soft green hover / Soft green
+                                                    : Color{220, 220, 220, 255}; // Light grey disabled
     DrawRectangleRec(confirmNameButton, confirmColor);
-    DrawRectangleLinesEx(confirmNameButton, 2, BLACK);
+    DrawRectangleLinesEx(confirmNameButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* confirmText = "CONFIRM";
     int confirmTextWidth = MeasureText(confirmText, 20);
     DrawText(confirmText,
              confirmNameButton.x + (confirmNameButton.width - confirmTextWidth) / 2,
              confirmNameButton.y + (confirmNameButton.height - 20) / 2,
              20,
-             !suborderNameInput.empty() ? WHITE : DARKGRAY);
+             !suborderNameInput.empty() ? Color{85, 107, 95, 255} : Color{150, 150, 150, 255}); // Dark forest green : Medium grey
 
     // Cancel button
-    Color cancelColor = cancelNameHovered ? DARKGRAY : GRAY;
+    Color cancelColor = cancelNameHovered ? Color{235, 225, 230, 255} : Color{245, 240, 242, 255}; // Soft rose hover / Very light grey
     DrawRectangleRec(cancelNameButton, cancelColor);
-    DrawRectangleLinesEx(cancelNameButton, 2, BLACK);
+    DrawRectangleLinesEx(cancelNameButton, 2, Color{85, 107, 95, 255}); // Dark forest green
     const char* cancelText = "CANCEL";
     int cancelTextWidth = MeasureText(cancelText, 20);
     DrawText(cancelText,
              cancelNameButton.x + (cancelNameButton.width - cancelTextWidth) / 2,
              cancelNameButton.y + (cancelNameButton.height - 20) / 2,
              20,
-             WHITE);
+             Color{85, 107, 95, 255}); // Dark forest green
 }
 
 bool OrderCreationScreen::AllCartItemsAdded() const {
