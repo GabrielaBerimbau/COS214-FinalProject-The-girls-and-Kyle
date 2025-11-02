@@ -31,7 +31,8 @@ enum class GameScreen {
     ORDER_CONFIRMATION,
     CHECKOUT,
     RECEIPT,
-    STAFF_GREENHOUSE
+    STAFF_GREENHOUSE,
+    STAFF_SALES_FLOOR
 };
 
 class ScreenManager {
@@ -56,11 +57,18 @@ private:
     Plant* currentPlantBeingDecorated;
     int currentCartIndex;
     FinalOrder* finalOrder;
-    
+
+    // Prototype pattern demonstration
+    FinalOrder* previousOrder;
+    bool hasShownReorderNotification;
+
     // Time tracking for real-time updates
     float lastUpdateTime;
     int daysCounter;
-    
+
+    // Color scheme toggle
+    bool useAlternativeColors;
+
     // Asset management
     std::map<std::string, Texture2D> plantTextures;
     std::map<std::string, Texture2D> potTextures;
@@ -71,6 +79,7 @@ private:
     // Helper methods
     void PopulateInitialGreenhouse();
     void PopulateInitialSalesFloor();
+    void CreateSamplePreviousOrder();
     void LoadAssets();
     void UnloadAssets();
 
@@ -114,7 +123,12 @@ public:
     
     void SetFinalOrder(FinalOrder* order);
     FinalOrder* GetFinalOrder() const;
-    
+
+    // Previous order management (Prototype pattern)
+    FinalOrder* GetPreviousOrder() const;
+    bool HasShownReorderNotification() const;
+    void SetHasShownReorderNotification(bool shown);
+
     // Days counter
     int GetDaysCounter() const;
     
@@ -130,6 +144,10 @@ public:
     void DeleteCustomer();
 
     void PerformDailyUpdate();
+
+    // Color scheme management
+    bool IsAlternativeColors() const;
+    void ToggleColorScheme();
 };
 
 #endif // SCREEN_MANAGER_H
