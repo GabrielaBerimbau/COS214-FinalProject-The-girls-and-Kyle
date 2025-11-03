@@ -32,7 +32,8 @@ SalesFloorScreen::SalesFloorScreen(ScreenManager* mgr)
       responseText(""),
       showReorderNotification(false),
       reorderYesHovered(false),
-      reorderNoHovered(false) {
+      reorderNoHovered(false),
+      cartScrollOffset(0.0f) {
 
     gridRows = 5;
     gridCols = 5;
@@ -797,12 +798,43 @@ void SalesFloorScreen::DrawRightPanel() {
     if (customer == nullptr) return;
 
     std::vector<Plant*> cart = customer->getCart();
-    int yPos = 60;
+
+    // Define the cart display area boundaries
+    const int cartStartY = 60;
+    const int buttonAreaStartY = screenHeight - 400;
+    const int cartEndY = buttonAreaStartY - 20; // 20px margin above buttons
+    const int cartDisplayHeight = cartEndY - cartStartY;
+
+    // Handle mouse wheel scrolling in the cart area
+    Vector2 mousePos = GetMousePosition();
+    if (mousePos.x >= screenWidth - rightPanelWidth && mousePos.x < screenWidth &&
+        mousePos.y >= cartStartY && mousePos.y < cartEndY) {
+        float wheel = GetMouseWheelMove();
+        if (wheel != 0.0f) {
+            cartScrollOffset -= wheel * 20.0f;
+        }
+    }
 
     if (cart.empty()) {
-        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, emptyColor);
+        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, cartStartY, 16, emptyColor);
     } else {
-        Vector2 mousePos = GetMousePosition();
+        // Calculate total content height to determine scroll limits
+        int totalContentHeight = 0;
+        for (size_t i = 0; i < cart.size(); i++) {
+            totalContentHeight += 55; // Each item takes 55px (25 + 30)
+        }
+        totalContentHeight += 10 + 15 + 20; // Line separator + space + total text
+
+        // Clamp scroll offset
+        float maxScroll = totalContentHeight - cartDisplayHeight;
+        if (maxScroll < 0) maxScroll = 0;
+        if (cartScrollOffset < 0) cartScrollOffset = 0;
+        if (cartScrollOffset > maxScroll) cartScrollOffset = maxScroll;
+
+        // Begin scissor mode to clip drawing to cart area
+        BeginScissorMode(screenWidth - rightPanelWidth, cartStartY, rightPanelWidth, cartDisplayHeight);
+
+        int yPos = cartStartY - static_cast<int>(cartScrollOffset);
 
         for (size_t i = 0; i < cart.size(); i++) {
             Plant* plant = cart[i];
@@ -828,7 +860,7 @@ void SalesFloorScreen::DrawRightPanel() {
                 if (removeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     std::cout << "[SalesFloorScreen] Removing item " << i << " from cart" << std::endl;
                     customer->returnPlantToSalesFloor((int)i);
-                    //break;
+                    EndScissorMode();
                     return;
                 }
 
@@ -857,6 +889,8 @@ void SalesFloorScreen::DrawRightPanel() {
         std::ostringstream totalStream;
         totalStream << "Total: R" << std::fixed << std::setprecision(2) << cartTotal;
         DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, totalColor);
+
+        EndScissorMode();
     }
 
     DrawButtons();

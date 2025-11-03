@@ -41,11 +41,14 @@ private:
     bool createOrderHovered;
     bool makeRequestHovered;
     bool backToStartHovered;
-    
+
     bool requestOverlayActive;
     char requestText[256];
     int requestTextLength;
     std::string responseText;
+
+    // Cart scrolling
+    float cartScrollOffset;
 
     // Konami code tracking
     std::vector<int> konamiSequence;

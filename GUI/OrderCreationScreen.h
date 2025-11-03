@@ -130,6 +130,7 @@ private:
 
     bool AllCartItemsAdded() const;
     int CountOrderNodes(OrderNode* node) const;
+    int CalculateOrderHierarchyHeight(OrderNode* node) const;
 
     void CleanupOrderHierarchy();
 

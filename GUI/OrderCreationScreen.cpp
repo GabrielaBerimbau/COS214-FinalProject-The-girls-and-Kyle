@@ -263,7 +263,16 @@ void OrderCreationScreen::UpdateOrderSelection() {
     float wheelMove = GetMouseWheelMove();
     if (wheelMove != 0 && CheckCollisionPointRec(mousePos, rightPanel)) {
         orderScrollOffset -= wheelMove * 20;
+
+        // Calculate scroll bounds
+        int totalHierarchyHeight = CalculateOrderHierarchyHeight(rootOrderNode);
+        int visibleHeight = static_cast<int>(rightPanel.height) - 45; // Subtract header space
+        float maxScroll = static_cast<float>(totalHierarchyHeight - visibleHeight);
+
+        // Clamp scroll offset
+        if (maxScroll < 0) maxScroll = 0;
         if (orderScrollOffset < 0) orderScrollOffset = 0;
+        if (orderScrollOffset > maxScroll) orderScrollOffset = maxScroll;
     }
 }
 
@@ -526,6 +535,14 @@ void OrderCreationScreen::DrawCartList() {
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
 
+    // Begin scissor mode to clip drawing to left panel area (excluding border and title)
+    BeginScissorMode(
+        static_cast<int>(leftPanel.x + 2),
+        static_cast<int>(leftPanel.y + 40), // Start below the title
+        static_cast<int>(leftPanel.width - 4),
+        static_cast<int>(leftPanel.height - 42) // Adjust for title space
+    );
+
     int itemHeight = 60;
     int yOffset = leftPanel.y + 40 - cartScrollOffset;
 
@@ -599,6 +616,8 @@ void OrderCreationScreen::DrawCartList() {
             DrawText("ADDED", itemRect.x + itemRect.width - 65, itemRect.y + 20, 14, statusColor);
         }
     }
+
+    EndScissorMode();
 }
 
 void OrderCreationScreen::DrawRightPanel() {
@@ -627,8 +646,18 @@ void OrderCreationScreen::DrawRightPanel() {
 void OrderCreationScreen::DrawOrderHierarchy() {
     if (rootOrderNode == nullptr) return;
 
+    // Begin scissor mode to clip drawing to right panel area (excluding border and title)
+    BeginScissorMode(
+        static_cast<int>(rightPanel.x + 2),
+        static_cast<int>(rightPanel.y + 40), // Start below the title
+        static_cast<int>(rightPanel.width - 4),
+        static_cast<int>(rightPanel.height - 42) // Adjust for title space
+    );
+
     int yPos = rightPanel.y + 45 - orderScrollOffset;
     DrawOrderNode(rootOrderNode, yPos);
+
+    EndScissorMode();
 }
 
 void OrderCreationScreen::DrawOrderNode(OrderNode* node, int& yPos) {
@@ -966,4 +995,21 @@ int OrderCreationScreen::CountOrderNodes(OrderNode* node) const {
         count += CountOrderNodes(child);
     }
     return count;
+}
+
+int OrderCreationScreen::CalculateOrderHierarchyHeight(OrderNode* node) const {
+    if (node == nullptr) return 0;
+
+    int nodeHeight = 50; // Height of each node
+    int spacing = 5;     // Spacing between nodes
+    int totalHeight = nodeHeight + spacing;
+
+    // If expanded, add children heights
+    if (node->isExpanded) {
+        for (OrderNode* child : node->children) {
+            totalHeight += CalculateOrderHierarchyHeight(child);
+        }
+    }
+
+    return totalHeight;
 }
