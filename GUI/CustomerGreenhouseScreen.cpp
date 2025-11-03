@@ -138,196 +138,244 @@ void CustomerGreenhouseScreen::HandlePlantSelection(int row, int col) {
 }
 
 void CustomerGreenhouseScreen::Draw() {
-    ClearBackground(GRAY);
-    
+    Color bgColor = manager->IsAlternativeColors()
+        ? Color{30, 30, 35, 255}     // Dark mode
+        : Color{216, 228, 220, 255}; // Soft sage green
+    ClearBackground(bgColor);
+
     DrawLeftPanel();
     DrawMiddlePanel();
     DrawRightPanel();
 }
 
 void CustomerGreenhouseScreen::DrawLeftPanel() {
-    // Draw panel background - matches staff greenhouse
-    DrawRectangle(0, 0, leftPanelWidth, screenHeight, Color{40, 40, 50, 255});
-    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, BLACK);
-    
+    Color panelBg = manager->IsAlternativeColors()
+        ? Color{40, 38, 45, 255}     // Dark lavender
+        : Color{230, 224, 237, 255}; // Soft lavender
+    Color lineColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color textColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color budgetColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 150, 255}  // Light green
+        : Color{120, 165, 120, 255}; // Soft green
+
+    DrawRectangle(0, 0, leftPanelWidth, screenHeight, panelBg);
+    DrawLine(leftPanelWidth, 0, leftPanelWidth, screenHeight, lineColor);
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
+
     int yPos = 20;
-    
-    // Draw customer info
-    DrawText("CUSTOMER INFO", 20, yPos, 20, WHITE);
+
+    DrawText("CUSTOMER INFO", 20, yPos, 20, headerColor);
     yPos += 35;
-    
-    // Customer name
+
     std::string nameText = "Name: " + customer->getName();
-    DrawText(nameText.c_str(), 20, yPos, 16, LIGHTGRAY);
+    DrawText(nameText.c_str(), 20, yPos, 16, textColor);
     yPos += 25;
-    
-    // Budget
+
     std::ostringstream budgetStream;
     budgetStream << "Budget: R" << std::fixed << std::setprecision(2) << customer->getBudget();
-    DrawText(budgetStream.str().c_str(), 20, yPos, 18, GREEN);
+    DrawText(budgetStream.str().c_str(), 20, yPos, 18, budgetColor);
     yPos += 45;
-    
-    // Draw separator line
-    DrawLine(20, yPos, leftPanelWidth - 20, yPos, WHITE);
+
+    DrawLine(20, yPos, leftPanelWidth - 20, yPos, lineColor);
     yPos += 15;
-    
-    // Selected plant information
+
+    Color accentColor = manager->IsAlternativeColors()
+        ? Color{255, 150, 130, 255}  // Light coral
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    Color detailColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    Color separatorColor = manager->IsAlternativeColors()
+        ? Color{80, 90, 85, 255}     // Dark grey-green
+        : Color{200, 210, 205, 255}; // Light sage
+
     if (selectedPlant != nullptr) {
-        DrawText("SELECTED PLANT", 20, yPos, 18, YELLOW);
+        DrawText("SELECTED PLANT", 20, yPos, 18, accentColor);
         yPos += 30;
-        
-        // Plant name
+
         std::string plantNameText = selectedPlant->getName();
-        DrawText(plantNameText.c_str(), 20, yPos, 16, WHITE);
+        DrawText(plantNameText.c_str(), 20, yPos, 16, textColor);
         yPos += 25;
-        
-        // Plant ID
+
         std::string idText = "ID: " + selectedPlant->getID();
-        DrawText(idText.c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(idText.c_str(), 20, yPos, 13, detailColor);
         yPos += 25;
-        
-        // Plant state
+
         std::string stateText = "State: " + selectedPlant->getState()->getStateName();
-        DrawText(stateText.c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(stateText.c_str(), 20, yPos, 13, detailColor);
         yPos += 25;
-        
-        // Plant age
+
         std::ostringstream ageStream;
         ageStream << "Age: " << selectedPlant->getAge() << " days";
-        DrawText(ageStream.str().c_str(), 20, yPos, 13, LIGHTGRAY);
+        DrawText(ageStream.str().c_str(), 20, yPos, 13, detailColor);
         yPos += 35;
-        
-        DrawLine(20, yPos, leftPanelWidth - 20, yPos, DARKGRAY);
+
+        DrawLine(20, yPos, leftPanelWidth - 20, yPos, separatorColor);
         yPos += 20;
-        
-        // Growth status
-        DrawText("GROWTH STATUS:", 20, yPos, 14, SKYBLUE);
+
+        DrawText("GROWTH STATUS:", 20, yPos, 14, headerColor);
         yPos += 30;
-        
-        // Ready for sale status
+
         std::string readyText = selectedPlant->isReadyForSale() ? "✓ Ready for Sale" : "✗ Still Growing";
-        Color readyColor = selectedPlant->isReadyForSale() ? GREEN : ORANGE;
+        Color readyGood = manager->IsAlternativeColors() ? Color{150, 220, 150, 255} : Color{120, 165, 120, 255};
+        Color readyBad = manager->IsAlternativeColors() ? Color{255, 150, 130, 255} : Color{235, 186, 170, 255};
+        Color readyColor = selectedPlant->isReadyForSale() ? readyGood : readyBad;
         DrawText(readyText.c_str(), 20, yPos, 16, readyColor);
         yPos += 30;
-        
-        // Add a note about viewing more details
+
         if (!selectedPlant->isReadyForSale()) {
-            DrawText("This plant is still", 20, yPos, 12, LIGHTGRAY);
+            DrawText("This plant is still", 20, yPos, 12, detailColor);
             yPos += 18;
-            DrawText("being cared for by", 20, yPos, 12, LIGHTGRAY);
+            DrawText("being cared for by", 20, yPos, 12, detailColor);
             yPos += 18;
-            DrawText("our staff.", 20, yPos, 12, LIGHTGRAY);
+            DrawText("our staff.", 20, yPos, 12, detailColor);
         }
-        
+
     } else {
-        // No plant selected - show instructions
-        DrawText("INSTRUCTIONS:", 20, yPos, 16, YELLOW);
+        DrawText("INSTRUCTIONS:", 20, yPos, 16, accentColor);
         yPos += 30;
-        
-        DrawText("1. Click a plant to view", 20, yPos, 13, WHITE);
+
+        DrawText("1. Click a plant to view", 20, yPos, 13, textColor);
         yPos += 22;
-        DrawText("2. Check plant details", 20, yPos, 13, WHITE);
+        DrawText("2. Check plant details", 20, yPos, 13, textColor);
         yPos += 22;
-        DrawText("3. See growth stages", 20, yPos, 13, WHITE);
+        DrawText("3. See growth stages", 20, yPos, 13, textColor);
         yPos += 22;
-        DrawText("4. Monitor plant health", 20, yPos, 13, WHITE);
+        DrawText("4. Monitor plant health", 20, yPos, 13, textColor);
     }
 }
 
 void CustomerGreenhouseScreen::DrawMiddlePanel() {
-    // Draw panel background - matches staff greenhouse
-    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, Color{60, 80, 70, 255});
-    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, BLACK);
-    
-    // Draw header
+    Color middleBg = manager->IsAlternativeColors()
+        ? Color{35, 45, 40, 255}     // Dark mint
+        : Color{206, 237, 223, 255}; // Soft mint
+    Color lineColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+
+    DrawRectangle(leftPanelWidth, 0, middlePanelWidth, screenHeight, middleBg);
+    DrawLine(leftPanelWidth + middlePanelWidth, 0, leftPanelWidth + middlePanelWidth, screenHeight, lineColor);
+
     const char* header = "CUSTOMER GREENHOUSE - GROWING AREA";
     int headerSize = 22;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             leftPanelWidth + (middlePanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
-    
-    // Draw grid
+    DrawText(header,
+             leftPanelWidth + (middlePanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             headerColor);
+
     DrawGrid();
 }
 
 void CustomerGreenhouseScreen::DrawRightPanel() {
-    // Draw panel background - matches staff greenhouse
-    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, Color{30, 50, 40, 255});
-    
-    // Draw header
+    Color rightBg = manager->IsAlternativeColors()
+        ? Color{50, 45, 40, 255}     // Dark peachy
+        : Color{255, 236, 214, 255}; // Peachy cream
+    Color headerColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color emptyColor = manager->IsAlternativeColors()
+        ? Color{180, 200, 190, 255}  // Light grey-green
+        : Color{120, 140, 125, 255}; // Medium sage
+    Color textColor = manager->IsAlternativeColors()
+        ? Color{200, 200, 200, 255}  // Light grey
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color priceColor = manager->IsAlternativeColors()
+        ? Color{255, 150, 130, 255}  // Light coral
+        : Color{235, 186, 170, 255}; // Warm terracotta
+    Color lineColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 180, 255}  // Light mint
+        : Color{85, 107, 95, 255};   // Dark forest green
+    Color totalColor = manager->IsAlternativeColors()
+        ? Color{150, 220, 150, 255}  // Light green
+        : Color{120, 165, 120, 255}; // Soft green
+
+    DrawRectangle(leftPanelWidth + middlePanelWidth, 0, rightPanelWidth, screenHeight, rightBg);
+
     const char* header = "CART";
     int headerSize = 18;
     int headerWidth = MeasureText(header, headerSize);
-    DrawText(header, 
-             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2, 
-             20, 
-             headerSize, 
-             WHITE);
-    
+    DrawText(header,
+             screenWidth - rightPanelWidth + (rightPanelWidth - headerWidth) / 2,
+             20,
+             headerSize,
+             headerColor);
+
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
-    // Draw cart items
+
     std::vector<Plant*> cart = customer->getCart();
     int yPos = 60;
-    
+
     if (cart.empty()) {
-        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, LIGHTGRAY);
+        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, emptyColor);
     } else {
         for (size_t i = 0; i < cart.size(); i++) {
             Plant* plant = cart[i];
             if (plant != nullptr) {
                 std::string itemText = "- " + plant->getName();
-                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 20, yPos, 14, WHITE);
+                DrawText(itemText.c_str(), screenWidth - rightPanelWidth + 20, yPos, 14, textColor);
                 yPos += 25;
-                
+
                 std::ostringstream priceStream;
                 priceStream << "  R" << std::fixed << std::setprecision(2) << plant->getPrice();
-                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, YELLOW);
+                DrawText(priceStream.str().c_str(), screenWidth - rightPanelWidth + 30, yPos, 12, priceColor);
                 yPos += 30;
             }
         }
-        
-        // Draw total
+
         yPos += 10;
-        DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, WHITE);
+        DrawLine(screenWidth - rightPanelWidth + 20, yPos, screenWidth - 20, yPos, lineColor);
         yPos += 15;
-        
+
         std::ostringstream totalStream;
         totalStream << "Total: R" << std::fixed << std::setprecision(2) << customer->calculateTotal();
-        DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, GREEN);
+        DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, totalColor);
     }
-    
-    // Draw buttons
+
     DrawButtons();
 }
 
 void CustomerGreenhouseScreen::DrawGrid() {
     Greenhouse* greenhouse = manager->GetGreenhouse();
     if (greenhouse == nullptr) return;
-    
+
+    Color cellIdle = manager->IsAlternativeColors()
+        ? Color{50, 55, 50, 255}     // Dark sage
+        : Color{245, 250, 247, 255}; // Very light sage
+    Color cellSelected = manager->IsAlternativeColors()
+        ? Color{80, 80, 60, 255}     // Dark yellow
+        : Color{255, 247, 204, 255}; // Soft butter yellow
+    Color cellBorder = manager->IsAlternativeColors()
+        ? Color{80, 90, 85, 255}     // Grey-green
+        : Color{200, 210, 205, 255}; // Light sage
+
     for (int row = 0; row < gridRows; row++) {
         for (int col = 0; col < gridCols; col++) {
             int x = gridStartX + col * cellSize;
             int y = gridStartY + row * cellSize;
-            
-            // Determine cell color - matches staff greenhouse
-            Color cellColor = Color{50, 70, 60, 255};
+
+            Color cellColor = cellIdle;
             if (row == selectedRow && col == selectedCol) {
-                cellColor = GOLD;
+                cellColor = cellSelected;
             }
-            
-            // Draw cell background
+
             DrawRectangle(x + 1, y + 1, cellSize - 2, cellSize - 2, cellColor);
-            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, Color{40, 60, 50, 255});
-            
-            // Draw plant if exists
+            DrawRectangleLines(x + 1, y + 1, cellSize - 2, cellSize - 2, cellBorder);
+
             Plant* plant = greenhouse->getPlantAt(row, col);
             if (plant != nullptr) {
                 DrawPlantInCell(plant, row, col);
@@ -358,45 +406,65 @@ void CustomerGreenhouseScreen::DrawPlantInCell(Plant* plant, int row, int col) {
         // Draw with full color
         DrawTextureEx(plantTexture, Vector2{static_cast<float>(texX), static_cast<float>(texY)}, 0.0f, scale, WHITE);
     } else {
-        // Fallback: draw plant name
+        Color nameColor = manager->IsAlternativeColors()
+            ? Color{200, 200, 200, 255}  // Light grey
+            : Color{85, 107, 95, 255};   // Dark forest green
         const char* name = plant->getName().c_str();
         int nameWidth = MeasureText(name, 10);
-        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, DARKGREEN);
+        DrawText(name, x + (cellSize - nameWidth) / 2, y + cellSize / 2 - 10, 10, nameColor);
     }
-    
-    // Draw growth stage indicator at bottom of cell (no health bar for customers)
+
+    Color stageGood = manager->IsAlternativeColors() ? Color{150, 220, 150, 255} : Color{120, 165, 120, 255};
+    Color stageBad = manager->IsAlternativeColors() ? Color{255, 150, 130, 255} : Color{235, 186, 170, 255};
     std::string stage = plant->getState()->getStateName();
     int stageWidth = MeasureText(stage.c_str(), 11);
-    Color stageColor = plant->isReadyForSale() ? GREEN : ORANGE;
+    Color stageColor = plant->isReadyForSale() ? stageGood : stageBad;
     DrawText(stage.c_str(), x + (cellSize - stageWidth) / 2, y + cellSize - 18, 11, stageColor);
 }
 
 void CustomerGreenhouseScreen::DrawButtons() {
     Customer* customer = manager->GetCustomer();
     bool hasCartItems = (customer != nullptr && customer->getCartSize() > 0);
-    
+
+    Color border = manager->IsAlternativeColors() ? Color{150, 220, 180, 255} : Color{85, 107, 95, 255};
+    Color textColor = manager->IsAlternativeColors() ? Color{240, 240, 240, 255} : Color{85, 107, 95, 255};
+
     // Back to Sales Floor button
-    Color backColor = backButtonHovered ? DARKGRAY : Color{100, 100, 100, 255};
+    Color backIdle = manager->IsAlternativeColors() ? Color{80, 50, 50, 255} : Color{245, 215, 220, 255};
+    Color backHover = manager->IsAlternativeColors() ? Color{100, 65, 65, 255} : Color{255, 200, 195, 255};
+    Color backColor = backButtonHovered ? backHover : backIdle;
     DrawRectangleRec(backToSalesFloorButton, backColor);
-    DrawRectangleLinesEx(backToSalesFloorButton, 2, BLACK);
+    DrawRectangleLinesEx(backToSalesFloorButton, 2, border);
     const char* backText = "Back to Sales Floor";
     int backTextWidth = MeasureText(backText, 16);
     DrawText(backText,
              backToSalesFloorButton.x + (backToSalesFloorButton.width - backTextWidth) / 2,
              backToSalesFloorButton.y + (backToSalesFloorButton.height - 16) / 2,
              16,
-             WHITE);
-    
+             textColor);
+
     // View Cart button
-    Color cartColor = hasCartItems ? 
-                      (viewCartHovered ? Color{0, 120, 200, 255} : Color{50, 150, 220, 255}) : GRAY;
+    Color cartIdle = manager->IsAlternativeColors()
+        ? Color{50, 65, 75, 255}     // Dark blue-grey (active)
+        : Color{220, 237, 245, 255}; // Light sky blue
+    Color cartHover = manager->IsAlternativeColors()
+        ? Color{60, 80, 90, 255}     // Lighter on hover
+        : Color{210, 225, 240, 255}; // Sky blue hover
+    Color cartDisabled = manager->IsAlternativeColors()
+        ? Color{45, 45, 50, 255}     // Dark grey (disabled)
+        : Color{200, 210, 205, 255}; // Light sage disabled
+    Color cartColor = hasCartItems ? (viewCartHovered ? cartHover : cartIdle) : cartDisabled;
     DrawRectangleRec(viewCartButton, cartColor);
-    DrawRectangleLinesEx(viewCartButton, 2, BLACK);
+    DrawRectangleLinesEx(viewCartButton, 2, border);
+
     const char* cartText = "View Cart";
     int cartTextWidth = MeasureText(cartText, 18);
+    Color cartTextColor = manager->IsAlternativeColors()
+        ? (hasCartItems ? Color{240, 240, 240, 255} : Color{120, 120, 120, 255})  // Light or muted grey
+        : (hasCartItems ? Color{85, 107, 95, 255} : Color{150, 160, 155, 255});   // Dark or muted
     DrawText(cartText,
              viewCartButton.x + (viewCartButton.width - cartTextWidth) / 2,
              viewCartButton.y + (viewCartButton.height - 18) / 2,
              18,
-             WHITE);
+             cartTextColor);
 }

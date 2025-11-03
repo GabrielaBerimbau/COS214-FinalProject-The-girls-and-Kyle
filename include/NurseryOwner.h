@@ -31,7 +31,11 @@ class NurseryOwner: public StaffMembers{
          * @param staffId ID of nursery owner
          */
         NurseryOwner(NurseryMediator* med, std::string staffName, std::string staffId);
-        
+
+        /**
+         * @brief Virtual destructor
+         * Ensures proper cleanup of nursery owner resources
+         */
         virtual ~NurseryOwner();
         
         /**

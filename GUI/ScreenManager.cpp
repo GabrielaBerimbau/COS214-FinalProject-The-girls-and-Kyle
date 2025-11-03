@@ -28,8 +28,10 @@
 #include "../include/MonsteraFactory.h"
 #include "../include/VenusFlyTrapFactory.h"
 #include "../include/CarrotFactory.h"
+#include "../include/ConcreteOrder.h"
+#include "../include/Leaf.h"
 
-ScreenManager::ScreenManager() 
+ScreenManager::ScreenManager()
     : currentScreen(GameScreen::START),
       previousScreen(GameScreen::START),
       mediator(nullptr),
@@ -43,9 +45,12 @@ ScreenManager::ScreenManager()
       currentPlantBeingDecorated(nullptr),
       currentCartIndex(0),
       finalOrder(nullptr),
+      previousOrder(nullptr),
+      hasShownReorderNotification(false),
       lastUpdateTime(0.0f),
-      daysCounter(0) {
-    
+      daysCounter(0),
+      useAlternativeColors(false) {
+
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 }
 
@@ -99,7 +104,10 @@ void ScreenManager::Initialize() {
     // Initialize time tracking
     lastUpdateTime = GetTime();
     daysCounter = 0;
-    
+
+    // Create a sample previous order for Prototype pattern demonstration
+    CreateSamplePreviousOrder();
+
     std::cout << "[ScreenManager] Initialization complete!" << std::endl;
 }
 
@@ -320,6 +328,49 @@ void ScreenManager::PopulateInitialSalesFloor() {
     std::cout << "[ScreenManager] Created " << plantsCreated << " mature plants for sales floor with variety" << std::endl;
 }
 
+void ScreenManager::CreateSamplePreviousOrder() {
+    std::cout << "[ScreenManager] Creating sample previous order for Prototype demonstration..." << std::endl;
+
+    // Create a sample final order
+    previousOrder = new FinalOrder("Sample Customer");
+
+    // Create factories for some popular plants
+    RoseFactory roseFactory;
+    DaisyFactory daisyFactory;
+    MonsteraFactory monsteraFactory;
+
+    // Create a composite order (suborder)
+    ConcreteOrder* flowerBundle = new ConcreteOrder("Flower Bundle");
+
+    // Create sample plants with realistic prices
+    Plant* rose = roseFactory.buildPlant(nullptr);
+    rose->setPrice(25.00);
+    rose->setReadyForSale(true);
+    Leaf* roseLeaf = new Leaf(rose, true);
+    flowerBundle->add(roseLeaf);
+
+    Plant* daisy = daisyFactory.buildPlant(nullptr);
+    daisy->setPrice(18.00);
+    daisy->setReadyForSale(true);
+    Leaf* daisyLeaf = new Leaf(daisy, true);
+    flowerBundle->add(daisyLeaf);
+
+    // Add the flower bundle to the order
+    previousOrder->addOrder(flowerBundle);
+
+    // Add an individual plant (not in a suborder)
+    Plant* monstera = monsteraFactory.buildPlant(nullptr);
+    monstera->setPrice(35.00);
+    monstera->setReadyForSale(true);
+    Leaf* monsteraLeaf = new Leaf(monstera, true);
+    previousOrder->addOrder(monsteraLeaf);
+
+    std::cout << "[ScreenManager] Sample previous order created with total: R"
+              << previousOrder->calculateTotalPrice() << std::endl;
+    std::cout << "[ScreenManager] Order contents:" << std::endl;
+    previousOrder->printInvoice();
+}
+
 void ScreenManager::LoadAssets() {
     std::cout << "[ScreenManager] Loading plant textures..." << std::endl;
     
@@ -456,7 +507,13 @@ void ScreenManager::Cleanup() {
         delete finalOrder;
         finalOrder = nullptr;
     }
-    
+
+    // Delete previous order if exists
+    if (previousOrder != nullptr) {
+        delete previousOrder;
+        previousOrder = nullptr;
+    }
+
     // Delete staff members
     if (salesAssistant != nullptr) {
         delete salesAssistant;
@@ -653,4 +710,29 @@ void ScreenManager::DeleteCustomer() {
         customer = nullptr;
         std::cout << "[ScreenManager] Customer deleted successfully" << std::endl;
     }
+}
+
+// Previous order management (Prototype pattern)
+FinalOrder* ScreenManager::GetPreviousOrder() const {
+    return previousOrder;
+}
+
+bool ScreenManager::HasShownReorderNotification() const {
+    return hasShownReorderNotification;
+}
+
+void ScreenManager::SetHasShownReorderNotification(bool shown) {
+    hasShownReorderNotification = shown;
+}
+
+// Color scheme management
+bool ScreenManager::IsAlternativeColors() const {
+    return useAlternativeColors;
+}
+
+void ScreenManager::ToggleColorScheme() {
+    useAlternativeColors = !useAlternativeColors;
+    std::cout << "[ScreenManager] Color scheme toggled to: "
+              << (useAlternativeColors ? "Dark Mode" : "Light Mode (Sage Green)")
+              << std::endl;
 }

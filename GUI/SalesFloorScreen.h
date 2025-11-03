@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include <string>
+#include <vector>
 
 class ScreenManager;
 class Plant;
@@ -40,19 +41,38 @@ private:
     bool createOrderHovered;
     bool makeRequestHovered;
     bool backToStartHovered;
-    
+
     bool requestOverlayActive;
     char requestText[256];
     int requestTextLength;
     std::string responseText;
-    
+
+    // Cart scrolling
+    float cartScrollOffset;
+
+    // Konami code tracking
+    std::vector<int> konamiSequence;
+    const std::vector<int> konamiCode = {KEY_UP, KEY_UP, KEY_DOWN, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_LEFT, KEY_RIGHT, KEY_B, KEY_A};
+    void CheckKonamiCode(int key);
+
+    // Reorder notification (Prototype pattern demonstration)
+    bool showReorderNotification;
+    Rectangle reorderNotificationBox;
+    Rectangle reorderYesButton;
+    Rectangle reorderNoButton;
+    bool reorderYesHovered;
+    bool reorderNoHovered;
+
     void InitializeLayout();
     void InitializeButtons();
+    void InitializeReorderNotification();
     void UpdateGrid();
     void UpdateButtons();
     void UpdateRequestOverlay();
-    
+    void UpdateReorderNotification();
+
     void DrawLeftPanel();
+    void DrawReorderNotification();
     void DrawMiddlePanel();
     void DrawRightPanel();
     void DrawGrid();

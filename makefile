@@ -5,8 +5,9 @@
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I. -Iinclude
+CXXFLAGS += -std=c++17 -Wall -Wextra -I. -Iinclude
 TEST_FLAGS = -pthread
+LDFLAGS ?=
 
 # ============================================================================
 # RAYLIB SETUP (local installation in external/)
@@ -137,27 +138,27 @@ $(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp | $(BUILD_DIR) $(GTEST_LIB_DIR)/libgtes
 # Build TestingMain
 $(TESTING_EXEC): $(SRC_DIR)/TestingMain.cpp $(COMMON_OBJECTS) | $(BUILD_DIR)
 	@echo "Building TestingMain..."
-	@$(CXX) $(CXXFLAGS) $(SRC_DIR)/TestingMain.cpp $(COMMON_OBJECTS) -o $(TESTING_EXEC)
+	@$(CXX) $(CXXFLAGS) $(SRC_DIR)/TestingMain.cpp $(COMMON_OBJECTS) -o $(TESTING_EXEC) $(LDFLAGS)
 	@echo "✓ TestingMain built successfully!"
 
 # Build DemoMain (placeholder for future)
 $(DEMO_EXEC): $(SRC_DIR)/DemoMain.cpp $(COMMON_OBJECTS) | $(BUILD_DIR)
 	@echo "Building DemoMain..."
-	@$(CXX) $(CXXFLAGS) $(SRC_DIR)/DemoMain.cpp $(COMMON_OBJECTS) -o $(DEMO_EXEC)
+	@$(CXX) $(CXXFLAGS) $(SRC_DIR)/DemoMain.cpp $(COMMON_OBJECTS) -o $(DEMO_EXEC) $(LDFLAGS)
 	@echo "✓ DemoMain built successfully!"
 
 # Build GUI application (with raylib)
 $(GUI_EXEC): $(COMMON_OBJECTS) $(GUI_OBJECTS) | $(BUILD_DIR) $(RAYLIB_LIB_DIR)/libraylib.a
 	@echo "Building Plant Shop GUI..."
 	@$(CXX) $(CXXFLAGS) -I$(RAYLIB_INCLUDE) $(GUI_OBJECTS) $(COMMON_OBJECTS) \
-	-o $(GUI_EXEC) $(RAYLIB_LIBS)
+	-o $(GUI_EXEC) $(RAYLIB_LIBS) $(LDFLAGS)
 	@echo "✓ Plant Shop GUI built successfully!"
 
 # Build test executable (with gtest)
 $(TEST_EXEC): $(COMMON_OBJECTS) $(TEST_OBJECTS) | $(BUILD_DIR) $(GTEST_LIB_DIR)/libgtest.a
 	@echo "Building tests..."
 	@$(CXX) $(CXXFLAGS) $(TEST_FLAGS) $(COMMON_OBJECTS) $(TEST_OBJECTS) \
-	-o $(TEST_EXEC) $(GTEST_LIBS)
+-o $(TEST_EXEC) $(GTEST_LIBS) $(LDFLAGS)
 	@echo "✓ Tests built successfully!"
 
 # ============================================================================

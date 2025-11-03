@@ -22,6 +22,8 @@
 #include "include/ConcreteOrder.h"
 #include "include/Leaf.h"
 #include "include/FinalOrder.h"
+#include "include/Iterator.h"
+#include"include/ConcreteIterator.h"
 #include "include/PaymentProcessor.h"
 #include "include/CashPayment.h"
 #include "include/CreditCardPayment.h"
@@ -960,6 +962,270 @@ void customerMakeRequest(Customer* customer) {
     pause();
 }
 
+// Helper function to build composite orders
+void customerBuildCompositeOrder(Customer* customer) {
+    clearScreen();
+    printHeader("📦 BUILD COMPOSITE ORDER");
+    
+    if (customer->getCartSize() == 0) {
+        cout << YELLOW << "Your cart is empty! Add some plants first.\n" << RESET;
+        pause();
+        return;
+    }
+    
+    displayCartWithNumbers(customer);
+    
+    cout << "\n" << BOLD << CYAN << "COMPOSITE ORDER BUILDER\n" << RESET;
+    cout << "Create complex orders with suborders (e.g., Wedding Package, Gift Baskets)\n\n";
+    
+    // Get main order name
+    string mainOrderName = getStringInput("Enter main order name (e.g., 'Wedding Package'): ");
+    customer->startNewOrder(mainOrderName);
+    
+    cout << "\n" << GREEN << "✓ Created main order: " << mainOrderName << "\n" << RESET;
+    
+    // create suborders
+    cout << "\n" << CYAN << "Do you want to create suborders? (1 = Yes, 2 = No): " << RESET;
+    int suborderChoice = getMenuChoice(1, 2);
+    
+    if (suborderChoice == 2) {
+        // Add all cart items directly to main order
+        customer->addEntireCartToOrder();
+        cout << GREEN << "\n✓ Added all cart items to main order\n" << RESET;
+        pause();
+        return;
+    }
+    
+    // Create suborders - get vector of indices of remaining items
+    vector<int> remainingItems;
+    for (int i = 0; i < customer->getCartSize(); i++) {
+        remainingItems.push_back(i);
+    }
+    
+    while (!remainingItems.empty()) {
+        clearScreen();
+        printHeader("📦 CREATE SUBORDER");
+
+        // listing plants available to group together in order
+        cout << BOLD << "Available cart items:\n" << RESET;
+        for (size_t i = 0; i < remainingItems.size(); i++) {
+            // getting index of plants in cart
+            int idx = remainingItems[i];
+            Plant* plant = customer->getPlantFromCart(idx);
+            cout << "  " << CYAN << "[" << (i + 1) << "] " << RESET
+                 << setw(20) << left << plant->getName()
+                 << GREEN << formatPrice(plant->getPrice()) << RESET << "\n";
+        }
+        
+        cout << "\n" << YELLOW << "Items will be grouped into suborders (e.g., 'Centerpiece Flowers', 'Gift Baskets')\n" << RESET;
+        
+        // Get suborder name
+        string suborderName = getStringInput("\nEnter suborder name (or 'done' to finish): ");
+        
+        if (suborderName == "done" || suborderName == "DONE") {
+            // Add remaining items to main order
+            for (int idx : remainingItems) {
+                customer->addCartItemToOrder(idx);
+            }
+            break;
+        }
+        
+        // Create new suborder
+        ConcreteOrder* suborder = new ConcreteOrder(suborderName);
+        
+        // Select items for this suborder
+        cout << "\n" << CYAN << "Select items for '" << suborderName << "' (enter 0 when done):\n" << RESET;
+        
+        // creating a vector to add selected items to
+        vector<int> selectedItems;
+        while (true) {
+            cout << "Select item (1-" << remainingItems.size() << ", 0 to finish this suborder): ";
+            int choice = getMenuChoice(0, remainingItems.size());
+            
+            if (choice == 0) break;
+            
+            int itemIdx = remainingItems[choice - 1]; //minus 1 because indexing starts at zero
+            
+            // Check if already selected
+            if (find(selectedItems.begin(), selectedItems.end(), itemIdx) != selectedItems.end()) {
+                cout << YELLOW << "Item already selected for this suborder!\n" << RESET;
+                continue;
+            }
+            
+            // Add to suborder
+            Plant* plant = customer->getPlantFromCart(itemIdx);
+            Leaf* leaf = new Leaf(plant, false);  // Don't own the plant
+            suborder->add(leaf);
+            selectedItems.push_back(itemIdx);
+            
+            cout << GREEN << "✓ Added " << plant->getName() << " to suborder\n" << RESET;
+        }
+        
+        if (!selectedItems.empty()) {
+            // Add suborder to main order
+            customer->getCurrentOrder()->add(suborder);
+            
+            cout << GREEN << "\n✓ Created suborder '" << suborderName 
+                 << "' with " << selectedItems.size() << " items\n" << RESET;
+            
+            // Remove selected items from remaining
+            for (int idx : selectedItems) {
+                remainingItems.erase(remove(remainingItems.begin(), remainingItems.end(), idx), 
+                                   remainingItems.end());
+            }
+        } else {
+            delete suborder;
+            cout << YELLOW << "No items added to suborder. Skipping.\n" << RESET;
+        }
+        
+        if (remainingItems.empty()) {
+            cout << GREEN << "\n✓ All items assigned to suborders!\n" << RESET;
+            break;
+        }
+        
+        cout << "\n" << CYAN << "Continue creating suborders? (1 = Yes, 2 = No): " << RESET;
+        int continueChoice = getMenuChoice(1, 2);
+        
+        if (continueChoice == 2) {
+            // Add remaining items directly to main order
+            for (int idx : remainingItems) {
+                customer->addCartItemToOrder(idx);
+            }
+            break;
+        }
+    }
+    
+    // Show final structure
+    clearScreen();
+    printHeader("📦 ORDER STRUCTURE");
+    
+    cout << BOLD << "Your composite order has been built!\n" << RESET;
+    cout << "\n" << CYAN << "Order Structure:\n" << RESET;
+    customer->getCurrentOrder()->printStructure();
+    
+    cout << "\n" << GREEN << "Total Price: " << formatPrice(customer->getCurrentOrder()->getPrice()) << RESET << "\n";
+    
+    pause();
+}
+
+// Helper function to iterate through order and display items
+void customerViewOrderWithIterator(Customer* customer) {
+    clearScreen();
+    printHeader("🔄 ORDER ITERATOR DEMO");
+    
+    Order* order = customer->getCurrentOrder();
+    
+    if (order == nullptr) {
+        cout << YELLOW << "No active order! Build an order first.\n" << RESET;
+        pause();
+        return;
+    }
+    
+    cout << BOLD << "Order: " << order->getName() << "\n" << RESET;
+    cout << "Using Iterator Pattern to traverse all items...\n\n";
+    
+    printSeparator();
+    
+    // Create iterator
+    Iterator* iterator = order->createIterator();
+    
+    cout << CYAN << "Iterating through all leaf items (individual plants):\n" << RESET;
+    cout << "\n";
+    
+    int itemCount = 0;
+    double runningTotal = 0.0;
+    
+    // Iterate through all items
+    for (iterator->first(); !iterator->isDone(); iterator->next()) {
+        Order* currentItem = iterator->currentItem();
+        
+        if (currentItem != nullptr) {
+            itemCount++;
+            runningTotal += currentItem->getPrice();
+            
+            cout << "  " << GREEN << "[Item " << itemCount << "]" << RESET
+                 << " " << currentItem->getName()
+                 << " - " << CYAN << formatPrice(currentItem->getPrice()) << RESET << "\n";
+        }
+    }
+    
+    printSeparator();
+    
+    cout << "\n" << BOLD << "Iterator Summary:\n" << RESET;
+    cout << "Total Items Found: " << YELLOW << itemCount << RESET << "\n";
+    cout << "Running Total: " << GREEN << formatPrice(runningTotal) << RESET << "\n";
+    cout << "Order Total: " << GREEN << formatPrice(order->getPrice()) << RESET << "\n";
+    
+    if (abs(runningTotal - order->getPrice()) < 0.01) {
+        cout << GREEN << "✓ Iterator traversal verified!\n" << RESET;
+    } else {
+        cout << RED << "✗ Price mismatch detected!\n" << RESET;
+    }
+    
+    delete iterator;
+    
+    pause();
+}
+
+// Helper function to clone orders
+void customerCloneOrder(Customer* customer) {
+    clearScreen();
+    printHeader("🔬 CLONE ORDER");
+    
+    if (customer->getCurrentOrder() == nullptr) {
+        cout << YELLOW << "No active order to clone! Build an order first.\n" << RESET;
+        pause();
+        return;
+    }
+    
+    // Create final order from current order
+    FinalOrder* originalOrder = customer->createFinalOrder();
+    
+    if (originalOrder == nullptr) {
+        cout << RED << "Failed to create final order!\n" << RESET;
+        pause();
+        return;
+    }
+    
+    cout << BOLD << "Original Order Created:\n" << RESET;
+    printSeparator();
+    originalOrder->printInvoice();
+    printSeparator();
+    
+    cout << "\n" << CYAN << "Cloning order using Prototype Pattern...\n" << RESET;
+    
+    // Clone the order
+    FinalOrder* clonedOrder = originalOrder->clone();
+    
+    cout << GREEN << "✓ Order cloned successfully!\n" << RESET;
+    
+    cout << "\n" << BOLD << "Cloned Order:\n" << RESET;
+    printSeparator();
+    clonedOrder->printInvoice();
+    printSeparator();
+    
+    // Verify clone
+    cout << "\n" << BOLD << "Verification:\n" << RESET;
+    cout << "Original Total: " << formatPrice(originalOrder->calculateTotalPrice()) << "\n";
+    cout << "Cloned Total: " << formatPrice(clonedOrder->calculateTotalPrice()) << "\n";
+    
+    if (abs(originalOrder->calculateTotalPrice() - clonedOrder->calculateTotalPrice()) < 0.01) {
+        cout << GREEN << "✓ Clone verified - prices match!\n" << RESET;
+    }
+    
+    // Show hierarchical structure
+    cout << "\n" << CYAN << "Cloned Order Structure:\n" << RESET;
+    clonedOrder->printOrderStructure();
+    
+    delete originalOrder;
+    delete clonedOrder;
+    
+    // Rebuild order for customer to continue shopping
+    customer->startNewOrder(customer->getName() + "'s Order");
+    
+    pause();
+}
+
 // customer menu
 void customerView() {
     clearScreen();
@@ -1009,10 +1275,13 @@ void customerView() {
         cout << "3. " << MAGENTA << "🎨 Decorate Plant\n" << RESET;
         cout << "4. " << YELLOW << "🗑️  Remove from Cart\n" << RESET;
         cout << "5. " << BLUE << "💬 Make a Request to Staff\n" << RESET;
-        cout << "6. " << CYAN << "💳 Checkout\n" << RESET;
-        cout << "7. " << RED << "❌ Leave Store\n" << RESET;
+        cout << "6. " << CYAN << "📦 Build Composite Order\n" << RESET;
+        cout << "7. " << GREEN << "🔄 View Order (Iterator)\n" << RESET;
+        cout << "8. " << MAGENTA << "🔬 Clone Order (Prototype)\n" << RESET;
+        cout << "9. " << CYAN << "💳 Checkout\n" << RESET;
+        cout << "10. " << RED << "❌ Leave Store\n" << RESET;
         
-        int choice = getMenuChoice(1, 7);
+        int choice = getMenuChoice(1, 10);
         
         switch (choice) {
             case 1:
@@ -1031,9 +1300,18 @@ void customerView() {
                 customerMakeRequest(customer);
             break;
             case 6:
-                customerCheckout(customer);
+                customerBuildCompositeOrder(customer);
                 break;
             case 7:
+                customerViewOrderWithIterator(customer);
+                break;
+            case 8:
+                customerCloneOrder(customer);
+                break;
+            case 9:
+                customerCheckout(customer);
+                break;
+            case 10:
                 coordinator->removeColleague(customer);
                 delete customer;
                 return;

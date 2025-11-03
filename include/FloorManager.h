@@ -33,7 +33,11 @@ class FloorManager: public StaffMembers{
          * @param staffId ID of floor manager
          */
         FloorManager(NurseryMediator* med, std::string staffName, std::string staffId);
-        
+
+        /**
+         * @brief Virtual destructor
+         * Ensures proper cleanup of floor manager resources
+         */
         virtual ~FloorManager();
         
         /**
