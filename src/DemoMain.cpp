@@ -22,6 +22,8 @@
 #include "include/ConcreteOrder.h"
 #include "include/Leaf.h"
 #include "include/FinalOrder.h"
+#include "include/Iterator.h"
+#include"include/ConcreteIterator.h"
 #include "include/PaymentProcessor.h"
 #include "include/CashPayment.h"
 #include "include/CreditCardPayment.h"
@@ -960,6 +962,270 @@ void customerMakeRequest(Customer* customer) {
     pause();
 }
 
+// Helper function to build composite orders
+void customerBuildCompositeOrder(Customer* customer) {
+    clearScreen();
+    printHeader("📦 BUILD COMPOSITE ORDER");
+    
+    if (customer->getCartSize() == 0) {
+        cout << YELLOW << "Your cart is empty! Add some plants first.\n" << RESET;
+        pause();
+        return;
+    }
+    
+    displayCartWithNumbers(customer);
+    
+    cout << "\n" << BOLD << CYAN << "COMPOSITE ORDER BUILDER\n" << RESET;
+    cout << "Create complex orders with suborders (e.g., Wedding Package, Gift Baskets)\n\n";
+    
+    // Get main order name
+    string mainOrderName = getStringInput("Enter main order name (e.g., 'Wedding Package'): ");
+    customer->startNewOrder(mainOrderName);
+    
+    cout << "\n" << GREEN << "✓ Created main order: " << mainOrderName << "\n" << RESET;
+    
+    // create suborders
+    cout << "\n" << CYAN << "Do you want to create suborders? (1 = Yes, 2 = No): " << RESET;
+    int suborderChoice = getMenuChoice(1, 2);
+    
+    if (suborderChoice == 2) {
+        // Add all cart items directly to main order
+        customer->addEntireCartToOrder();
+        cout << GREEN << "\n✓ Added all cart items to main order\n" << RESET;
+        pause();
+        return;
+    }
+    
+    // Create suborders - get vector of indices of remaining items
+    vector<int> remainingItems;
+    for (int i = 0; i < customer->getCartSize(); i++) {
+        remainingItems.push_back(i);
+    }
+    
+    while (!remainingItems.empty()) {
+        clearScreen();
+        printHeader("📦 CREATE SUBORDER");
+
+        // listing plants available to group together in order
+        cout << BOLD << "Available cart items:\n" << RESET;
+        for (size_t i = 0; i < remainingItems.size(); i++) {
+            // getting index of plants in cart
+            int idx = remainingItems[i];
+            Plant* plant = customer->getPlantFromCart(idx);
+            cout << "  " << CYAN << "[" << (i + 1) << "] " << RESET
+                 << setw(20) << left << plant->getName()
+                 << GREEN << formatPrice(plant->getPrice()) << RESET << "\n";
+        }
+        
+        cout << "\n" << YELLOW << "Items will be grouped into suborders (e.g., 'Centerpiece Flowers', 'Gift Baskets')\n" << RESET;
+        
+        // Get suborder name
+        string suborderName = getStringInput("\nEnter suborder name (or 'done' to finish): ");
+        
+        if (suborderName == "done" || suborderName == "DONE") {
+            // Add remaining items to main order
+            for (int idx : remainingItems) {
+                customer->addCartItemToOrder(idx);
+            }
+            break;
+        }
+        
+        // Create new suborder
+        ConcreteOrder* suborder = new ConcreteOrder(suborderName);
+        
+        // Select items for this suborder
+        cout << "\n" << CYAN << "Select items for '" << suborderName << "' (enter 0 when done):\n" << RESET;
+        
+        // creating a vector to add selected items to
+        vector<int> selectedItems;
+        while (true) {
+            cout << "Select item (1-" << remainingItems.size() << ", 0 to finish this suborder): ";
+            int choice = getMenuChoice(0, remainingItems.size());
+            
+            if (choice == 0) break;
+            
+            int itemIdx = remainingItems[choice - 1]; //minus 1 because indexing starts at zero
+            
+            // Check if already selected
+            if (find(selectedItems.begin(), selectedItems.end(), itemIdx) != selectedItems.end()) {
+                cout << YELLOW << "Item already selected for this suborder!\n" << RESET;
+                continue;
+            }
+            
+            // Add to suborder
+            Plant* plant = customer->getPlantFromCart(itemIdx);
+            Leaf* leaf = new Leaf(plant, false);  // Don't own the plant
+            suborder->add(leaf);
+            selectedItems.push_back(itemIdx);
+            
+            cout << GREEN << "✓ Added " << plant->getName() << " to suborder\n" << RESET;
+        }
+        
+        if (!selectedItems.empty()) {
+            // Add suborder to main order
+            customer->getCurrentOrder()->add(suborder);
+            
+            cout << GREEN << "\n✓ Created suborder '" << suborderName 
+                 << "' with " << selectedItems.size() << " items\n" << RESET;
+            
+            // Remove selected items from remaining
+            for (int idx : selectedItems) {
+                remainingItems.erase(remove(remainingItems.begin(), remainingItems.end(), idx), 
+                                   remainingItems.end());
+            }
+        } else {
+            delete suborder;
+            cout << YELLOW << "No items added to suborder. Skipping.\n" << RESET;
+        }
+        
+        if (remainingItems.empty()) {
+            cout << GREEN << "\n✓ All items assigned to suborders!\n" << RESET;
+            break;
+        }
+        
+        cout << "\n" << CYAN << "Continue creating suborders? (1 = Yes, 2 = No): " << RESET;
+        int continueChoice = getMenuChoice(1, 2);
+        
+        if (continueChoice == 2) {
+            // Add remaining items directly to main order
+            for (int idx : remainingItems) {
+                customer->addCartItemToOrder(idx);
+            }
+            break;
+        }
+    }
+    
+    // Show final structure
+    clearScreen();
+    printHeader("📦 ORDER STRUCTURE");
+    
+    cout << BOLD << "Your composite order has been built!\n" << RESET;
+    cout << "\n" << CYAN << "Order Structure:\n" << RESET;
+    customer->getCurrentOrder()->printStructure();
+    
+    cout << "\n" << GREEN << "Total Price: " << formatPrice(customer->getCurrentOrder()->getPrice()) << RESET << "\n";
+    
+    pause();
+}
+
+// Helper function to iterate through order and display items
+void customerViewOrderWithIterator(Customer* customer) {
+    clearScreen();
+    printHeader("🔄 ORDER ITERATOR DEMO");
+    
+    Order* order = customer->getCurrentOrder();
+    
+    if (order == nullptr) {
+        cout << YELLOW << "No active order! Build an order first.\n" << RESET;
+        pause();
+        return;
+    }
+    
+    cout << BOLD << "Order: " << order->getName() << "\n" << RESET;
+    cout << "Using Iterator Pattern to traverse all items...\n\n";
+    
+    printSeparator();
+    
+    // Create iterator
+    Iterator* iterator = order->createIterator();
+    
+    cout << CYAN << "Iterating through all leaf items (individual plants):\n" << RESET;
+    cout << "\n";
+    
+    int itemCount = 0;
+    double runningTotal = 0.0;
+    
+    // Iterate through all items
+    for (iterator->first(); !iterator->isDone(); iterator->next()) {
+        Order* currentItem = iterator->currentItem();
+        
+        if (currentItem != nullptr) {
+            itemCount++;
+            runningTotal += currentItem->getPrice();
+            
+            cout << "  " << GREEN << "[Item " << itemCount << "]" << RESET
+                 << " " << currentItem->getName()
+                 << " - " << CYAN << formatPrice(currentItem->getPrice()) << RESET << "\n";
+        }
+    }
+    
+    printSeparator();
+    
+    cout << "\n" << BOLD << "Iterator Summary:\n" << RESET;
+    cout << "Total Items Found: " << YELLOW << itemCount << RESET << "\n";
+    cout << "Running Total: " << GREEN << formatPrice(runningTotal) << RESET << "\n";
+    cout << "Order Total: " << GREEN << formatPrice(order->getPrice()) << RESET << "\n";
+    
+    if (abs(runningTotal - order->getPrice()) < 0.01) {
+        cout << GREEN << "✓ Iterator traversal verified!\n" << RESET;
+    } else {
+        cout << RED << "✗ Price mismatch detected!\n" << RESET;
+    }
+    
+    delete iterator;
+    
+    pause();
+}
+
+// Helper function to clone orders
+void customerCloneOrder(Customer* customer) {
+    clearScreen();
+    printHeader("🔬 CLONE ORDER");
+    
+    if (customer->getCurrentOrder() == nullptr) {
+        cout << YELLOW << "No active order to clone! Build an order first.\n" << RESET;
+        pause();
+        return;
+    }
+    
+    // Create final order from current order
+    FinalOrder* originalOrder = customer->createFinalOrder();
+    
+    if (originalOrder == nullptr) {
+        cout << RED << "Failed to create final order!\n" << RESET;
+        pause();
+        return;
+    }
+    
+    cout << BOLD << "Original Order Created:\n" << RESET;
+    printSeparator();
+    originalOrder->printInvoice();
+    printSeparator();
+    
+    cout << "\n" << CYAN << "Cloning order using Prototype Pattern...\n" << RESET;
+    
+    // Clone the order
+    FinalOrder* clonedOrder = originalOrder->clone();
+    
+    cout << GREEN << "✓ Order cloned successfully!\n" << RESET;
+    
+    cout << "\n" << BOLD << "Cloned Order:\n" << RESET;
+    printSeparator();
+    clonedOrder->printInvoice();
+    printSeparator();
+    
+    // Verify clone
+    cout << "\n" << BOLD << "Verification:\n" << RESET;
+    cout << "Original Total: " << formatPrice(originalOrder->calculateTotalPrice()) << "\n";
+    cout << "Cloned Total: " << formatPrice(clonedOrder->calculateTotalPrice()) << "\n";
+    
+    if (abs(originalOrder->calculateTotalPrice() - clonedOrder->calculateTotalPrice()) < 0.01) {
+        cout << GREEN << "✓ Clone verified - prices match!\n" << RESET;
+    }
+    
+    // Show hierarchical structure
+    cout << "\n" << CYAN << "Cloned Order Structure:\n" << RESET;
+    clonedOrder->printOrderStructure();
+    
+    delete originalOrder;
+    delete clonedOrder;
+    
+    // Rebuild order for customer to continue shopping
+    customer->startNewOrder(customer->getName() + "'s Order");
+    
+    pause();
+}
+
 // customer menu
 void customerView() {
     clearScreen();
@@ -1009,10 +1275,13 @@ void customerView() {
         cout << "3. " << MAGENTA << "🎨 Decorate Plant\n" << RESET;
         cout << "4. " << YELLOW << "🗑️  Remove from Cart\n" << RESET;
         cout << "5. " << BLUE << "💬 Make a Request to Staff\n" << RESET;
-        cout << "6. " << CYAN << "💳 Checkout\n" << RESET;
-        cout << "7. " << RED << "❌ Leave Store\n" << RESET;
+        cout << "6. " << CYAN << "📦 Build Composite Order\n" << RESET;
+        cout << "7. " << GREEN << "🔄 View Order (Iterator)\n" << RESET;
+        cout << "8. " << MAGENTA << "🔬 Clone Order (Prototype)\n" << RESET;
+        cout << "9. " << CYAN << "💳 Checkout\n" << RESET;
+        cout << "10. " << RED << "❌ Leave Store\n" << RESET;
         
-        int choice = getMenuChoice(1, 7);
+        int choice = getMenuChoice(1, 10);
         
         switch (choice) {
             case 1:
@@ -1031,9 +1300,18 @@ void customerView() {
                 customerMakeRequest(customer);
             break;
             case 6:
-                customerCheckout(customer);
+                customerBuildCompositeOrder(customer);
                 break;
             case 7:
+                customerViewOrderWithIterator(customer);
+                break;
+            case 8:
+                customerCloneOrder(customer);
+                break;
+            case 9:
+                customerCheckout(customer);
+                break;
+            case 10:
                 coordinator->removeColleague(customer);
                 delete customer;
                 return;
@@ -1101,185 +1379,11 @@ void mainMenu() {
     }
 }
 
-// ==================== AUTOMATED DEMO ====================
-
-void runAutomatedDemo() {
-    cout << CYAN << "\n🤖 Running Automated Demo for Coverage Testing...\n\n" << RESET;
-
-    try {
-        // Test 1: Employee views greenhouse
-        cout << GREEN << "Test 1: Employee viewing greenhouse plants...\n" << RESET;
-        vector<Plant*> greenhousePlants = greenhouse->getAllPlants();
-        if (!greenhousePlants.empty()) {
-            displayPlantDetailed(greenhousePlants[0]);
-        }
-
-        // Test 2: Employee cares for plants
-        cout << GREEN << "\nTest 2: Employee caring for plants...\n" << RESET;
-        if (!greenhousePlants.empty()) {
-            Plant* testPlant = greenhousePlants[0];
-            testPlant->getStrategy()->water(testPlant);
-            testPlant->getStrategy()->fertilize(testPlant);
-            testPlant->getStrategy()->adjustSunlight(testPlant);
-            testPlant->getStrategy()->prune(testPlant);
-            testPlant->performCare();
-            testPlant->updateHealth();
-        }
-
-        // Test 3: View sales floor
-        cout << GREEN << "\nTest 3: Viewing sales floor...\n" << RESET;
-        vector<Plant*> salesPlants = salesFloor->getDisplayPlants();
-        displaySalesFloorGrid();
-
-        // Test 4: Customer shopping experience
-        cout << GREEN << "\nTest 4: Customer shopping experience...\n" << RESET;
-        RegularCustomer* autoCustomer = new RegularCustomer();
-        autoCustomer->setMediator(coordinator);
-        autoCustomer->setName("Automated Test Customer");
-        coordinator->registerColleague(autoCustomer);
-
-        // Browse and add plants to cart
-        if (!salesPlants.empty()) {
-            autoCustomer->addPlantFromSalesFloor(salesPlants[0]->getName());
-            if (salesPlants.size() > 1) {
-                autoCustomer->addPlantFromSalesFloor(salesPlants[1]->getName());
-            }
-        }
-
-        displayCartWithNumbers(autoCustomer);
-
-        // Test 5: Decorate plants
-        cout << GREEN << "\nTest 5: Decorating plants...\n" << RESET;
-        if (autoCustomer->getCartSize() > 0) {
-            autoCustomer->decorateCartItemWithRibbon(0);
-            if (autoCustomer->getCartSize() > 1) {
-                autoCustomer->decorateCartItemWithGiftWrap(1);
-                autoCustomer->decorateCartItemWithPot(1, "terracotta");
-            }
-        }
-
-        displayCartWithNumbers(autoCustomer);
-
-        // Test 6: Customer requests
-        cout << GREEN << "\nTest 6: Testing customer requests...\n" << RESET;
-        Request* lowReq = autoCustomer->createRequest("I need help finding a Rose");
-        autoCustomer->submitRequestToStaff(assistant);
-
-        Request* medReq = autoCustomer->createRequest("I want 50 plants for wedding");
-        autoCustomer->submitRequestToStaff(assistant);
-
-        Request* highReq = autoCustomer->createRequest("I want a refund");
-        autoCustomer->submitRequestToStaff(assistant);
-
-        // Test 7: Checkout with different payment methods
-        cout << GREEN << "\nTest 7: Testing checkout process...\n" << RESET;
-        if (autoCustomer->getCartSize() > 0) {
-            string orderName = autoCustomer->getName() + "'s Order";
-            autoCustomer->startNewOrder(orderName);
-            autoCustomer->addEntireCartToOrder();
-
-            FinalOrder* finalOrder = autoCustomer->createFinalOrder();
-
-            if (finalOrder) {
-                double total = finalOrder->calculateTotalPrice();
-                finalOrder->printInvoice();
-
-                if (autoCustomer->canAfford(total)) {
-                    // Test cash payment
-                    CashPayment* cashProc = new CashPayment();
-                    cashProc->processTransaction(finalOrder);
-                    delete cashProc;
-
-                    autoCustomer->deductFromBudget(total);
-                }
-
-                delete finalOrder;
-            }
-        }
-
-        autoCustomer->clearCart();
-
-        // Test 8: Another customer with credit card
-        cout << GREEN << "\nTest 8: Testing credit card payment...\n" << RESET;
-        if (!salesPlants.empty() && salesPlants.size() > 2) {
-            autoCustomer->addPlantFromSalesFloor(salesPlants[2]->getName());
-
-            if (autoCustomer->getCartSize() > 0) {
-                autoCustomer->startNewOrder("Credit Card Order");
-                autoCustomer->addEntireCartToOrder();
-                FinalOrder* ccOrder = autoCustomer->createFinalOrder();
-
-                if (ccOrder) {
-                    CreditCardPayment* ccProc = new CreditCardPayment();
-                    ccProc->processTransaction(ccOrder);
-                    delete ccProc;
-                    delete ccOrder;
-                }
-            }
-        }
-
-        // Test 9: Remove from cart
-        cout << GREEN << "\nTest 9: Testing cart operations...\n" << RESET;
-        if (!salesPlants.empty()) {
-            autoCustomer->addPlantFromSalesFloor(salesPlants[0]->getName());
-            if (autoCustomer->getCartSize() > 0) {
-                autoCustomer->returnPlantToSalesFloor(0);
-            }
-        }
-
-        // Test 10: Plant relocation
-        cout << GREEN << "\nTest 10: Testing plant relocation...\n" << RESET;
-        coordinator->checkPlantRelocation();
-
-        // Test 11: Different customer types
-        cout << GREEN << "\nTest 11: Testing different customer types...\n" << RESET;
-        WalkInCustomer* walkIn = new WalkInCustomer();
-        walkIn->setMediator(coordinator);
-        walkIn->setName("Walk-In Test");
-        coordinator->registerColleague(walkIn);
-
-        CorporateCustomer* corporate = new CorporateCustomer();
-        corporate->setMediator(coordinator);
-        corporate->setName("Corporate Test");
-        coordinator->registerColleague(corporate);
-
-        // Cleanup test customers
-        coordinator->removeColleague(autoCustomer);
-        coordinator->removeColleague(walkIn);
-        coordinator->removeColleague(corporate);
-        delete autoCustomer;
-        delete walkIn;
-        delete corporate;
-
-        cout << GREEN << BOLD << "\n✓ Automated demo completed successfully!\n" << RESET;
-
-    } catch (const exception& e) {
-        cout << RED << "Error in automated demo: " << e.what() << RESET << endl;
-    }
-}
-
 // ==================== MAIN FUNCTION ====================
 
 int main() {
     cout << fixed << setprecision(2);
-
-    // Check if running in CI environment
-    if (getenv("CI") != nullptr) {
-        cout << CYAN << " CI Environment Detected - Running Automated Demo\n" << RESET;
-
-        try {
-            systemSetUp();
-            runAutomatedDemo();
-            cleanupSystem();
-        } catch (const exception& e) {
-            cout << RED << "\n Error: " << e.what() << RESET << endl;
-            return 1;
-        }
-
-        return 0;
-    }
-
-    // Interactive mode for normal execution
+    
     cout << GREEN << BOLD;
     cout << "╔════════════════════════════════════════════════════════════╗\n";
     cout << "║                                                            ║\n";
@@ -1289,9 +1393,9 @@ int main() {
     cout << "║                                                            ║\n";
     cout << "╚════════════════════════════════════════════════════════════╝\n";
     cout << RESET << endl;
-
+    
     pause("\nPress Enter to initialize system...");
-
+    
     try {
         systemSetUp();
         mainMenu();
@@ -1300,6 +1404,6 @@ int main() {
         cout << RED << "\n❌ Error: " << e.what() << RESET << endl;
         return 1;
     }
-
+    
     return 0;
 }
