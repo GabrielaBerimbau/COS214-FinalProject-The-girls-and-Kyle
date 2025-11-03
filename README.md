@@ -11,6 +11,12 @@ https://gabrielaberimbau.github.io/COS214-FinalProject-The-girls-and-Kyle/
 
 ---
 
+## Access our Google Docs report here
+[https://gabrielaberimbau.github.io/COS214-FinalProject-The-girls-and-Kyle/](https://docs.google.com/document/d/19OLgRupq3-crgAOELdSHIXyBhpyM64h0tUNlKTewJq0/edit?usp=sharing)
+
+---
+
+
 ## Table of Contents
 
 - [Overview](#overview)
