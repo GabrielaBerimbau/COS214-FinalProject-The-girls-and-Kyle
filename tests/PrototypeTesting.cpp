@@ -52,9 +52,7 @@ TEST_F(PrototypeTest, CloneIsIndependent) {
     delete clone;
 }
 
-/**
- * @test Ensures that multiple clones remain consistent and independent.
- */
+
 TEST_F(PrototypeTest, MultipleClonesRemainConsistent) {
     FinalOrder* clone1 = original->clone();
     FinalOrder* clone2 = original->clone();
