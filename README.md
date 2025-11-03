@@ -6,6 +6,11 @@ A comprehensive C++ simulation of a plant nursery management system, demonstrati
 
 ---
 
+## Access our diagrams and documentation here
+https://gabrielaberimbau.github.io/COS214-FinalProject-The-girls-and-Kyle/
+
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
