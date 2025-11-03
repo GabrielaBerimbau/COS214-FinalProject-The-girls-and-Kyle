@@ -76,14 +76,13 @@ jobs:
           LDFLAGS: "--coverage"
         run: |
           make clean || true
-          make -j"$(nproc)" build/RunTests build/DemoMain
+          make -j"$(nproc)" build/RunTests
 
       # ---------- RUN TESTS ----------
 
       - name: Run tests
         run: |
           ./build/RunTests || true
-          ./build/DemoMain || true
 
       # ---------- COVERAGE REPORTS ----------
 
