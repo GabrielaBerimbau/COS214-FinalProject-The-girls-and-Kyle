@@ -4,6 +4,8 @@
 #include <cstring>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
+#include <vector>
 
 // Backend includes
 #include "../include/Customer.h"
@@ -30,7 +32,8 @@ SalesFloorScreen::SalesFloorScreen(ScreenManager* mgr)
       responseText(""),
       showReorderNotification(false),
       reorderYesHovered(false),
-      reorderNoHovered(false) {
+      reorderNoHovered(false),
+      cartScrollOffset(0.0f) {
 
     gridRows = 5;
     gridCols = 5;
@@ -161,6 +164,12 @@ void SalesFloorScreen::InitializeReorderNotification() {
 }
 
 void SalesFloorScreen::Update() {
+    // Check for Konami code keypresses (always active)
+    int key = GetKeyPressed();
+    if (key != 0) {
+        CheckKonamiCode(key);
+    }
+
     if (requestOverlayActive) {
         UpdateRequestOverlay();
     } else if (showReorderNotification) {
@@ -177,7 +186,7 @@ void SalesFloorScreen::Update() {
                 }
             }
         }
-        
+
         UpdateGrid();
         UpdateButtons();
     }
@@ -372,19 +381,62 @@ void SalesFloorScreen::HandleCreateOrder() {
 void SalesFloorScreen::HandleMakeRequest() {
     Customer* customer = manager->GetCustomer();
     if (customer == nullptr) return;
-    
-    Request* request = customer->createRequest(std::string(requestText));
-    
+
+    // Check for cheat code fallback
+    std::string requestStr = std::string(requestText);
+    std::string lowerRequest = requestStr;
+    std::transform(lowerRequest.begin(), lowerRequest.end(), lowerRequest.begin(), ::tolower);
+
+    if (lowerRequest.find("cheat") != std::string::npos) {
+        std::cout << "[CHEAT CODE] Detected 'cheat' keyword! Opening cheat menu..." << std::endl;
+        manager->SwitchScreen(GameScreen::CHEAT_MENU);
+        return;
+    }
+
+    Request* request = customer->createRequest(requestStr);
+
     SalesAssistant* salesAssistant = manager->GetSalesAssistant();
     if (salesAssistant != nullptr) {
         salesAssistant->handleRequest(request);
-        
+
         if (request->isHandled()) {
             responseText = "Request handled: " + request->getMessage();
-            
-            std::string plantName = request->extractPlantName();
-            if (!plantName.empty()) {
-                responseText += "\n\nPlant '" + plantName + "' has been added to your cart!";
+
+            // Extract all plant keywords from the message
+            std::vector<std::string> plantTypes = {
+                "cactus", "aloe", "succulent",
+                "potato", "radish", "carrot", "vegetable",
+                "rose", "daisy", "flower", "strelitzia",
+                "venusflytrap", "venus", "flytrap", "monstera",
+                "plant"
+            };
+
+            std::string msg = request->getMessage();
+            std::transform(msg.begin(), msg.end(), msg.begin(), ::tolower);
+
+            std::vector<std::string> foundPlants;
+            for(const std::string& plantType : plantTypes){
+                if(msg.find(plantType) != std::string::npos){
+                    std::string capitalizedPlant = plantType;
+                    if(!capitalizedPlant.empty()){
+                        capitalizedPlant[0] = std::toupper(capitalizedPlant[0]);
+                    }
+                    if(std::find(foundPlants.begin(), foundPlants.end(), capitalizedPlant) == foundPlants.end()){
+                        foundPlants.push_back(capitalizedPlant);
+                    }
+                }
+            }
+
+            if (!foundPlants.empty()) {
+                if(foundPlants.size() == 1){
+                    responseText += "\n\nPlant '" + foundPlants[0] + "' has been added to your cart!";
+                } else {
+                    responseText += "\n\n" + std::to_string(foundPlants.size()) + " plants have been added to your cart: ";
+                    for(size_t i = 0; i < foundPlants.size(); i++){
+                        if(i > 0) responseText += ", ";
+                        responseText += foundPlants[i];
+                    }
+                }
             }
         } else {
             responseText = "Request could not be handled at this time.";
@@ -395,11 +447,38 @@ void SalesFloorScreen::HandleMakeRequest() {
 // NEW: Handle back to start screen
 void SalesFloorScreen::HandleBackToStart() {
     std::cout << "[SalesFloorScreen] Returning to start screen" << std::endl;
-    
+
     // Optional: Delete customer when going back
     manager->DeleteCustomer();
-    
+
     manager->SwitchScreen(GameScreen::START);
+}
+
+void SalesFloorScreen::CheckKonamiCode(int key) {
+    // Add key to sequence
+    konamiSequence.push_back(key);
+
+    // Keep only last 10 keys
+    if (konamiSequence.size() > 10) {
+        konamiSequence.erase(konamiSequence.begin());
+    }
+
+    // Check if sequence matches Konami code
+    if (konamiSequence.size() == 10) {
+        bool match = true;
+        for (size_t i = 0; i < konamiCode.size(); i++) {
+            if (konamiSequence[i] != konamiCode[i]) {
+                match = false;
+                break;
+            }
+        }
+
+        if (match) {
+            std::cout << "[KONAMI CODE] Activated! Opening cheat menu..." << std::endl;
+            manager->SwitchScreen(GameScreen::CHEAT_MENU);
+            konamiSequence.clear();
+        }
+    }
 }
 
 void SalesFloorScreen::Draw() {
@@ -719,12 +798,43 @@ void SalesFloorScreen::DrawRightPanel() {
     if (customer == nullptr) return;
 
     std::vector<Plant*> cart = customer->getCart();
-    int yPos = 60;
+
+    // Define the cart display area boundaries
+    const int cartStartY = 60;
+    const int buttonAreaStartY = screenHeight - 400;
+    const int cartEndY = buttonAreaStartY - 20; // 20px margin above buttons
+    const int cartDisplayHeight = cartEndY - cartStartY;
+
+    // Handle mouse wheel scrolling in the cart area
+    Vector2 mousePos = GetMousePosition();
+    if (mousePos.x >= screenWidth - rightPanelWidth && mousePos.x < screenWidth &&
+        mousePos.y >= cartStartY && mousePos.y < cartEndY) {
+        float wheel = GetMouseWheelMove();
+        if (wheel != 0.0f) {
+            cartScrollOffset -= wheel * 20.0f;
+        }
+    }
 
     if (cart.empty()) {
-        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, yPos, 16, emptyColor);
+        DrawText("Cart is empty", screenWidth - rightPanelWidth + 20, cartStartY, 16, emptyColor);
     } else {
-        Vector2 mousePos = GetMousePosition();
+        // Calculate total content height to determine scroll limits
+        int totalContentHeight = 0;
+        for (size_t i = 0; i < cart.size(); i++) {
+            totalContentHeight += 55; // Each item takes 55px (25 + 30)
+        }
+        totalContentHeight += 10 + 15 + 20; // Line separator + space + total text
+
+        // Clamp scroll offset
+        float maxScroll = totalContentHeight - cartDisplayHeight;
+        if (maxScroll < 0) maxScroll = 0;
+        if (cartScrollOffset < 0) cartScrollOffset = 0;
+        if (cartScrollOffset > maxScroll) cartScrollOffset = maxScroll;
+
+        // Begin scissor mode to clip drawing to cart area
+        BeginScissorMode(screenWidth - rightPanelWidth, cartStartY, rightPanelWidth, cartDisplayHeight);
+
+        int yPos = cartStartY - static_cast<int>(cartScrollOffset);
 
         for (size_t i = 0; i < cart.size(); i++) {
             Plant* plant = cart[i];
@@ -750,7 +860,7 @@ void SalesFloorScreen::DrawRightPanel() {
                 if (removeHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     std::cout << "[SalesFloorScreen] Removing item " << i << " from cart" << std::endl;
                     customer->returnPlantToSalesFloor((int)i);
-                    //break;
+                    EndScissorMode();
                     return;
                 }
 
@@ -779,6 +889,8 @@ void SalesFloorScreen::DrawRightPanel() {
         std::ostringstream totalStream;
         totalStream << "Total: R" << std::fixed << std::setprecision(2) << cartTotal;
         DrawText(totalStream.str().c_str(), screenWidth - rightPanelWidth + 20, yPos, 16, totalColor);
+
+        EndScissorMode();
     }
 
     DrawButtons();

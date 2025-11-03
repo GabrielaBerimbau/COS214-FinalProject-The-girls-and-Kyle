@@ -2,6 +2,8 @@
 #include "../include/SalesAssistant.h"
 #include "../include/Customer.h"
 #include <iostream>
+#include <algorithm>
+#include <vector>
 
 SalesAssistant::SalesAssistant(NurseryMediator* med, std::string staffName, std::string staffId)
     : StaffMembers(med, staffName, staffId), scheduler(new CareScheduler()){}
@@ -22,22 +24,67 @@ void SalesAssistant::handleRequest(Request* request){
     // Handle LOW level requests - simple plant requests
     if(request->getLevel() == RequestLevel::LOW){
         std::cout << "[SalesAssistant " << getId() << "] Handling simple request\n";
-        
-        std::string plantName = request->extractPlantName();
+
         Customer* customer = request->getCustomer();
-        
-        if(!plantName.empty() && customer != nullptr && mediator != nullptr){
-            std::cout << "[SalesAssistant " << getId() << "] Customer wants a '" 
-                      << plantName << "'\n";
-            
-            // Use mediator to add plant to customer's cart
-            bool success = mediator->staffAddPlantToCustomerCart(plantName, customer);
-            
-            if(success) {
-                customer->receiveResponse("Here's your " + plantName + "! It's been added to your cart.");
+
+        // Extract all plant names from the request
+        std::vector<std::string> plantTypes = {
+            "cactus", "aloe", "succulent",
+            "potato", "radish", "carrot", "vegetable",
+            "rose", "daisy", "flower", "strelitzia",
+            "venusflytrap", "venus", "flytrap", "monstera",
+            "plant"
+        };
+
+        // Get keywords from request message
+        std::string msg = request->getMessage();
+        std::transform(msg.begin(), msg.end(), msg.begin(), ::tolower);
+
+        std::vector<std::string> foundPlants;
+        int successCount = 0;
+
+        // Check for each plant type in the message
+        for(const std::string& plantType : plantTypes){
+            if(msg.find(plantType) != std::string::npos){
+                // Capitalize first letter
+                std::string capitalizedPlant = plantType;
+                if(!capitalizedPlant.empty()){
+                    capitalizedPlant[0] = std::toupper(capitalizedPlant[0]);
+                }
+
+                // Avoid duplicates
+                if(std::find(foundPlants.begin(), foundPlants.end(), capitalizedPlant) == foundPlants.end()){
+                    foundPlants.push_back(capitalizedPlant);
+                }
+            }
+        }
+
+        // Try to add all found plants to cart
+        if(!foundPlants.empty() && customer != nullptr && mediator != nullptr){
+            for(const std::string& plantName : foundPlants){
+                std::cout << "[SalesAssistant " << getId() << "] Customer wants a '"
+                          << plantName << "'\n";
+
+                bool success = mediator->staffAddPlantToCustomerCart(plantName, customer);
+                if(success) {
+                    successCount++;
+                }
+            }
+
+            if(successCount > 0) {
+                if(successCount == 1){
+                    customer->receiveResponse("Here's your " + foundPlants[0] + "! It's been added to your cart.");
+                } else {
+                    std::string response = "Great! I've added " + std::to_string(successCount) + " plants to your cart: ";
+                    for(size_t i = 0; i < foundPlants.size(); i++){
+                        if(i > 0) response += ", ";
+                        response += foundPlants[i];
+                    }
+                    customer->receiveResponse(response);
+                }
                 request->markHandled();
             } else {
-                customer->receiveResponse("Sorry, we don't have that plant available right now.");
+                customer->receiveResponse("Sorry, we don't have those plants available right now.");
                 request->markHandled();
             }
         } else {

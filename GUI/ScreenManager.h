@@ -32,7 +32,13 @@ enum class GameScreen {
     CHECKOUT,
     RECEIPT,
     STAFF_GREENHOUSE,
-    STAFF_SALES_FLOOR
+    STAFF_SALES_FLOOR,
+    CHEAT_MENU,
+    FLAPPY_BIRD,
+    SNAKE,
+    CHEATS_SUBMENU,
+    CREDITS,
+    MATRIX_RAIN
 };
 
 class ScreenManager {
